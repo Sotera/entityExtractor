@@ -160,10 +160,14 @@
         "StrongLoopBranchName": "deploy",
         "StrongLoopServerUrl": "http://localhost:8701",
         "ServiceName": "watchman",
+        "ClusterSize": 20,
         "DoBowerInstall": true,
         "EnvironmentVariables": {
           "PORT": 3001,
-          "NODE_ENV": "production"
+          "NODE_ENV": "production",
+          "BASIC_AUTH_ON": "0",
+          "BASIC_AUTH_USER": "USER",
+          "BASIC_AUTH_PASS": "PASS"
         },
         "Scripts":[
 

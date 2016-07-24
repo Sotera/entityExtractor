@@ -59,5 +59,9 @@
   "job": {
     "dataSource": null,
     "public": true
+  },
+  "socialMediaRecord": {
+    "dataSource": "db",
+    "public": true
   }
 }
