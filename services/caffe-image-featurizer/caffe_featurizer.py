@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import sys
-sys.path
 sys.path.append(os.getenv('CAFFE_PYTHON_PATH', '/home/caffe-user/caffe/python/'))
 import caffe
 
@@ -45,7 +44,7 @@ class CaffeFeaturizer:
         for f in self.files:
             if i % 10 == 0:
                 if not self.quiet:
-                    print >> sys.stderr,  i
+                    print >> sys.stderr, i
             try:
                 self.net.blobs['data'].data[i] = self.transformer.preprocess('data', caffe.io.load_image(f))
             except:
@@ -59,5 +58,5 @@ class CaffeFeaturizer:
 
     def featurize(self, layer='fc7'):
         feat = [ self.net.blobs[layer].data[i] for i in range(self.batch_size)]
-        feat = np.array(feat)
-        return feat
+
+        return np.array(feat)

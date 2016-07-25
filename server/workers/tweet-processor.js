@@ -12,8 +12,8 @@ const es = require('elasticsearch'),
     requestTimeout: 60000,
     log: 'error'
   }),
-  destIndex = 'stream',
-  destType = 'tweet',
+  destIndex = process.env.ES_INDEX || 'stream',
+  destType = process.env.ES_TYPE || 'tweet',
   fs = require('fs'),
   url = require('url'),
   path = require('path'),
@@ -22,9 +22,10 @@ const es = require('elasticsearch'),
   readline = require('readline'),
   _ = require('lodash'),
   dir = require('node-dir'),
-  queuedFilesDir = path.join('/downloads', destType, 'files'),
+  downloadPath = process.env.DOWNLOAD_PATH || '/downloads',
+  queuedFilesDir = path.join(downloadPath, destType, 'files'),
   processedFilesDir = path.join(queuedFilesDir, 'done'),
-  imagesDir = path.join('/downloads', destType, 'images'),
+  imagesDir = path.join(downloadPath, destType, 'images'),
   POLL_WAIT = 30 // seconds
 ;
 
@@ -125,11 +126,23 @@ function processFiles() {
 
 function bulkIndex(lines) {
   if (!lines || !lines.length) return;
-  return destClient.bulk({
-    index: destIndex,
-    type: destType,
-    body: lines.join('\n')
-  });
+  // chunk lines to prevent ES bulk limits.
+  // chunk count must be evenly divisible by 2 for bulk format.
+  let chunks = _.chunk(lines, 100);
+  let promiseChain = Promise.resolve();
+  for (let chunk of chunks) {
+    promiseChain = promiseChain
+      .then(() => {
+        return destClient.bulk({
+          index: destIndex,
+          type: destType,
+          body: chunk.join('\n')
+        });
+      })
+      .then(() => console.log('ES bulk indexing...'))
+      .catch(err => console.error('error in ES bulk indexing:', err));
+  }
+  return promiseChain;
 }
 
 function alterTweet(line) {

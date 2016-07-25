@@ -3,7 +3,10 @@
     "name": "data-container",
     "Image": "lukewendling/data-container:2",
     "DockerFilePath": "",
-    "Hostname": "data-container"
+    "Hostname": "data-container",
+    "HostConfig": {
+      "Binds": ["/downloads:/downloads"]
+    }
   },
   {
     "name": "trained-models",
@@ -107,7 +110,7 @@
   },
   {
     "name": "caffe",
-    "Image": "sotera/caffe_redis_client:4",
+    "Image": "sotera/caffe_redis_client:6",
     "DockerFilePath": "",
     "Hostname": "caffe",
     "HostConfig": {

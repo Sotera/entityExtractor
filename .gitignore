@@ -5,3 +5,4 @@ temp
 *.log
 .env
 firmament/docker/**/*.conf
+*.pyc

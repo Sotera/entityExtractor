@@ -10,15 +10,16 @@ const es = require('elasticsearch'),
     requestTimeout: 60000,
     log: 'error'
   }),
-  destIndex = 'stream',
-  destType = 'tweet',
+  destIndex = process.env.ES_INDEX || 'stream',
+  destType = process.env.ES_TYPE || 'tweet',
   fs = require('fs'),
   path = require('path'),
   mkdirp = require('mkdirp'),
   redis = require('../../lib/redis'),
   _ = require('lodash'),
   dir = require('node-dir'),
-  queuedImagesDir = path.join('/downloads', destType, 'images'),
+  downloadPath = process.env.DOWNLOAD_PATH || '/downloads',
+  queuedImagesDir = path.join(downloadPath, destType, 'images'),
   processedImagesDir = path.join(queuedImagesDir, 'done'),
   channelName = 'features',
   POLL_WAIT = 30 // seconds
@@ -120,8 +121,7 @@ function pollResults() {
         if (_.isEmpty(data.data)) {
           console.error('%s is missing features data', key);
         } else {
-          //HACK: data from featurizer is stringified json in an array
-          let features = JSON.parse(data.data.replace(/\['/,'').replace(/'\]/,'')).features;
+          let features = JSON.parse(data.data)[0].features[0];
           saveFeatures(getRecordId(key), features);
         }
         queue.delete(key);
