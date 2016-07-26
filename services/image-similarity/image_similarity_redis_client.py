@@ -5,7 +5,6 @@ import threading
 import time
 from image_similarity import ImageSimilarity
 from elasticsearch import Elasticsearch
-import matplotlib.pyplot as plt
 
 
 class Worker(threading.Thread):
@@ -45,13 +44,28 @@ class Worker(threading.Thread):
         # do the work to find similarity
         image_similarity = ImageSimilarity(obj_dict['similarity_threshold'])
         es = Elasticsearch([{'host': obj_dict['es_host'], 'port': obj_dict['es_port']}])
-        data = es.search(index=obj_dict['es_index'], body=obj_dict['es_query'], doc_type=obj_dict['es_doc_type'], size= 100)
-        for doc in data['hits']['hits']:
-            image_similarity.process_vector(doc['fields']['id'][0], doc['fields']['features'])
+        data = es.search(index=obj_dict['es_index'],
+                         body=obj_dict['es_query'],
+                         doc_type=obj_dict['es_doc_type'],
+                         size=100,
+                         scroll='2m',
+                         search_type='scan')
+
+        sid = data['_scroll_id']
+        scroll_size = data['hits']['total']
+        while scroll_size > 0:
+            print "Scrolling..."
+            data = es.scroll(scroll_id=sid, scroll='2m')
+            # Update the scroll ID
+            sid = data['_scroll_id']
+            # Get the number of results that we returned in the last scroll
+            scroll_size = len(data['hits']['hits'])
+            print "scroll size: " + str(scroll_size)
+            # Do something with the obtained page
+            for doc in data['hits']['hits']:
+                image_similarity.process_vector(doc['fields']['id'][0], doc['fields']['features'])
+
         print 'FINISHED SIMILARITY PROCESSING'
-        values = image_similarity.get_cosine_similarity_values()
-        plt.hist(values)
-        plt.show()
         # obj_dict['data'] = similarity_data
         obj_dict['state'] = 'processed'
         # report features to redis
