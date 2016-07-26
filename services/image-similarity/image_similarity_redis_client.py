@@ -3,6 +3,7 @@
 import redis
 import threading
 import time
+import json
 from image_similarity import ImageSimilarity
 from elasticsearch import Elasticsearch
 
@@ -38,18 +39,25 @@ class Worker(threading.Thread):
         self.send.hmset(key, obj_dict)
         self.process_message(key, obj_dict)
 
+    def dump(obj):
+        return json.dumps(obj)
+
     def process_message(self, key, obj_dict):
         # get features:
         print 'FINDING SIMILARITY'
         # do the work to find similarity
-        image_similarity = ImageSimilarity(obj_dict['similarity_threshold'])
+        image_similarity = ImageSimilarity(float(obj_dict['similarity_threshold']))
         es = Elasticsearch([{'host': obj_dict['es_host'], 'port': obj_dict['es_port']}])
+        query = json.loads(obj_dict['es_query'])
         data = es.search(index=obj_dict['es_index'],
-                         body=obj_dict['es_query'],
+                         body=query,
                          doc_type=obj_dict['es_doc_type'],
                          size=100,
-                         scroll='2m',
-                         search_type='scan')
+                         scroll='2m')
+
+        # process initial results
+        for doc in data['hits']['hits']:
+            image_similarity.process_vector(doc['fields']['id'][0], doc['fields']['features'])
 
         sid = data['_scroll_id']
         scroll_size = data['hits']['total']
@@ -66,11 +74,10 @@ class Worker(threading.Thread):
                 image_similarity.process_vector(doc['fields']['id'][0], doc['fields']['features'])
 
         print 'FINISHED SIMILARITY PROCESSING'
-        # obj_dict['data'] = similarity_data
+        obj_dict['data'] = image_similarity.to_json()
         obj_dict['state'] = 'processed'
         # report features to redis
         self.send.hmset(key, obj_dict)
-
 
 
 class Listener(threading.Thread):
@@ -95,33 +102,36 @@ class Listener(threading.Thread):
 
 
 if __name__ == "__main__":
-    worker = Worker(None, None)
-    worker.process_message(None, {"state": "new", "similarity_threshold": .5, "es_host": "54.234.139.42", "es_port": "9200", "es_index": "stream","es_doc_type": "jul2016-uk", "es_query": {
-            "fields": [
-                "timestamp_ms",
-                "features",
-                "id"
-            ],
-            "query": {
-                "bool": {
-                    "must": {
-                        "term": {
-                            "features": 0
-                        }
-                    },
-                    "filter": {
-                        "range": {
-                            "timestamp_ms": {
-                                "gte": "1468617997000",
-                                "lt": "1469316397000"
-                            }
-                        }
-                    }
-                }
-            }
-        }})
     pool = redis.ConnectionPool(host='redis', port=6379)
     r1 = redis.Redis(connection_pool=pool)
     r2 = redis.Redis(connection_pool=pool)
     client = Listener(r1, r2, ['similarity'])
     client.start()
+
+
+#to test:
+    # worker = Worker(None, None)
+    # worker.process_message(None, {"state": "new", "similarity_threshold": .5, "es_host": "54.234.139.42", "es_port": "9200", "es_index": "stream","es_doc_type": "jul2016-uk", "es_query": {
+    #         "fields": [
+    #             "timestamp_ms",
+    #             "features",
+    #             "id"
+    #         ],
+    #         "query": {
+    #             "bool": {
+    #                 "must": {
+    #                     "term": {
+    #                         "features": 0
+    #                     }
+    #                 },
+    #                 "filter": {
+    #                     "range": {
+    #                         "timestamp_ms": {
+    #                             "gte": "1468617997000",
+    #                             "lt": "1468618897000"
+    #                         }
+    #                     }
+    #                 }
+    #             }
+    #         }
+    #     }})

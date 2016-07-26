@@ -1,4 +1,5 @@
 from similarity_cluster import SimilarityCluster
+import json
 
 
 class ImageSimilarity:
@@ -17,6 +18,14 @@ class ImageSimilarity:
 
     def get_clusters(self):
         return self.similarity_clusters
+
+    def to_json(self):
+        json_list = []
+        for cluster in self.similarity_clusters:
+            if len(cluster.similar_image_ids) == 1:
+                continue
+            json_list.append(cluster.to_serializable_object())
+        return json.dumps(json_list)
 
     def get_cosine_similarity_values(self):
         values = []
