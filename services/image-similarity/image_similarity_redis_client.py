@@ -1,4 +1,8 @@
 
+#to test:
+    #from the redis cli run these commands
+    #hmset 1 "state" "new" "similarity_threshold" .5 "es_host" "54.234.139.42" "es_port" "9200" "es_index" "stream" "es_doc_type" "jul2016-uk" "es_query" "{\"fields\":[\"timestamp_ms\",\"features\",\"id\"],\"query\":{\"bool\":{\"must\":{\"term\":{\"features\":0}},\"filter\":{\"range\":{\"timestamp_ms\":{\"gte\":\"1468617997000\",\"lt\":\"1468618897000\"}}}}}}"
+    #publish similarity 1
 
 import redis
 import threading
@@ -53,7 +57,7 @@ class Worker(threading.Thread):
                          body=query,
                          doc_type=obj_dict['es_doc_type'],
                          size=100,
-                         scroll='2m')
+                         scroll='10m')
 
         # process initial results
         for doc in data['hits']['hits']:
@@ -108,30 +112,3 @@ if __name__ == "__main__":
     client = Listener(r1, r2, ['similarity'])
     client.start()
 
-
-#to test:
-    # worker = Worker(None, None)
-    # worker.process_message(None, {"state": "new", "similarity_threshold": .5, "es_host": "54.234.139.42", "es_port": "9200", "es_index": "stream","es_doc_type": "jul2016-uk", "es_query": {
-    #         "fields": [
-    #             "timestamp_ms",
-    #             "features",
-    #             "id"
-    #         ],
-    #         "query": {
-    #             "bool": {
-    #                 "must": {
-    #                     "term": {
-    #                         "features": 0
-    #                     }
-    #                 },
-    #                 "filter": {
-    #                     "range": {
-    #                         "timestamp_ms": {
-    #                             "gte": "1468617997000",
-    #                             "lt": "1468618897000"
-    #                         }
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     }})
