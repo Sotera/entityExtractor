@@ -3,7 +3,9 @@
 import redis
 import threading
 import time
-import os
+from image_similarity import ImageSimilarity
+from elasticsearch import Elasticsearch
+import matplotlib.pyplot as plt
 
 
 class Worker(threading.Thread):
@@ -35,15 +37,26 @@ class Worker(threading.Thread):
         # try:
         obj_dict['state'] = 'processing'
         self.send.hmset(key, obj_dict)
+        self.process_message(key, obj_dict)
 
+    def process_message(self, key, obj_dict):
         # get features:
         print 'FINDING SIMILARITY'
         # do the work to find similarity
+        image_similarity = ImageSimilarity(obj_dict['similarity_threshold'])
+        es = Elasticsearch([{'host': obj_dict['es_host'], 'port': obj_dict['es_port']}])
+        data = es.search(index=obj_dict['es_index'], body=obj_dict['es_query'], doc_type=obj_dict['es_doc_type'], size= 100)
+        for doc in data['hits']['hits']:
+            image_similarity.process_vector(doc['fields']['id'][0], doc['fields']['features'])
         print 'FINISHED SIMILARITY PROCESSING'
-        #obj_dict['data'] = similarity_data
+        values = image_similarity.get_cosine_similarity_values()
+        plt.hist(values)
+        plt.show()
+        # obj_dict['data'] = similarity_data
         obj_dict['state'] = 'processed'
         # report features to redis
         self.send.hmset(key, obj_dict)
+
 
 
 class Listener(threading.Thread):
@@ -66,9 +79,33 @@ class Listener(threading.Thread):
                 worker = Worker(self.redis_send, item)
                 worker.start()
 
-# pickle.load(open('kmeans.pickle', 'rb'))
 
 if __name__ == "__main__":
+    worker = Worker(None, None)
+    worker.process_message(None, {"state": "new", "similarity_threshold": .5, "es_host": "54.234.139.42", "es_port": "9200", "es_index": "stream","es_doc_type": "jul2016-uk", "es_query": {
+            "fields": [
+                "timestamp_ms",
+                "features",
+                "id"
+            ],
+            "query": {
+                "bool": {
+                    "must": {
+                        "term": {
+                            "features": 0
+                        }
+                    },
+                    "filter": {
+                        "range": {
+                            "timestamp_ms": {
+                                "gte": "1468617997000",
+                                "lt": "1469316397000"
+                            }
+                        }
+                    }
+                }
+            }
+        }})
     pool = redis.ConnectionPool(host='redis', port=6379)
     r1 = redis.Redis(connection_pool=pool)
     r2 = redis.Redis(connection_pool=pool)

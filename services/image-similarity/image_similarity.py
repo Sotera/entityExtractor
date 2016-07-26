@@ -2,19 +2,27 @@ from similarity_cluster import SimilarityCluster
 
 
 class ImageSimilarity:
-    def __init__(self, similarity_delta):
-        print "init"
-        self.similarity_delta = similarity_delta
+    def __init__(self, similarity_threshold):
+        self.similarity_threshold = similarity_threshold
         self.similarity_clusters = []
 
     def process_vector(self, vector_id, vector):
+        i = 0
         for cluster in self.similarity_clusters:
             if cluster.process_similarity(vector_id, vector):
+                print "similarity in %d" % i
                 return
-        self.similarity_clusters.append(SimilarityCluster(self.similarity_delta, vector_id, vector))
+            i += 1
+        self.similarity_clusters.append(SimilarityCluster(self.similarity_threshold, vector_id, vector))
 
     def get_clusters(self):
         return self.similarity_clusters
+
+    def get_cosine_similarity_values(self):
+        values = []
+        for cluster in self.similarity_clusters:
+            values.extend(cluster.cosine_similarity_values)
+        return values
 
 
 if __name__ == "__main__":
