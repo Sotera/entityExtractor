@@ -42,8 +42,8 @@ class ImageSimilarity:
     def get_clusters_falconn(self):
         serializable_list = []
         vector_numpy_ndarray = np.array(self.vector_matrix)
-        vector_numpy_ndarray /= np.linalg.norm(vector_numpy_ndarray, axis=1).reshape(-1, 1)
-        center = np.mean(vector_numpy_ndarray, axis=0)
+        vector_numpy_ndarray /= np.linalg.norm(vector_numpy_ndarray).reshape(-1, 1)
+        center = np.mean(vector_numpy_ndarray)
         vector_numpy_ndarray -= center
         falconn_params = falconn.get_default_parameters(len(self.vector_matrix), len(self.vector_matrix[0]))
         falconn_params.distance_function = "euclidean_squared"
