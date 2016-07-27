@@ -11,7 +11,7 @@ from image_similarity import ImageSimilarity
 from elasticsearch import Elasticsearch
 
 
-class Worker():
+class Worker:
     def __init__(self, redis_send, message):
         self.send = redis_send
         self.item = message
@@ -40,7 +40,7 @@ class Worker():
         # get features:
         print 'FINDING SIMILARITY'
         # do the work to find similarity
-        image_similarity = ImageSimilarity(float(job['similarity_threshold']))
+        image_similarity = ImageSimilarity(float(job['similarity_threshold']), job['similarity_method'])
         es = Elasticsearch([{'host': job['es_host'], 'port': job['es_port']}])
         query = json.loads(job['es_query'])
         data = es.search(index=job['es_index'],
