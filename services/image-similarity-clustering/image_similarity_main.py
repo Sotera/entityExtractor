@@ -1,7 +1,7 @@
 
 #to test:
     #from the redis cli run these commands
-    #hmset 1 "state" "new" "similarity_threshold" .5 "es_host" "54.234.139.42" "es_port" "9200" "es_index" "stream" "es_doc_type" "jul2016-uk" "es_query" "{\"fields\":[\"timestamp_ms\",\"features\",\"id\"],\"query\":{\"bool\":{\"must\":{\"term\":{\"features\":0}},\"filter\":{\"range\":{\"timestamp_ms\":{\"gte\":\"1468617997000\",\"lt\":\"1468618897000\"}}}}}}"
+    #hmset 1 "state" "new" "similarity_threshold" .5 "es_host" "54.234.139.42" "similarity_method" "custom" "es_port" "9200" "es_index" "stream" "es_doc_type" "jul2016-uk" "es_query" "{\"fields\":[\"timestamp_ms\",\"features\",\"id\"],\"query\":{\"bool\":{\"must\":{\"term\":{\"features\":0}},\"filter\":{\"range\":{\"timestamp_ms\":{\"gte\":\"1468617997000\",\"lt\":\"1468618897000\"}}}}}}"
     #publish similarity 1
 
 import sys, os
@@ -15,7 +15,7 @@ def process_message(key, job):
     # get features:
     print 'FINDING SIMILARITY'
     # do the work to find similarity
-    image_similarity = ImageSimilarity(float(job['similarity_threshold']))
+    image_similarity = ImageSimilarity(float(job['similarity_threshold']), job['similarity_method'])
     es = Elasticsearch([{'host': job['es_host'], 'port': job['es_port']}])
     query = json.loads(job['es_query'])
     data = es.search(index=job['es_index'],

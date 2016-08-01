@@ -1,5 +1,4 @@
 from running_stat import RunningStat
-import math
 import numpy as np
 
 
