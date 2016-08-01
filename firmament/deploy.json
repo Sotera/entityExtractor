@@ -16,7 +16,7 @@
   },
   {
     "name": "stream-twitter",
-    "Image": "sotera/stream-twitter:2",
+    "Image": "sotera/stream-twitter:3",
     "DockerFilePath": "",
     "Hostname": "stream-twitter",
     "Env": [
@@ -30,7 +30,7 @@
   },
   {
     "name": "extract-twitter-images",
-    "Image": "sotera/extract-twitter-images:2",
+    "Image": "sotera/extract-twitter-images:4",
     "DockerFilePath": "",
     "Hostname": "extract-twitter-images",
     "HostConfig": {

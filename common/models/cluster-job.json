@@ -1,0 +1,50 @@
+{
+  "name": "clusterJob",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "indexes": {
+    "idx_end_time": {
+      "keys": {
+        "end_time": 1
+      }
+    },
+    "idx_state": {
+      "keys": {
+        "state": 1
+      }
+    }
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "Timestamp": {}
+  },
+  "properties": {
+    "state": {
+      "type": "string",
+      "required": true,
+      "default": "running"
+    },
+    "start_time": {
+      "type": "number",
+      "required": true
+    },
+    "end_time": {
+      "type": "number",
+      "required": true
+    },
+    "params": {
+      "type": "object",
+      "required": true,
+      "default": {}
+    },
+    "clusters": {
+      "type": "array"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

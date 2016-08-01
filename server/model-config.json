@@ -60,7 +60,15 @@
     "dataSource": null,
     "public": true
   },
-  "socialMediaRecord": {
+  "clusterJob": {
+    "dataSource": "db",
+    "public": true
+  },
+  "tweet": {
+    "dataSource": "db",
+    "public": true
+  },
+  "jobMonitor": {
     "dataSource": "db",
     "public": true
   }

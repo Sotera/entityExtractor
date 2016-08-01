@@ -126,11 +126,23 @@ function processFiles() {
 
 function bulkIndex(lines) {
   if (!lines || !lines.length) return;
-  return destClient.bulk({
-    index: destIndex,
-    type: destType,
-    body: lines.join('\n')
-  });
+  // chunk lines to prevent ES bulk limits.
+  // chunk count must be evenly divisible by 2 for bulk format.
+  let chunks = _.chunk(lines, 100);
+  let promiseChain = Promise.resolve();
+  for (let chunk of chunks) {
+    promiseChain = promiseChain
+      .then(() => {
+        return destClient.bulk({
+          index: destIndex,
+          type: destType,
+          body: chunk.join('\n')
+        });
+      })
+      .then(() => console.log('ES bulk indexing...'))
+      .catch(err => console.error('error in ES bulk indexing:', err));
+  }
+  return promiseChain;
 }
 
 function alterTweet(line) {

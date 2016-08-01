@@ -121,7 +121,7 @@ function pollResults() {
         if (_.isEmpty(data.data)) {
           console.error('%s is missing features data', key);
         } else {
-          let features = JSON.parse(data.data).features[0];
+          let features = JSON.parse(data.data)[0].features[0];
           saveFeatures(getRecordId(key), features);
         }
         queue.delete(key);

@@ -1,0 +1,46 @@
+{
+  "name": "jobMonitor",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "indexes": {
+    "idx_uniq": {
+      "keys": {
+        "start_time": 1,
+        "end_time": 1,
+        "featurizer": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "Timestamp": {}
+  },
+  "properties": {
+    "start_time": {
+      "type": "number",
+      "required": true
+    },
+    "end_time": {
+      "type": "number",
+      "required": true
+    },
+    "featurizer": {
+      "type": "string",
+      "required": true
+    },
+    "state": {
+      "type": "string",
+      "required": true,
+      "default": "new"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

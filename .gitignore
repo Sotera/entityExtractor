@@ -6,3 +6,4 @@ temp
 .env
 firmament/docker/**/*.conf
 *.pyc
+tmp

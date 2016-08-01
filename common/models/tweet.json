@@ -1,0 +1,74 @@
+{
+  "name": "tweet",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "indexes": {
+    "idx_id_str": {
+      "keys": {
+        "id_str": 1
+      },
+      "options": {
+        "unique": true
+      }
+    },
+    "idx_timestamp_ms": {
+      "keys": {
+        "timestamp_ms": 1
+      }
+    },
+    "idx_state": {
+      "keys": {
+        "state": 1
+      }
+    },
+    "idx_featurizers": {
+      "keys": {
+        "featurizers": 1
+      }
+    }
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "Timestamp": {}
+  },
+  "properties": {
+    "id_str": {
+      "type": "string",
+      "required": true
+    },
+    "text": {
+      "type": "string"
+    },
+    "hashtags": {
+      "type": [
+        "string"
+      ],
+      "default": []
+    },
+    "featurizers": {
+      "type": [
+        "string"
+      ],
+      "default": []
+    },
+    "timestamp_ms": {
+      "type": "number",
+      "required": true
+    },
+    "state": {
+      "type": "string",
+      "required": true
+    },
+    "features": {
+      "type": [
+        "number"
+      ]
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

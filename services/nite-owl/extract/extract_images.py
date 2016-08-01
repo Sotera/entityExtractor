@@ -88,7 +88,9 @@ def main(args):
                 if debug:
                     print "Finished in", time.time() - start_time, "seconds"
         else:
-            time.sleep(300)
+            wait = 5 * 60 # 5 mins
+            time.sleep(wait)
+            print "sleeping for %d mins..." % wait
             n_sleep += 1
             if n_sleep > 5:
                 print "There have been no files to analyze for", n_sleep*5, "minutes, the twitter stream may be down"

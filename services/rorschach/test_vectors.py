@@ -10,23 +10,26 @@ def nz_inds(vec):
     return l_ret
 
 
-es = Elasticsearch([{"host":"52.91.192.62", "port":9200}])
+es = Elasticsearch([{"host":"54.234.139.42", "port":9200}])
 print "ES:", es.ping()
-res = es.search(index='stream', doc_type='tweet', body='{"query":{"match_all":{}}}', size=100)
+res = es.search(index='stream', doc_type='jul2016-uk',
+    body='{"query":{"exists": {"field": "features"}}}', size=100)
 print "Total", res['hits']['total']
 hits = res['hits']['hits']
 n_hits = []
 used_inds = []
 used_mult_inds = []
 for hit in hits:
+    src = hit['_source']
+    features = src['features']
     try:
-        vl = len(hit['_source']['features'])
+        vl = len(features)
     except:
         #print "!!!"
         continue
-    if vl==88:
+    if vl == 1: # len 1 == featurizer failed
         continue
-    fv = hit['_source']['features'][0]
+    fv = features
 
     used = nz_inds(fv)
     nz = len(used)
@@ -37,7 +40,7 @@ for hit in hits:
         used_mult_inds.extend(used)
         print nz
     n_hits.append(nz)
-    print "used inds:", len(used), hit['_source']['id_str'], hit['_source']['instagram']
+    print "used inds:", len(used), src['id_str'], src['instagram']
 
 
 plt.figure(1)

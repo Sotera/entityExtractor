@@ -76,9 +76,8 @@ def stream_data(response, response_open_time, outdir, debug = False):
                 outfile = open(outdir+"/stream/"+current_string, "w", 0)
                 #every 2 hours, close existing connection, open under new key to avoid timeout
             try:
-                json.load
                 outfile.write(line.strip()+"\n")
-                print "."
+                print line[:100], '...'
             except:
                 if debug:
                     print "json load error:", sys.exc_info()[0]
@@ -115,7 +114,7 @@ def main(args):
         print "Response open time: ", str(response_open_time)
 
     while True:
-        stream_data(response, response_open_time, outdir)
+        stream_data(response, response_open_time, outdir, debug)
         if debug:
             print "Exit stream_data"
         response.close()

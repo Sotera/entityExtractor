@@ -2,6 +2,8 @@ FROM ubuntu:14.04
 
 USER root
 
+ENV TERM xterm
+
 # Install git, bc and dependencies
 RUN apt-get update --fix-missing && apt-get install -y \
   wget \
@@ -28,7 +30,8 @@ RUN apt-get update --fix-missing && apt-get install -y \
   libhdf5-dev \
   libleveldb-dev \
   liblmdb-dev \
-  libsnappy-dev
+  libsnappy-dev \
+  htop
 
 RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
   wget --quiet --no-check-certificate https://repo.continuum.io/archive/Anaconda2-2.4.1-Linux-x86_64.sh && \
@@ -36,7 +39,8 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
   rm Anaconda2-2.4.1-Linux-x86_64.sh
 
 ENV PATH /opt/conda/bin:$PATH
-RUN export PYTHONPATH=/home/caffe-user/caffe/python/:$PYTHONPATH
+ENV PYTHONPATH /home/caffe-user/caffe/python:$PYTHONPATH
+
 RUN conda install -c https://conda.anaconda.org/memex elasticsearch-py && \
   conda install -c https://conda.anaconda.org/anaconda protobuf
 
@@ -56,7 +60,7 @@ RUN cd /home/caffe-user/caffe && \
   make distribute
 
 RUN cd /home/caffe-user/caffe/models/bvlc_reference_caffenet && \
-wget --quiet http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
+  wget --quiet http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
 
 WORKDIR /home/caffe-user/
 
@@ -67,8 +71,6 @@ RUN chown -R caffe-user:caffe-user /home/caffe-user
 
 USER caffe-user
 
-RUN export CAFFE_ROOT=/home/caffe-user/caffe/
-
-RUN export PYTHONPATH=/home/caffe-user/caffe/python:$PYTHONPATH
+ENV CAFFE_ROOT /home/caffe-user/caffe
 
 ENTRYPOINT ["python", "app/caffe_redis_client.py"]

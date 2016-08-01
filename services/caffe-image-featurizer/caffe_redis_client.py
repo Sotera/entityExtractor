@@ -5,7 +5,6 @@
 #CAFFE_PYTHON_PATH = /home/caffe-user/caffe/python/
 
 import redis
-import threading
 import caffe_feature_extraction
 import time
 import os
