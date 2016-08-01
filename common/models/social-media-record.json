@@ -1,0 +1,35 @@
+{
+  "name": "socialMediaRecord",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "indexes": {
+    "uniq_idx": {
+      "keys": {
+        "postId": 1,
+        "type": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "postId": {
+      "type": "string",
+      "required": true,
+      "description": "external id from social media service"
+    },
+    "type": {
+      "type": "string",
+      "required": true,
+      "description": "twitter, instagram, etc."
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -7,6 +7,8 @@ var boot = require('loopback-boot');
 var bodyParser = require('body-parser');
 var app = module.exports = loopback();
 
+require('./basic-auth').auth(app, ['socialmediarecords']);
+
 // to support JSON-encoded bodies
 app.middleware('parse', bodyParser.json());
 // to support URL-encoded bodies
