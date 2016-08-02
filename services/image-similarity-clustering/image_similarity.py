@@ -26,8 +26,9 @@ class ImageSimilarity:
 
     def process_vector_custom(self, vector_id, vector):
         i = 0
+        normalized_vector = np.linalg.norm(vector)
         for cluster in self.similarity_clusters:
-            if cluster.process_similarity(vector_id, vector):
+            if cluster.process_similarity(vector_id, vector, normalized_vector):
                 print "similarity in %d" % i
                 return
             i += 1
@@ -88,7 +89,7 @@ class ImageSimilarity:
 
 
 if __name__ == "__main__":
-    #get data
+    # get data
     data = [
         [
             2.0112218856811523,
@@ -126,4 +127,3 @@ if __name__ == "__main__":
     imageSim.process_vector(3, data[3])
 
     print "done"
-

@@ -1,19 +1,23 @@
 
-#to test:
-    #from the redis cli run these commands
-    #hmset 1 "state" "new" "similarity_threshold" .5 "es_host" "54.234.139.42" "similarity_method" "custom" "es_port" "9200" "es_index" "stream" "es_doc_type" "jul2016-uk" "es_query" "{\"fields\":[\"timestamp_ms\",\"features\",\"id\"],\"query\":{\"bool\":{\"must\":{\"term\":{\"features\":0}},\"filter\":{\"range\":{\"timestamp_ms\":{\"gte\":\"1468617997000\",\"lt\":\"1468618897000\"}}}}}}"
-    #publish similarity 1
+# to test:
+# from the redis cli run these commands
+# hmset 1 "state" "new" "similarity_threshold" .5 "es_host" "54.234.139.42" "similarity_method" "custom" "es_port" "9200" "es_index" "stream" "es_doc_type" "jul2016-uk" "es_query" "{\"fields\":[\"timestamp_ms\",\"features\",\"id\"],\"query\":{\"bool\":{\"must\":{\"term\":{\"features\":0}},\"filter\":{\"range\":{\"timestamp_ms\":{\"gte\":\"1468617997000\",\"lt\":\"1468618897000\"}}}}}}"
+# publish similarity 1
 
-import sys, os
+import sys
+import os
 import json
+import time
 from image_similarity import ImageSimilarity
 from elasticsearch import Elasticsearch
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
 
+
 def process_message(key, job):
     # get features:
     print 'FINDING SIMILARITY'
+
     # do the work to find similarity
     image_similarity = ImageSimilarity(float(job['similarity_threshold']), job['similarity_method'])
     es = Elasticsearch([{'host': job['es_host'], 'port': job['es_port']}])
@@ -32,6 +36,7 @@ def process_message(key, job):
     scroll_size = data['hits']['total']
     while scroll_size > 0:
         print "Scrolling..."
+
         data = es.scroll(scroll_id=sid, scroll='2m')
         # Update the scroll ID
         sid = data['_scroll_id']
@@ -39,8 +44,13 @@ def process_message(key, job):
         scroll_size = len(data['hits']['hits'])
         print "scroll size: " + str(scroll_size)
         # Do something with the obtained page
+        start = time.clock()
         for doc in data['hits']['hits']:
             image_similarity.process_vector(doc['fields']['id'][0], doc['fields']['features'])
+        end = time.clock()
+        duration = end - start if scroll_size > 0 else 0
+
+        print 'SIMILARITY PROCESSING of {} took {}'.format(scroll_size, duration)
 
     print 'FINISHED SIMILARITY PROCESSING'
     job['data'] = image_similarity.to_json()
@@ -48,8 +58,5 @@ def process_message(key, job):
 
 
 if __name__ == '__main__':
-    dispatcher = Dispatcher(redis_host='redis',
-        process_func=process_message,
-        channels=['similarity'])
+    dispatcher = Dispatcher(redis_host='redis', process_func=process_message, channels=['similarity'])
     dispatcher.start()
-
