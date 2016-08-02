@@ -18,8 +18,9 @@ class SimilarityCluster:
         if are_similar:
             print "{} is similar to {}".format(vector_id, self.similar_image_ids[0])
             self.similar_image_ids.append(vector_id)
-            self.average_similarity_vector = [n * .5 for n in [x + y for x, y in
-                                                               zip(self.average_similarity_vector, vector)]]
+            self.average_similarity_vector = [n / (len(self.similar_image_ids)+1) for n in
+                                              [(x * len(self.similar_image_ids)) + y for x, y in
+                                               zip(self.average_similarity_vector, vector)]]
             self.running_stat.push(similarity)
 
         return are_similar
