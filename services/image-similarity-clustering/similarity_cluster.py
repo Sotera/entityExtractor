@@ -1,5 +1,7 @@
 from running_stat import RunningStat
 import numpy as np
+from itertools import starmap,izip
+from operator import mul
 
 
 class SimilarityCluster:
@@ -16,7 +18,7 @@ class SimilarityCluster:
         are_similar = similarity > self.similarity_threshold
 
         if are_similar:
-            print "{} is similar to {}".format(vector_id, self.similar_image_ids[0])
+            # print "{} is similar to {}".format(vector_id, self.similar_image_ids[0])
             self.apply_vector_to_average(vector)
             self.similar_image_ids.append(vector_id)
             self.running_stat.push(similarity)
@@ -26,7 +28,7 @@ class SimilarityCluster:
     def apply_vector_to_average(self, vector):
         self.average_similarity_vector = [n / (len(self.similar_image_ids)+1)
                                           for n in [(x * len(self.similar_image_ids)) + y for x, y in
-                                          zip(self.average_similarity_vector, vector)]]
+                                          izip(self.average_similarity_vector, vector)]]
         self.normalized_average_similarity_vector = np.linalg.norm(self.average_similarity_vector)
 
     def to_serializable_object(self):
@@ -39,4 +41,4 @@ class SimilarityCluster:
 
     @staticmethod
     def cosine_similarity(v1, normalized_v1, v2, normalized_v2):
-        return np.dot(v1, v2) / (normalized_v1 * normalized_v2)
+        return sum(starmap(mul, izip(v1, v2))) / (normalized_v1 * normalized_v2)

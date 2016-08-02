@@ -25,13 +25,10 @@ class ImageSimilarity:
         self.vector_id_list.append(vector_id)
 
     def process_vector_custom(self, vector_id, vector):
-        i = 0
         normalized_vector = np.linalg.norm(vector)
         for cluster in self.similarity_clusters:
             if cluster.process_similarity(vector_id, vector, normalized_vector):
-                print "similarity in %d" % i
                 return
-            i += 1
         self.similarity_clusters.append(SimilarityCluster(self.similarity_threshold, vector_id, vector))
 
     def get_clusters(self):
