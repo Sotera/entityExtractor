@@ -2,15 +2,19 @@ from running_stat import RunningStat
 import numpy as np
 from itertools import starmap,izip
 from operator import mul
+import uuid
 
 
 class SimilarityCluster:
-    def __init__(self, similarity_threshold, initial_vector_id, initial_vector):
+    def __init__(self, similarity_threshold, initial_vector_id, initial_vector, start_time_ms, end_time_ms):
         self.average_similarity_vector = initial_vector
         self.normalized_average_similarity_vector = np.linalg.norm(initial_vector)
         self.similar_image_ids = [initial_vector_id]
         self.similarity_threshold = similarity_threshold
         self.running_stat = RunningStat()
+        self.id = uuid.uuid4()
+        self.start_time_ms = start_time_ms
+        self.end_time_ms = end_time_ms
 
     def process_similarity(self, vector_id, vector, vector_normalized):
         similarity = self.cosine_similarity(self.average_similarity_vector, self.normalized_average_similarity_vector,
@@ -36,7 +40,10 @@ class SimilarityCluster:
             "variance": self.running_stat.variance(),
             "average_similarity_vector": self.average_similarity_vector,
             "average_similarity": self.running_stat.mean(),
-            "similar_image_ids": self.similar_image_ids
+            "similar_image_ids": self.similar_image_ids,
+            "start_time_ms": self.start_time_ms,
+            "end_time_ms": self.end_time_ms,
+            "id": str(self.id)
         }
 
     @staticmethod
