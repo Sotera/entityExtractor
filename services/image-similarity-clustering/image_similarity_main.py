@@ -11,7 +11,7 @@ import sys
 import os
 from image_similarity import ImageSimilarity
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "./util"))
 from redis_dispatcher import Dispatcher
 from loopy import Loopy
 
@@ -67,6 +67,6 @@ def process_message(key, job):
 
 
 if __name__ == '__main__':
-    dispatcher = Dispatcher(process_func=process_message,
+    dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
                             channels=['genie:clust_txt', 'genie:clust_img'])
     dispatcher.start()
