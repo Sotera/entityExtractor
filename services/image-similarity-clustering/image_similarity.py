@@ -54,7 +54,9 @@ class ImageSimilarity:
 
     def process_vector_custom(self, vector_id, vector):
         normalized_vector = np.linalg.norm(vector)
-
+        if normalized_vector == 0:
+            print "normalized vector returned 0, skipping."
+            return
         match_id = self.process_cluster_set(self.similarity_clusters["high"], vector_id, vector, normalized_vector)
         if match_id is not None:
             self.organize_cluster(match_id, self.similarity_clusters["high"])

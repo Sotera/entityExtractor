@@ -1,79 +1,72 @@
+# http://10.104.1.144:3003/api/socialMediaPosts/count?[where][timestamp_ms][between][0]=1469644000000&[where][timestamp_ms][between][1]=1469644050000&filter[where][lang]=en
 
+# http://10.104.1.144:3003/api/socialMediaPosts?filter[where][timestamp_ms][between][0]=1469695563000&filter[where][timestamp_ms][between][1]=1469702566000&filter[where][lang]=en&filter[limit]=5&filter[skip]=0
 # to test:
 # from the redis cli run these commands
-# hmset 1 "state" "new" "start_time_ms" 1468617997000 "end_time_ms" 1468618897000 "similarity_threshold" .5 "es_host" "54.234.139.42" "similarity_method" "custom" "es_port" "9200" "es_index" "stream" "es_doc_type" "jul2016-uk" "es_query" "{\"fields\":[\"timestamp_ms\",\"features\",\"id\"],\"query\":{\"bool\":{\"must\":{\"term\":{\"features\":0}},\"filter\":{\"range\":{\"timestamp_ms\":{\"gte\":\"1468617997000\",\"lt\":\"1468618897000\"}}}}}}"
+# hmset 1 "state" "new" "similarity_threshold" .5 "similarity_method" "custom" "query_url" "http://10.104.1.144:3003/api/socialMediaPosts/" "lang" "en" "data_type" "text" "start_time_ms" 1469695563000 "end_time_ms" 1469702566000
+# hmset 1 "state" "new" "similarity_threshold" .5 "es_host" "54.234.139.42" "similarity_method" "custom" "es_port" "9200" "es_index" "stream" "es_doc_type" "jul2016-uk" "es_query" "{\"fields\":[\"timestamp_ms\",\"features\",\"id\"],\"query\":{\"bool\":{\"must\":{\"term\":{\"features\":0}},\"filter\":{\"range\":{\"timestamp_ms\":{\"gte\":\"1468617997000\",\"lt\":\"1468618897000\"}}}}}}"
 # publish similarity 1
 
 import sys
 import os
-import json
-import time
 from image_similarity import ImageSimilarity
-from elasticsearch import Elasticsearch
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
-
-
-def process_data(image_similarity, data):
-    if len(data['hits']['hits']) == 0:
-        return
-
-    print 'PROCESSING {}'.format(len(data['hits']['hits']))
-
-    start = time.clock()
-    for doc in data['hits']['hits']:
-        image_similarity.process_vector(doc['fields']['id'][0], doc['fields']['features'])
-    end = time.clock()
-    duration = end - start
-    print 'SIMILARITY PROCESSING of {} took {}'.format(len(data['hits']['hits']), duration)
+from loopy import Loopy
 
 
 def process_message(key, job):
     # get features:
     print 'FINDING SIMILARITY'
-
     # do the work to find similarity
-    image_similarity = ImageSimilarity(float(job['similarity_threshold']), job['start_time_ms'],
-                                       job['end_time_ms'], job['similarity_method'])
-    es = Elasticsearch([{'host': job['es_host'], 'port': job['es_port']}])
-    query = json.loads(job['es_query'])
+    image_similarity = ImageSimilarity(float(job['similarity_threshold']), job['start_time_ms'], job['end_time_ms'],
+                                       job['similarity_method'])
+    loopy = Loopy(job['query_url'], [
+        {
+            "query_type": "between",
+            "property_name": "timestamp_ms",
+            "query_value": [job['start_time_ms'], job['end_time_ms']]
+        },
+        {
+            "query_type": "where",
+            "property_name": "lang",
+            "query_value": "en"
+        }
+    ])
 
-    total_time = time.clock()
+    if loopy.result_count == 0:
+        print "No data to process"
+        job['data'] = []
+        job['error'] = "No data found to process."
+        job['state'] = 'error'
+        return
 
-    data = es.search(index=job['es_index'],
-                     body=query,
-                     doc_type=job['es_doc_type'],
-                     size=100,
-                     scroll='10m')
-
-    # process initial results
-    process_data(image_similarity, data)
-
-    sid = data['_scroll_id']
-    scroll_size = data['hits']['total']
-    total_items = data['hits']['total']
-
-    while scroll_size > 0:
-        print "Scrolling..."
-        data = es.scroll(scroll_id=sid, scroll='2m')
-        # Update the scroll ID
-        sid = data['_scroll_id']
-        # Get the number of results that we returned in the last scroll
-        scroll_size = len(data['hits']['hits'])
+    while True:
+        print "Scrolling...{}".format(loopy.current_page)
+        page = loopy.get_next_page()
+        if page is None:
+            break
         # Do something with the obtained page
-        process_data(image_similarity, data)
+        for doc in page:
+            if job['data_type'] == "text" and 'text_features' in doc and 'id' in doc and len(doc['text_features']) > 0:
+                image_similarity.process_vector(doc['id'], doc['text_features'])
+                continue
+            if job['data_type'] == "image" and 'image_features' in doc and 'id' in doc and \
+                    len(doc['image_features']) > 0:
+                image_similarity.process_vector(doc['id'], doc['image_features'])
 
-    print 'FINISHED SIMILARITY PROCESSING of {} took {}'.format(total_items, time.clock() - total_time)
+    clusters = image_similarity.get_clusters()
 
-    num_high = len(image_similarity.similarity_clusters["high"])
-    num_med = len(image_similarity.similarity_clusters["medium"])
-
-    print 'found {} high {} medium {} total'.format(num_high, num_med, num_high+num_med)
-
+    print 'FINISHED SIMILARITY PROCESSING: found {} clusters'.format(len(clusters))
+    for cluster in clusters:
+        cluster['job_monitor_id'] = job['job_id']
+        loopy.post_result(job['result_url'], cluster)
     job['data'] = image_similarity.to_json()
     job['state'] = 'processed'
 
 
 if __name__ == '__main__':
-    dispatcher = Dispatcher(redis_host='redis', process_func=process_message, channels=['similarity'])
+    dispatcher = Dispatcher(process_func=process_message,
+                            channels=['genie:clust_txt', 'genie:clust_img'])
     dispatcher.start()
