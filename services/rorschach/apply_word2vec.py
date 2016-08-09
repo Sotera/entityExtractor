@@ -9,6 +9,7 @@ def set_err(job, msg):
     job['data'] = []
     job['error'] = msg
 
+
 def process_message(key, job):
     # Examine job for correct fields
     if 'txt' not in job.keys():
@@ -19,19 +20,20 @@ def process_message(key, job):
         return
 
     # Check if the text language can be featurized
-    if 'lang' == 'en':
+    lng = job['lang']
+    if lng in model_langs:
         try:
-            if SentimentFilter.is_scoreable(job['txt']) is False:
+            if sent_filt.is_scoreable(job['txt'], lng) is False:
                 job['data'] = []
                 job['state'] = 'processed'
         except:
-            set_err(job, "Error checking if doc is 'scorable'")
+            set_err(job, "Error checking if doc is 'scorable', language=" + str(lng))
 
         try:
-            job['data'] = syntax_vectorizer['en'].vec_from_tweet(job['txt'])
+            job['data'] = syntax_vectorizer[lng].vec_from_tweet(job['txt'])
             job['state'] = 'processed'
         except:
-            set_err(job, "Error making syntax vector:\n" + str(sys.exc_info()[0]))
+            set_err(job, "Error making syntax vector (" + lng + "):\n" + str(sys.exc_info()[0]))
     else:
         job['data'] = []
         job['state'] = 'processed'
@@ -39,11 +41,14 @@ def process_message(key, job):
 if __name__ == '__main__':
     # ar = argparse.ArgumentParser()
     # ar.add_argument("")
+    global model_langs
+    model_langs = ['en', 'ar']
     global sent_filt
     sent_filt = SentimentFilter()
     global syntax_vectorizer
     syntax_vectorizer = {}
-    syntax_vectorizer['en'] = SyntaxVectorizer("july28_eng_")
+    syntax_vectorizer['en'] = SyntaxVectorizer("july28_eng")
+    syntax_vectorizer['ar'] = SyntaxVectorizer("")
     dispatcher = Dispatcher(redis_host='redis',
         process_func=process_message, channels=['genie:feature_txt'])
     dispatcher.start()

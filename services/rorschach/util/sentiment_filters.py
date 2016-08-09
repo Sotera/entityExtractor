@@ -29,8 +29,10 @@ class SentimentFilter:
             caption = re.sub('[^\w\s@]','',caption,flags=re.UNICODE)
             return filter(lambda x: x!='', caption.strip().split(' '))
         elif lang=='ar':
-            caption = re.sub('[\s#.]', ' ', caption, flags=re.UNICODE)
-            caption = re.sub('[^\u0627-\u064a\w]', '', caption, flags=re.UNICODE)
-            return filter(lambda x: len(x)>1, Text(caption).words)
+            try:
+                return filter(lambda x: len(x)>1, Text(caption).words)
+            except:
+                print caption
+                return []
         else:
             return []

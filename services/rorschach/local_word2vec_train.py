@@ -29,8 +29,9 @@ def get_cos(v1, v2):
     return np.dot(v1, v2)/(np.linalg.norm(v1)*np.linalg.norm(v2))
 
 def main(s_lng='en', test_words=None):
-    s_path = '/Volumes/ed_00/data/raw_tweet_data/tweets_w_img_url/'
-    s_save = date.today().strftime('%b%d')+'_'+s_lng+'_'
+    #s_path = '/Volumes/ed_00/data/raw_tweet_data/tweets_w_img_url/'
+    s_path = '/Volumes/ed_00/data/arabic_json/'
+    s_save = date.today().strftime('%b%d')+'_'+s_lng
 
     l_files = os.listdir(s_path)
     _X = []
