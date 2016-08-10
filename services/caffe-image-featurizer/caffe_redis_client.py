@@ -66,7 +66,7 @@ def download_image(image_url):
 
 
 def process_message(key, job):
-    caffe_root = os.getenv('CAFFE_HOME', '/home/jlueders/caffe/')
+    caffe_root = os.getenv('CAFFE_HOME', '/home/caffe-user/caffe/')
 
     if not job:
         print 'No Valid Job.'
