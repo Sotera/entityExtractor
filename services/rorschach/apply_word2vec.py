@@ -21,8 +21,6 @@ def process_message(key, job):
 
     # Check if the text language can be featurized
     lng = job['lang']
-    print "Text:", job['txt']
-    print "Type:", type(job['txt'])
     if lng in model_langs:
         try:
             if sent_filt.is_scoreable(job['txt'], lng) is False:
@@ -47,8 +45,9 @@ def process_message(key, job):
 
 if __name__ == '__main__':
     ar = argparse.ArgumentParser()
-    ar.add_argument("-englishModel", help="Name of Engilsh model (assumes in './models'")
-    ar.add_argument("-arabicModel", help="Name of Arabic model (assumes in './models'")
+    ar.add_argument("-modelPath", help="Path to model (e.g. ./models)")
+    ar.add_argument("-englishModel", help="Name of Engilsh model")
+    ar.add_argument("-arabicModel", help="Name of Arabic model")
     args = ar.parse_args()
     global model_langs
     model_langs = ['en', 'ar']
@@ -57,9 +56,9 @@ if __name__ == '__main__':
     global syntax_vectorizer
     syntax_vectorizer = {}
     if args.englishModel != '':
-        syntax_vectorizer['en'] = SyntaxVectorizer(args.englishModel)
+        syntax_vectorizer['en'] = SyntaxVectorizer(args.modelPath, args.englishModel)
     if args.arabicModel != '':
-        syntax_vectorizer['ar'] = SyntaxVectorizer(args.arabicModel)
+        syntax_vectorizer['ar'] = SyntaxVectorizer(args.modelPath, args.arabicModel)
     dispatcher = Dispatcher(redis_host='redis',
         process_func=process_message, channels=['genie:feature_txt'])
     dispatcher.start()
