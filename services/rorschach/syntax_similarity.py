@@ -8,10 +8,7 @@ class SyntaxVectorizer:
         self.model_words = set(self.model.keys())
         self.dim = len(self.model[self.model.keys()[0]])
 
-    def vec_from_tweet(self, txt):
-        txt = re.sub('[\s#]', ' ', txt.lower())
-        txt = re.sub('[^\w\s]', '', txt)
-        l_txt = filter(lambda x: x!='', txt.split(' '))
+    def vec_from_tweet(self, l_txt):
         v = self.dim*[0]
         for term in l_txt:
             if term in self.model_words:

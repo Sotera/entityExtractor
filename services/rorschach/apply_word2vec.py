@@ -21,22 +21,29 @@ def process_message(key, job):
 
     # Check if the text language can be featurized
     lng = job['lang']
+    print "Text:", job['txt']
+    print "Type:", type(job['txt'])
     if lng in model_langs:
         try:
             if sent_filt.is_scoreable(job['txt'], lng) is False:
                 job['data'] = []
                 job['state'] = 'processed'
+                return
         except:
             set_err(job, "Error checking if doc is 'scorable', language=" + str(lng))
+            return
 
         try:
-            job['data'] = syntax_vectorizer[lng].vec_from_tweet(job['txt'])
+            job['data'] = syntax_vectorizer[lng].vec_from_tweet(sent_filt.tokenize(job['txt'], lng))
             job['state'] = 'processed'
+            return
         except:
             set_err(job, "Error making syntax vector (" + lng + "):\n" + str(sys.exc_info()[0]))
+            return
     else:
         job['data'] = []
         job['state'] = 'processed'
+        return
 
 if __name__ == '__main__':
     ar = argparse.ArgumentParser()
@@ -49,8 +56,10 @@ if __name__ == '__main__':
     sent_filt = SentimentFilter()
     global syntax_vectorizer
     syntax_vectorizer = {}
-    syntax_vectorizer['en'] = SyntaxVectorizer(args.englishModel)
-    syntax_vectorizer['ar'] = SyntaxVectorizer(args.arabicModel)
+    if args.englishModel != '':
+        syntax_vectorizer['en'] = SyntaxVectorizer(args.englishModel)
+    if args.arabicModel != '':
+        syntax_vectorizer['ar'] = SyntaxVectorizer(args.arabicModel)
     dispatcher = Dispatcher(redis_host='redis',
         process_func=process_message, channels=['genie:feature_txt'])
     dispatcher.start()

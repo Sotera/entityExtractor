@@ -7,4 +7,4 @@ RUN apt-get update && apt-get install -y \
 
 ENV TERM=xterm
 
-CMD ["python", "apply_english_word2vec.py"]
+CMD ["python", "apply_word2vec.py "]

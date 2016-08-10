@@ -18,7 +18,7 @@ class SentimentFilter:
                 if word[:4] == 'http' or word.find('.com')!=-1:
                     continue
             scorable_words += 1
-        if scorable_words >4:
+        if scorable_words >2:
             return True
         return False
 
@@ -30,6 +30,8 @@ class SentimentFilter:
             return filter(lambda x: x!='', caption.strip().split(' '))
         elif lang=='ar':
             try:
+                print caption
+                print "TOKENS, caption as is:", Text(caption).words
                 return filter(lambda x: len(x)>1, Text(caption).words)
             except:
                 print caption
