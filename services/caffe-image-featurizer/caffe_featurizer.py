@@ -17,8 +17,7 @@ class CaffeFeaturizer:
         self.model = os.getenv('CAFFE_MODEL', 'bvlc_reference_caffenet.caffemodel')
 
         caffe.set_mode_cpu()
-        self.net = caffe.Net(self.model_path + 'deploy.prototxt', self.model_path +
-                             self.model, caffe.TEST)
+        self.net = caffe.Net(self.model_path + 'deploy.prototxt', self.model_path + self.model, caffe.TEST)
         transformer = caffe.io.Transformer({'data': self.net.blobs['data'].data.shape})
         transformer.set_transpose('data', (2, 0, 1))
         transformer.set_mean('data', np.load(self.caffe_root +

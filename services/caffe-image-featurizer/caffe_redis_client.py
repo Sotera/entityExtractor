@@ -4,72 +4,93 @@
 #CAFFE_MODEL = bvlc_reference_caffenet.caffemodel
 #CAFFE_PYTHON_PATH = /home/caffe-user/caffe/python/
 
-import redis
+import sys
 import caffe_feature_extraction
-import time
+import urllib2
+import urllib
+from bs4 import BeautifulSoup
 import os
+import uuid
+sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
+from redis_dispatcher import Dispatcher
 
 
-class Worker():
-    def __init__(self, redis_send, message):
-        self.send = redis_send
-        self.item = message
-        self.caffe_root = os.getenv('CAFFE_HOME', '/home/caffe-user/caffe/')
-
-    def start(self):
-        key = self.item['data']
-        if key == 1:  # subscribe response
-            print 'SUBSCRIBED TO CHANNEL'
-            return
-        # get object in db corresponding to pub msg:
-        job = self.send.hgetall(key)
-        if not job:
-            self.send.hmset(key, {'state': 'error', 'error': 'could not find item in redis'})
-            print 'COULD NOT FIND ITEM IN REDIS'
-            return
-        if job['state'] != 'downloaded':  # not yet ready
-            print 'NOT YET DOWNLOADED'
-            return
-        image_dir_path = job['path']
-        job['state'] = 'processing'
-        self.send.hmset(key, job)
-
-        # get features:
-        print 'GETTING FEATURES'
-        features = caffe_feature_extraction.get_all_features_in_path(self.caffe_root, image_dir_path)
-        if not features:
-            print 'INVALID IMAGE OR DIRECTORY PATH'
-            self.send.hmset(key, {'state': 'error', 'error': 'invalid image or directory path'})
-            return
-        print 'FINISHED FEATURE PROCESSING'
-        job['data'] = features
-        job['state'] = 'processed'
-        # save features to redis
-        self.send.hmset(key, job)
+def url_to_soup(url):
+    hdr = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+        'Accept-Encoding': 'none',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Connection': 'keep-alive'
+    }
+    req = urllib2.Request(url, headers=hdr)
+    res = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(req, timeout=4)
+    return BeautifulSoup(res.read(), "html.parser")
 
 
-class Listener():
-    def __init__(self, redis_receive, redis_send, channels):
-        self.redis_receive = redis_receive
-        self.redis_send = redis_send
-        self.pubsub_receive = self.redis_receive.pubsub()
-        self.pubsub_receive.subscribe(channels)
+def get_instagram_page_image(soup):
+    l_meta = soup.head.find_all('meta')
+    for m in l_meta:
+        if m.has_attr('content'):
+            ind = m['content'].find('jpg')
+            if ind != -1:
+                return m['content'][:ind + 3]
+    return None
 
-    def start(self):
-        # listen for messages and do work:
-        for item in self.pubsub_receive.listen():
-            print 'MESSAGE HEARD'
-            if item['data'] == 'KILL':
-                self.pubsub_receive.unsubscribe()
-                print self, 'un-subscribed and finished'
-                break
-            else:
-                worker = Worker(self.redis_send, item)
-                worker.start()
+
+def get_image(post_url):
+    try:
+        img_url = None
+        if post_url.find('instagram') != -1:
+            try:
+                soup = url_to_soup(post_url)
+                img_url = get_instagram_page_image(soup)
+            except:
+                print "error"
+        if img_url is not None:
+            return img_url
+        else:
+            print "No Image Found"
+            return None
+    except:
+        print "error"
+
+
+def download_image(image_url):
+    if image_url is None:
+        return None
+    image_path = "{}.jpg".format(uuid.uuid4())
+    urllib.urlretrieve(image_url, image_path)
+    return image_path
+
+
+def process_message(key, job):
+    caffe_root = os.getenv('CAFFE_HOME', '/home/jlueders/caffe/')
+
+    if not job:
+        print 'No Valid Job.'
+        return
+
+    image_path = download_image(get_image(job['url']))
+
+    # get features:
+    print 'GETTING FEATURES'
+    features = caffe_feature_extraction.get_all_features_in_path(caffe_root, image_path)
+    if not features:
+        print 'INVALID IMAGE OR DIRECTORY PATH'
+        job['state'] = 'error'
+        job['error'] = 'invalid image or directory path'
+        return
+    print 'FINISHED FEATURE PROCESSING'
+    job['data'] = features
+    job['state'] = 'processed'
+
+    os.remove(image_path)
+    # save features to redis
 
 
 if __name__ == '__main__':
-    pool = redis.ConnectionPool(host='redis', port=6379)
-    r1, r2 = redis.Redis(connection_pool=pool), redis.Redis(connection_pool=pool)
-    client = Listener(r1, r2, ['features'])
-    client.start()
+    dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
+                            channels=['genie:feature_img'])
+    dispatcher.start()

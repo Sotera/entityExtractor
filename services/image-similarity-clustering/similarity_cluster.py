@@ -7,6 +7,9 @@ import uuid
 
 class SimilarityCluster:
     def __init__(self, similarity_threshold, initial_vector_id, initial_vector, start_time_ms, end_time_ms):
+        self.valid_cluster = True
+        if initial_vector is None or len(initial_vector) == 0:
+            self.valid_cluster = False
         self.average_similarity_vector = initial_vector
         self.normalized_average_similarity_vector = np.linalg.norm(initial_vector)
         self.similar_image_ids = [initial_vector_id]

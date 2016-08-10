@@ -84,6 +84,7 @@ def get_all_features_in_path(caffe_root_path, image_dir_path):
     start_time = time.time()
 
     global featurizer # re-use on successive runs
+
     featurizer = CaffeFeaturizer(caffe_root_path)
 
     file_paths = convert_files_to_dictionary(image_dir_path)
