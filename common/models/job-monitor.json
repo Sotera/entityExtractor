@@ -46,6 +46,9 @@
     },
     "done_at": {
       "type": "date"
+    },
+    "error_msg": {
+      "type": "string"
     }
   },
   "validations": [],

@@ -36,3 +36,4 @@ class SentimentFilter:
                 return []
         else:
             return []
+

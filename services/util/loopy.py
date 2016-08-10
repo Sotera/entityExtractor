@@ -6,7 +6,7 @@ from switch import switch
 # pronounced Loo Py, not loopy.  Loopback Python Module
 class Loopy:
     def __init__(self, query_url, params, page_size=100):
-        self.query_url = query_url
+        self.query_url = query_url.strip().rstrip('/') + '/' # normalize url
         self.params = params
         self.page_size = page_size
         self.current_page = 0
@@ -43,14 +43,15 @@ class Loopy:
         return query_string
 
     def get_count_query_string(self):
-        return "count" + self.get_query_string("")
+        return 'count' + self.get_query_string(filter_prefix='')
 
     def get_count(self):
         count_query_string = self.get_count_query_string()
         try:
             result = requests.get(self.query_url + count_query_string).json()
             return result['count']
-        except:
+        except Exception as e:
+            print e
             print "Woops! Loopy says: error getting count from Loopback endpoint"
             return 0
 

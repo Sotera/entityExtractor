@@ -36,30 +36,34 @@ function run() {
   };
 
   JobMonitor.findOrCreate({ where: params }, params)
-  .then(jobMonitor => {
-    jobMonitor = jobMonitor[0]; //why array here?
-    const fMonitor = new FeaturizeMonitor(jobMonitor);
-    const cMonitor = new ClusterizeMonitor(jobMonitor);
-
-    fMonitor.start();
-
-    fMonitor.on('featurized', onFeaturized);
-    cMonitor.on('done', onDone);
-
-    function onFeaturized() {
-      updateAttributes({state: 'featurized'});
-      cMonitor.start();
-    }
-
-    function onDone() {
-      updateAttributes({state: 'done', done_at: new Date()});
-    }
-
-    function updateAttributes(attrs) {
-      jobMonitor
-      .updateAttributes(attrs)
-      .catch(err => console.error(err.stack));
-    }
-  })
+  .then(startMonitors)
   .catch(err => console.error(err.stack));
+}
+
+function startMonitors(jobMonitor) {
+  jobMonitor = jobMonitor[0]; //why array here?
+  const fMonitor = new FeaturizeMonitor(jobMonitor);
+
+  fMonitor.start();
+
+  fMonitor.on('featurized', onFeaturized);
+
+  function onFeaturized() {
+    updateJobMonitor({state: 'featurized'})
+    .then(jobMonitor => {
+      const cMonitor = new ClusterizeMonitor(jobMonitor);
+      cMonitor.on('done', onDone);
+      cMonitor.start();
+    });
+  }
+
+  function onDone() {
+    updateJobMonitor({state: 'done', done_at: new Date()});
+  }
+
+  function updateJobMonitor(attrs) {
+    return jobMonitor
+    .updateAttributes(attrs)
+    .catch(err => console.error(err.stack));
+  }
 }
