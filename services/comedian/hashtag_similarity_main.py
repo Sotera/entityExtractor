@@ -12,22 +12,6 @@ def set_err(job, msg):
     job['error'] = msg
 
 def process_message(key, job):
-    # check job for correct fields
-    # if 'es_host' not in job.keys():
-    #     set_err(job, "No 'es_query' in job fields")
-    # if 'es_port' not in job.keys():
-    #     set_err(job, "No 'es_port' in job fields")
-    # if 'es_query' not in job.keys():
-    #     set_err(job, "No 'es_query' in job fields")
-    # es = Elasticsearch([{'host': job['es_host'], 'port': job['es_port']}])
-    # query = json.loads(job['es_query'])
-    # data = es.search(index=job['es_index'],
-    #                  body=query,
-    #                  doc_type=job['es_doc_type'],
-    #                  size=100,
-    #                  scroll='10m')
-
-    # get features:
     if 'query_url' not in job.keys():
         set_err(job, "No 'query_url' in job fields")
     if 'start_time_ms' not in job.keys():
