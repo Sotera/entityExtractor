@@ -50,12 +50,15 @@ if __name__ == '__main__':
     ar.add_argument("-englishModel", help="Name of Engilsh model")
     ar.add_argument("-arabicModel", help="Name of Arabic model")
     args = ar.parse_args()
+    print "Parsed args"
     global model_langs
     model_langs = ['en', 'ar']
+    print "Making filter"
     global sent_filt
     sent_filt = SentimentFilter()
     global syntax_vectorizer
     syntax_vectorizer = {}
+    
     if args.englishModel != '':
         syntax_vectorizer['en'] = SyntaxVectorizer(args.modelPath, args.englishModel)
     if args.arabicModel != '':
