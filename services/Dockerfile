@@ -10,8 +10,9 @@ WORKDIR /usr/src/app
 
 COPY $SERVICE/requirements.txt .
 RUN pip install --upgrade pip
+# numpy required in falconn setup.py (better way to handle install deps?)
 RUN pip install numpy
-pip install -U git+https://github.com/aboSamoor/polyglot.git@master
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY $SERVICE .
 # create consistent top-level filename
