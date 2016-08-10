@@ -39,16 +39,18 @@ def process_message(key, job):
         job['state'] = 'processed'
 
 if __name__ == '__main__':
-    # ar = argparse.ArgumentParser()
-    # ar.add_argument("")
+    ar = argparse.ArgumentParser()
+    ar.add_argument("-englishModel", help="Name of Engilsh model (assumes in './models'")
+    ar.add_argument("-arabicModel", help="Name of Arabic model (assumes in './models'")
+    args = ar.parse_args()
     global model_langs
     model_langs = ['en', 'ar']
     global sent_filt
     sent_filt = SentimentFilter()
     global syntax_vectorizer
     syntax_vectorizer = {}
-    syntax_vectorizer['en'] = SyntaxVectorizer("aug09_en")
-    syntax_vectorizer['ar'] = SyntaxVectorizer("aug09_ar")
+    syntax_vectorizer['en'] = SyntaxVectorizer(args.englishModel)
+    syntax_vectorizer['ar'] = SyntaxVectorizer(args.arabicModel)
     dispatcher = Dispatcher(redis_host='redis',
         process_func=process_message, channels=['genie:feature_txt'])
     dispatcher.start()
