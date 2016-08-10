@@ -15,7 +15,7 @@ class SentimentFilter:
             if word[0] == '@':
                 continue
             if len(word)>4:
-                if word[:4] == 'http' or word.find('.com')!=-1 or word.find('.jpeg')!=-1:
+                if word[:4] == 'http' or word.find('.com')!=-1:
                     continue
             scorable_words += 1
         if scorable_words >4:

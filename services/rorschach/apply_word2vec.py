@@ -47,8 +47,8 @@ if __name__ == '__main__':
     sent_filt = SentimentFilter()
     global syntax_vectorizer
     syntax_vectorizer = {}
-    syntax_vectorizer['en'] = SyntaxVectorizer("july28_eng")
-    syntax_vectorizer['ar'] = SyntaxVectorizer("")
+    syntax_vectorizer['en'] = SyntaxVectorizer("aug09_en")
+    syntax_vectorizer['ar'] = SyntaxVectorizer("aug09_ar")
     dispatcher = Dispatcher(redis_host='redis',
         process_func=process_message, channels=['genie:feature_txt'])
     dispatcher.start()
