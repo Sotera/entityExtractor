@@ -9,7 +9,7 @@ A core set of utilities frequently used in large data processing / ML projects, 
 1. Node 4+
 1. Strongloop 2+
 1. Bower
-1. Docker 1.8+
+1. Docker 1.9+ / Firmament2
 1. Mongo 2.6+
 
 ## Install
@@ -27,9 +27,7 @@ lb-ng server/server.js client/js/lb-services.js
 ```
 # get working copy of .env
 ./script/setup.js
-npm run dev # open localhost:3001
-docker run -d -p 8888:8888 --name mitie lukewendling/mitie-server
-./server/workers/start-extractor.js # start workers
+npm run dev # open localhost:3000
 ```
 
 ## Misc
@@ -38,4 +36,7 @@ docker run -d -p 8888:8888 --name mitie lukewendling/mitie-server
 # build mitie-server image
 git clone lukewendling/mitie-server
 docker build --no-cache --force-rm -t lukewendling/mitie-server .
+
+docker run -d -p 8888:8888 --name mitie lukewendling/mitie-server
+./server/workers/start-extractor.js # start workers
 ```

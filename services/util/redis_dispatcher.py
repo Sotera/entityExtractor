@@ -43,6 +43,7 @@ class Worker(object):
         except Exception as e:
             job['state'] = 'error'
             job['error'] = e.message
+            print e
         # when done, update job
         self.send.hmset(key, job)
 
@@ -67,8 +68,18 @@ class Dispatcher(object):
 
     def start(self):
         pool = redis.ConnectionPool(host=self.redis_host, port=self.redis_port)
-        redis_subscriber = redis.Redis(connection_pool=pool)
         redis_store = redis.Redis(connection_pool=pool)
+        try:
+            # test connection
+            redis_store.ping()
+        except redis.exceptions.ConnectionError as rexc:
+            print '''
+            Cannot connect to host "{host}" port {port}. 
+            Perhaps add "{host}" to /etc/hosts in dev env.
+            '''.format(host=self.redis_host, port=self.redis_port)
+            print rexc
+            return
+        redis_subscriber = redis.Redis(connection_pool=pool)
         pubsub = redis_subscriber.pubsub()
         pubsub.subscribe(self.channels)
         # listen for messages and do work:

@@ -49,6 +49,17 @@
     },
     "error_msg": {
       "type": "string"
+    },
+    "start": {
+      "type": "boolean",
+      "default": true,
+      "required": true,
+      "description": "trigger the monitoring process"
+    },
+    "service_args": {
+      "type": "object",
+      "default": {},
+      "description": "service-specific arguments, i.e. similarity_threshold"
     }
   },
   "validations": [],

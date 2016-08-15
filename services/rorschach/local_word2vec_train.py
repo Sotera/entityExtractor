@@ -1,8 +1,9 @@
-import json, time, re, os, logging, sys, argparse
+import json, time, os, logging, sys, argparse, codecs
 import numpy as np
 from datetime import date
+from math import log
 import matplotlib.pyplot as plt
-from sklearn.feature_extraction.text import TfidfVectorizer
+#from sklearn.feature_extraction.text import TfidfVectorizer
 from gensim.models import Word2Vec
 sys.path.append(os.path.join(os.path.dirname(__file__), "./util"))
 from sentiment_filters import SentimentFilter
@@ -28,81 +29,61 @@ def get_cos(v1, v2):
     return np.dot(v1, v2)/(np.linalg.norm(v1)*np.linalg.norm(v2))
 
 def main(s_lng='en', test_words=None):
-    s_path = '/Volumes/ed_00/data/raw_tweet_data/tweets_w_img_url/'
-    s_save = date.today().strftime('%b%d')+'_'+s_lng+'_'
+    #s_path = '/Volumes/ed_00/data/raw_tweet_data/tweets_w_img_url/'
+    s_path = '/Volumes/ed_00/data/arabic_json/'
+    s_save = date.today().strftime('%b%d')+'_'+s_lng
 
     l_files = os.listdir(s_path)
     _X = []
-    raw_text = []
+    d_df = {}
+    #raw_text = []
     t0 = time.time()
+    tt = time.time()
     sent_filt = SentimentFilter()
-
-    if test_words is not None and len(test_words)==2:
-        print "Collecting keyword test data for :", test_words
-        p_docs = []
-        p_soc = []
-        for l_num, s_file in enumerate(l_files):
-            if s_file[-4:] != 'json':
+    keys = set([])
+    l_num = 0
+    p_docs = []
+    p_soc = []
+    for s_file in l_files:
+        if s_file[-4:] != 'json':
+            continue
+        f = open(s_path+s_file)
+        for line in f:
+            try:
+                d0 = json.loads(line)
+            except:
                 continue
-            f = open(s_path+s_file)
-            for line in f:
-                try:
-                    d0 = json.loads(line)
-                except:
-                    continue
-                if 'lang' not in d0.keys():
-                    continue
-                if d0['lang'] != s_lng:
-                    continue
-                txt = d0['text']
-                if sent_filt.is_scoreable(txt, s_lng) is False:
-                    continue
-                txt = re.sub('[\s#]', ' ', txt.lower())
-                txt = re.sub('[^\w\s]', '', txt)
-                raw_text.append(txt)
-                l_txt = txt.split(' ')
-                l_txt = filter(lambda x: x != '', l_txt)
+            if 'lang' not in d0.keys():
+                continue
+            if d0['lang'] != s_lng:
+                continue
+            txt = d0['text']
+            if sent_filt.is_scoreable(txt, s_lng) is False:
+                continue
+            l_txt = sent_filt.tokenize(txt, s_lng)
+            if test_words is not None and len(test_words)==2:
                 if test_words[0] in l_txt:
                     p_docs.append(len(_X))
                 if test_words[1] in l_txt:
                     p_soc.append(len(_X))
-                _X.append(l_txt)
-    else:
-        print "Not collecting keyword test data"
-        for l_num, s_file in enumerate(l_files):
-            if s_file[-4:] != 'json':
-                continue
-            f = open(s_path+s_file)
-            for line in f:
-                try:
-                    d0 = json.loads(line)
-                except:
-                    continue
-                if 'lang' not in d0.keys():
-                    continue
-                if d0['lang'] != s_lng:
-                    continue
-                txt = d0['text']
-                if is_scoreable(txt) is False:
-                    continue
-                txt = re.sub('[\s#]', ' ', txt.lower())
-                txt = re.sub('[^\w\s]', '', txt)
-                raw_text.append(txt)
-                l_txt = txt.split(' ')
-                l_txt = filter(lambda x: x != '', l_txt)
-                _X.append(l_txt)
-
+            _X.append(l_txt)
+            l_num += 1
+            if l_num %100==0:
+                diff = time.time() - tt
+                print "time for 100:", diff, "(total", l_num, ")"
+                tt = time.time()
+                sys.stdout.flush()
+            for t in l_txt:
+                if t in keys:
+                    d_df[t] += 1
+                else:
+                    d_df[t] = 1
+                    keys.add(t)
 
     diff = time.time()-t0
     print "\nTime to read in", l_num, "files", diff
     if l_test is not None:
         print "Number of " + l_test[0] + " tweets:", len(p_docs), ", number of " + l_test[1] + " tweets:", len(p_soc)
-    tfidf_vec = TfidfVectorizer(max_df=0.95, min_df=100, stop_words='english')
-    tfidf_vec.fit_transform(raw_text)
-    d_idf = dict(zip(tfidf_vec.get_feature_names(), tfidf_vec.idf_))
-    with open('models/'+ s_save +'tfidf', 'w') as outfile:
-        outfile.write(json.dumps(d_idf))
-
 
     print "Training Model"
     t0 = time.time()
@@ -113,6 +94,19 @@ def main(s_lng='en', test_words=None):
     diff = time.time()-t0
     print "Time to train model:", diff
     print "Number of tweets:", len(_X)
+
+    d_idf = {}
+    model_vocab = set(model.vocab.keys())
+    print "Terms in dict:", len(d_df.keys())
+    for k, v in d_df.iteritems():
+        if k not in model_vocab:
+            continue
+        freq = float(v)/float(l_num)
+        if v > 100 and freq < 0.95:
+            d_idf[k] = map(lambda x: x*log(1/freq), list(model[k]))
+    with codecs.open('models/' + s_save, mode='w', encoding='utf-8') as outfile:
+        outfile.write(json.dumps(d_idf))
+
 
     print "TEST cosine diff of test phrases on 100! combination of sentances"
     t0 = time.time()
@@ -187,7 +181,7 @@ def main(s_lng='en', test_words=None):
 if __name__ == "__main__":
     par = argparse.ArgumentParser()
     par.add_argument("lang_code", help="Languae Code for tweets to train model (e.g. 'en')")
-    par.add_argument("test_words", help="Two words, separated by a comma, for testing cosine similarity (example 'tory,football')", default=None)
+    par.add_argument("--test_words", help="Two words, separated by a comma, for testing cosine similarity (example 'tory,football')", default=None)
     args = par.parse_args()
     s_lng = args.lang_code
     l_test = args.test_words.split(',') if type(args.test_words)==type('') else None

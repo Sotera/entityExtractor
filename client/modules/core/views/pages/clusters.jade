@@ -1,0 +1,18 @@
+.row.text-muted
+  .col-md-2 id
+  .col-md-6 posts (click to view)
+  .col-md-4 details
+hr
+
+.row(style='margin-bottom: 20px' ng-repeat='cluster in clusters')
+  .col-md-2 {{cluster.id}}
+  .col-md-6(style='height:200px;overflow-y:auto')
+    .post(ng-repeat='postId in cluster.similar_image_ids'
+      ng-click='showPostDetails($event, postId)' style='margin-bottom:10px')
+      | {{postId}}
+
+  .col-md-4
+    p type: {{cluster.jobMonitor.featurizer}}
+    p lang: {{cluster.jobMonitor.lang}}
+    p args: {{cluster.jobMonitor.service_args}}
+    p dates: {{cluster.jobMonitor.start_time | date:'medium'}} - {{cluster.jobMonitor.end_time | date:'medium'}}

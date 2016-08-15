@@ -1,21 +1,17 @@
 import json, re
-from gensim.models import Word2Vec
-import numpy as np
 
 class SyntaxVectorizer:
-    def __init__(self, str_model_stem):
-        self.d_idf = json.load(open('./models/' + str_model_stem + "tfidf"))
-        self.model_w2v = Word2Vec.load('./models/' + str_model_stem + "word2vec")
-        self.set_w2v_words = set(self.model_w2v.index2word)
-        self.dim = self.model_w2v[self.model_w2v.vocab.keys()[0]]
+    def __init__(self, str_model_path, str_model_stem):
+        if str_model_path[-1] != "/":
+            str_model_path = str_model_path + "/"
+        self.model = json.load(open(str_model_path + str_model_stem))
+        self.model_words = set(self.model.keys())
+        self.dim = len(self.model[self.model.keys()[0]])
 
-    def vec_from_tweet(self, txt):
-        txt = re.sub('[\s#]', ' ', txt.lower())
-        txt = re.sub('[^\w\s]', '', txt)
-        l_txt = filter(lambda x: x!='', txt.split(' '))
-        v = np.zeros(len(self.dim))
+    def vec_from_tweet(self, l_txt):
+        v = self.dim*[0]
         for term in l_txt:
-            if term in self.set_w2v_words and term in self.d_idf.keys():
-                v = v + self.d_idf[term]*self.model_w2v[term]
-        return v.tolist()
+            if term in self.model_words:
+                v = [x + y for x, y in zip(v, self.model[term])]
+        return v
 

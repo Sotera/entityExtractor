@@ -60,10 +60,6 @@
     "dataSource": null,
     "public": true
   },
-  "clusterJob": {
-    "dataSource": "db",
-    "public": true
-  },
   "socialMediaPost": {
     "dataSource": "db",
     "public": true

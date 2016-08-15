@@ -1,4 +1,4 @@
-angular.module('com.module.core',['leaflet-directive'])
+angular.module('com.module.core', [])
 
 // silence angular leaflet console messages
 // does it affect other modules?
