@@ -16,24 +16,52 @@ from redis_dispatcher import Dispatcher
 from loopy import Loopy
 
 
+def validate_job(job):
+    if 'similarity_threshold' not in job.keys():
+        return "No similarity_threshold."
+    if 'start_time_ms' not in job.keys():
+        return "No start_time_ms."
+    if 'end_time_ms' not in job.keys():
+        return "No end_time_ms."
+    if 'similarity_method' not in job.keys():
+        return "No similarity_method."
+    if 'job_id' not in job.keys():
+        return "No job_id."
+    if 'result_url' not in job.keys():
+        return "No result_url."
+    if 'query_url' not in job.keys():
+        return "No query_url."
+    if job['start_time_ms'] > job['end_time_ms']:
+        return "start_time_ms > end_time_ms"
+    return None
+
+
 def process_message(key, job):
     # get features:
     print 'FINDING SIMILARITY'
     # do the work to find similarity
+    error = validate_job(job)
+    if error is not None:
+        print "Error in Job : {}".format(error)
+        job['data'] = []
+        job['error'] = error
+        job['state'] = 'error'
+        return
+
     image_similarity = ImageSimilarity(float(job['similarity_threshold']), job['start_time_ms'], job['end_time_ms'],
                                        job['similarity_method'])
-    loopy = Loopy(job['query_url'], [
-        {
-            "query_type": "between",
-            "property_name": "timestamp_ms",
-            "query_value": [job['start_time_ms'], job['end_time_ms']]
-        },
-        {
+    query_params = [{
+        "query_type": "between",
+        "property_name": "timestamp_ms",
+        "query_value": [job['start_time_ms'], job['end_time_ms']]
+    }]
+    if 'lang' in job.keys():
+        query_params.append({
             "query_type": "where",
             "property_name": "lang",
-            "query_value": "en"
-        }
-    ])
+            "query_value": job['lang']
+        })
+    loopy = Loopy(job['query_url'], query_params)
 
     if loopy.result_count == 0:
         print "No data to process"

@@ -8,6 +8,7 @@ import sys
 import caffe_feature_extraction
 import urllib2
 import urllib
+import json
 from bs4 import BeautifulSoup
 import os
 import uuid
@@ -39,7 +40,7 @@ def get_instagram_page_image(soup):
     return None
 
 
-def get_image(post_url):
+def get_instagram_image_url(post_url):
     try:
         img_url = None
         if post_url.find('instagram') != -1:
@@ -48,6 +49,7 @@ def get_image(post_url):
                 img_url = get_instagram_page_image(soup)
             except:
                 print "error"
+
         if img_url is not None:
             return img_url
         else:
@@ -65,6 +67,12 @@ def download_image(image_url):
     return image_path
 
 
+def validate_job(job):
+    if 'image_urls' not in job.keys():
+        return "No urls."
+    return None
+
+
 def process_message(key, job):
     caffe_root = os.getenv('CAFFE_HOME', '/home/caffe-user/caffe/')
 
@@ -72,7 +80,34 @@ def process_message(key, job):
         print 'No Valid Job.'
         return
 
-    image_path = download_image(get_image(job['url']))
+    error = validate_job(job)
+    if error is not None:
+        print "Error in Job : {}".format(error)
+        job['data'] = []
+        job['error'] = error
+        job['state'] = 'error'
+        return
+
+    image_path = None
+
+    job_urls = json.loads(job['image_urls'])
+
+    for url in job_urls['image_urls']:
+        if url.find('instagram') == -1:
+            continue
+
+        image_url = get_instagram_image_url(url)
+        if image_url is None:
+            continue
+
+        image_path = download_image(image_url)
+        if image_path is not None:
+            break
+
+    if image_path is None:
+        job['state'] = 'error'
+        job['error'] = 'no valid images found to process'
+        return
 
     # get features:
     print 'GETTING FEATURES'
