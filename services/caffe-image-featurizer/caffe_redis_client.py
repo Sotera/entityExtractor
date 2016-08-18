@@ -68,7 +68,7 @@ def download_image(image_url):
 
 
 def validate_job(job):
-    if 'image_urls' not in job.keys():
+    if 'urls' not in job.keys():
         return "No urls."
     return None
 
@@ -90,10 +90,12 @@ def process_message(key, job):
 
     image_path = None
 
-    job_urls = json.loads(job['image_urls'])
+    job_urls = json.loads(job['urls'])
 
-    for url in job_urls['image_urls']:
-        if url.find('instagram') == -1:
+    for url_obj in job_urls['urls']:
+        url = url_obj['expanded_url']
+
+        if url is None or url.find('instagram') == -1:
             continue
 
         image_url = get_instagram_image_url(url)
