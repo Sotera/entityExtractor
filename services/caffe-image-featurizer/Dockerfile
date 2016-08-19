@@ -62,10 +62,15 @@ RUN cd /home/caffe-user/caffe && \
 RUN cd /home/caffe-user/caffe/models/bvlc_reference_caffenet && \
   wget --quiet http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
 
-WORKDIR /home/caffe-user/
+RUN mkdir /home/caffe-user/src
+RUN mkdir /home/caffe-user/src/util
+RUN mkdir /home/caffe-user/src/service
+WORKDIR /home/caffe-user/src/service
 
-RUN mkdir app
-COPY *.py app/
+COPY *.py ./
+
+# match project dir structure to satisfy imports
+COPY ../util/ ../util/
 
 RUN chown -R caffe-user:caffe-user /home/caffe-user
 
@@ -73,4 +78,4 @@ USER caffe-user
 
 ENV CAFFE_ROOT /home/caffe-user/caffe
 
-ENTRYPOINT ["python", "app/caffe_redis_client.py"]
+CMD ["python", "-u", "caffe_redis_client.py"]
