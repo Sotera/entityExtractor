@@ -1,7 +1,10 @@
 '''
-1. Create redis pubsub client.
-2. Update redis hash when job completes.
+What does this module do?
+1. Creates pubsub client and listen for messages.
+2. Kicks off a client-defined long-running job.
+3. Updates redis hash when job completes.
 '''
+
 import redis, sys
 
 '''
@@ -47,7 +50,6 @@ class Worker(object):
         # when done, update job
         self.send.hmset(key, job)
 
-
 '''
 Listen for messages and dispatch workers.
 1 worker per message for parallelization support (TODO).
@@ -74,7 +76,7 @@ class Dispatcher(object):
             redis_store.ping()
         except redis.exceptions.ConnectionError as rexc:
             print '''
-            Cannot connect to host "{host}" port {port}. 
+            Cannot connect to host "{host}" port {port}.
             Perhaps add "{host}" to /etc/hosts in dev env.
             '''.format(host=self.redis_host, port=self.redis_port)
             print rexc

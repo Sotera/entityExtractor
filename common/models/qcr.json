@@ -39,7 +39,7 @@
     },
     "image_urls": {
       "type": [
-        "string"
+        "object"
       ],
       "default": []
     }
