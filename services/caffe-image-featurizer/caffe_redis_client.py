@@ -90,11 +90,9 @@ def process_message(key, job):
 
     image_path = None
 
-    job_urls = json.loads(job['urls'])
+    job_urls = job['urls'].split(",")
 
-    for url_obj in job_urls:
-        url = url_obj['expanded_url']
-
+    for url in job_urls:
         if url is None or url.find('instagram') == -1:
             continue
 

@@ -44,8 +44,8 @@ module.exports = function(JobMonitor) {
   }
 
   function updatePosts(jobMonitor, app) {
-    return app.models.SocialMediaPost.updateAll({
-      lang: jobMonitor.lang,
+
+    let query = {
       featurizer: jobMonitor.featurizer,
       state: {neq: 'new'},
       timestamp_ms: {
@@ -54,7 +54,14 @@ module.exports = function(JobMonitor) {
           jobMonitor.end_time
         ]
       }
-    }, {state: 'new', image_features: [], text_features: []});
+    };
+    
+    //TODO: fix this hacky lang mess i have made!!!
+    if(jobMonitor.lang){
+      query.lang =jobMonitor.lang
+    }
+
+    return app.models.SocialMediaPost.updateAll(query, {state: 'new', image_features: [], text_features: []});
   }
 
   function monitor(jobMonitor, app) {
