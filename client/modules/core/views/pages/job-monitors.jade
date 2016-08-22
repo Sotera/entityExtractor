@@ -1,0 +1,25 @@
+.row
+  .col-md-10
+    h3 {{jobMonitors.length}} Jobs
+    h4 {{clustersCount}} clusters (out of {{totalClustersCount.count}} total)
+  .col-md-2
+    | Most recent:
+    select(ng-model='limit' class='form-control' ng-change='changeLimit()' ng-options='n for n in limitOptions')
+.row.text-muted
+  .col-md-1 # clusters
+  .col-md-1 type
+  .col-md-1 lang
+  .col-md-3 args
+  .col-md-4 times
+  .col-md-2 created
+hr
+
+.row(ng-repeat='monitor in jobMonitors')
+  .col-md-1
+    a(ng-href='#job-monitors/{{ monitor.id }}/clusters') {{monitor.postsClusters.length}}
+  .col-md-1 {{monitor.featurizer}}
+  .col-md-1 {{monitor.lang}}
+  .col-md-3 {{monitor.service_args}}
+  .col-md-4 {{monitor.start_time | date:'short'}} - {{monitor.end_time | date:'short'}}
+  .col-md-2 {{monitor.created | date:'short'}}
+

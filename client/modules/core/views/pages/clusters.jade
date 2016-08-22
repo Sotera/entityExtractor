@@ -1,3 +1,4 @@
+h3 {{clusters.length}} Clusters
 .row.text-muted
   .col-md-2 id
   .col-md-6 posts (click to view)
@@ -12,7 +13,8 @@ hr
       | {{postId}}
 
   .col-md-4
-    p type: {{cluster.jobMonitor.featurizer}}
-    p lang: {{cluster.jobMonitor.lang}}
-    p args: {{cluster.jobMonitor.service_args}}
-    p dates: {{cluster.jobMonitor.start_time | date:'medium'}} - {{cluster.jobMonitor.end_time | date:'medium'}}
+    p monitor id: {{jobMonitor.id}}
+    p type: {{jobMonitor.featurizer}}
+    p lang: {{jobMonitor.lang}}
+    p args: {{jobMonitor.service_args}}
+    p dates: {{jobMonitor.start_time | date:'short'}} - {{jobMonitor.end_time | date:'short'}}

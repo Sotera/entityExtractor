@@ -14,7 +14,11 @@ angular.module('watchman', [
   .when('/', {
     templateUrl: '/app/home'
   })
-  .when('/clusters', {
+  .when('/job-monitors', {
+    templateUrl: '/app/job-monitors',
+    controller: 'JobMonitorsCtrl'
+  })
+  .when('/job-monitors/:id/clusters', {
     templateUrl: '/app/clusters',
     controller: 'ClustersCtrl'
   })

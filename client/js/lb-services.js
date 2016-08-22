@@ -3482,83 +3482,6 @@ module.factory(
 
         /**
          * @ngdoc method
-         * @name lbServices.SocialMediaPost#create
-         * @methodOf lbServices.SocialMediaPost
-         *
-         * @description
-         *
-         * Create a new instance of the model and persist it into the data source.
-         *
-         * @param {Object=} parameters Request parameters.
-         *
-         *   This method does not accept any parameters.
-         *   Supply an empty object or omit this argument altogether.
-         *
-         * @param {Object} postData Request data.
-         *
-         * This method expects a subset of model properties as request parameters.
-         *
-         * @param {function(Object,Object)=} successCb
-         *   Success callback with two arguments: `value`, `responseHeaders`.
-         *
-         * @param {function(Object)=} errorCb Error callback with one argument:
-         *   `httpResponse`.
-         *
-         * @returns {Object} An empty reference that will be
-         *   populated with the actual data once the response is returned
-         *   from the server.
-         *
-         * <em>
-         * (The remote method definition does not provide any description.
-         * This usually means the response is a `SocialMediaPost` object.)
-         * </em>
-         */
-        "create": {
-          url: urlBase + "/socialMediaPosts",
-          method: "POST"
-        },
-
-        /**
-         * @ngdoc method
-         * @name lbServices.SocialMediaPost#createMany
-         * @methodOf lbServices.SocialMediaPost
-         *
-         * @description
-         *
-         * Create a new instance of the model and persist it into the data source.
-         *
-         * @param {Object=} parameters Request parameters.
-         *
-         *   This method does not accept any parameters.
-         *   Supply an empty object or omit this argument altogether.
-         *
-         * @param {Object} postData Request data.
-         *
-         * This method expects a subset of model properties as request parameters.
-         *
-         * @param {function(Array.<Object>,Object)=} successCb
-         *   Success callback with two arguments: `value`, `responseHeaders`.
-         *
-         * @param {function(Object)=} errorCb Error callback with one argument:
-         *   `httpResponse`.
-         *
-         * @returns {Array.<Object>} An empty reference that will be
-         *   populated with the actual data once the response is returned
-         *   from the server.
-         *
-         * <em>
-         * (The remote method definition does not provide any description.
-         * This usually means the response is a `SocialMediaPost` object.)
-         * </em>
-         */
-        "createMany": {
-          isArray: true,
-          url: urlBase + "/socialMediaPosts",
-          method: "POST"
-        },
-
-        /**
-         * @ngdoc method
          * @name lbServices.SocialMediaPost#exists
          * @methodOf lbServices.SocialMediaPost
          *
@@ -3803,6 +3726,58 @@ module.factory(
       urlBase + "/jobMonitors/:id",
       { 'id': '@id' },
       {
+
+        // INTERNAL. Use JobMonitor.postsClusters.findById() instead.
+        "prototype$__findById__postsClusters": {
+          params: {
+          'fk': '@fk'
+          },
+          url: urlBase + "/jobMonitors/:id/postsClusters/:fk",
+          method: "GET"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.destroyById() instead.
+        "prototype$__destroyById__postsClusters": {
+          params: {
+          'fk': '@fk'
+          },
+          url: urlBase + "/jobMonitors/:id/postsClusters/:fk",
+          method: "DELETE"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.updateById() instead.
+        "prototype$__updateById__postsClusters": {
+          params: {
+          'fk': '@fk'
+          },
+          url: urlBase + "/jobMonitors/:id/postsClusters/:fk",
+          method: "PUT"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters() instead.
+        "prototype$__get__postsClusters": {
+          isArray: true,
+          url: urlBase + "/jobMonitors/:id/postsClusters",
+          method: "GET"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.create() instead.
+        "prototype$__create__postsClusters": {
+          url: urlBase + "/jobMonitors/:id/postsClusters",
+          method: "POST"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.destroyAll() instead.
+        "prototype$__delete__postsClusters": {
+          url: urlBase + "/jobMonitors/:id/postsClusters",
+          method: "DELETE"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.count() instead.
+        "prototype$__count__postsClusters": {
+          url: urlBase + "/jobMonitors/:id/postsClusters/count",
+          method: "GET"
+        },
 
         /**
          * @ngdoc method
@@ -4373,6 +4348,307 @@ module.factory(
     */
     R.modelName = "JobMonitor";
 
+    /**
+     * @ngdoc object
+     * @name lbServices.JobMonitor.postsClusters
+     * @header lbServices.JobMonitor.postsClusters
+     * @object
+     * @description
+     *
+     * The object `JobMonitor.postsClusters` groups methods
+     * manipulating `PostsCluster` instances related to `JobMonitor`.
+     *
+     * Call {@link lbServices.JobMonitor#postsClusters JobMonitor.postsClusters()}
+     * to query all related instances.
+     */
+
+
+        /**
+         * @ngdoc method
+         * @name lbServices.JobMonitor#postsClusters
+         * @methodOf lbServices.JobMonitor
+         *
+         * @description
+         *
+         * Queries postsClusters of jobMonitor.
+         *
+         * @param {Object=} parameters Request parameters.
+         *
+         *  - `id` – `{*}` - PersistedModel id
+         *
+         *  - `filter` – `{object=}` - 
+         *
+         * @param {function(Array.<Object>,Object)=} successCb
+         *   Success callback with two arguments: `value`, `responseHeaders`.
+         *
+         * @param {function(Object)=} errorCb Error callback with one argument:
+         *   `httpResponse`.
+         *
+         * @returns {Array.<Object>} An empty reference that will be
+         *   populated with the actual data once the response is returned
+         *   from the server.
+         *
+         * <em>
+         * (The remote method definition does not provide any description.
+         * This usually means the response is a `PostsCluster` object.)
+         * </em>
+         */
+        R.postsClusters = function() {
+          var TargetResource = $injector.get("PostsCluster");
+          var action = TargetResource["::get::jobMonitor::postsClusters"];
+          return action.apply(R, arguments);
+        };
+
+        /**
+         * @ngdoc method
+         * @name lbServices.JobMonitor.postsClusters#count
+         * @methodOf lbServices.JobMonitor.postsClusters
+         *
+         * @description
+         *
+         * Counts postsClusters of jobMonitor.
+         *
+         * @param {Object=} parameters Request parameters.
+         *
+         *  - `id` – `{*}` - PersistedModel id
+         *
+         *  - `where` – `{object=}` - Criteria to match model instances
+         *
+         * @param {function(Object,Object)=} successCb
+         *   Success callback with two arguments: `value`, `responseHeaders`.
+         *
+         * @param {function(Object)=} errorCb Error callback with one argument:
+         *   `httpResponse`.
+         *
+         * @returns {Object} An empty reference that will be
+         *   populated with the actual data once the response is returned
+         *   from the server.
+         *
+         * Data properties:
+         *
+         *  - `count` – `{number=}` - 
+         */
+        R.postsClusters.count = function() {
+          var TargetResource = $injector.get("PostsCluster");
+          var action = TargetResource["::count::jobMonitor::postsClusters"];
+          return action.apply(R, arguments);
+        };
+
+        /**
+         * @ngdoc method
+         * @name lbServices.JobMonitor.postsClusters#create
+         * @methodOf lbServices.JobMonitor.postsClusters
+         *
+         * @description
+         *
+         * Creates a new instance in postsClusters of this model.
+         *
+         * @param {Object=} parameters Request parameters.
+         *
+         *  - `id` – `{*}` - PersistedModel id
+         *
+         * @param {Object} postData Request data.
+         *
+         * This method expects a subset of model properties as request parameters.
+         *
+         * @param {function(Object,Object)=} successCb
+         *   Success callback with two arguments: `value`, `responseHeaders`.
+         *
+         * @param {function(Object)=} errorCb Error callback with one argument:
+         *   `httpResponse`.
+         *
+         * @returns {Object} An empty reference that will be
+         *   populated with the actual data once the response is returned
+         *   from the server.
+         *
+         * <em>
+         * (The remote method definition does not provide any description.
+         * This usually means the response is a `PostsCluster` object.)
+         * </em>
+         */
+        R.postsClusters.create = function() {
+          var TargetResource = $injector.get("PostsCluster");
+          var action = TargetResource["::create::jobMonitor::postsClusters"];
+          return action.apply(R, arguments);
+        };
+
+        /**
+         * @ngdoc method
+         * @name lbServices.JobMonitor.postsClusters#createMany
+         * @methodOf lbServices.JobMonitor.postsClusters
+         *
+         * @description
+         *
+         * Creates a new instance in postsClusters of this model.
+         *
+         * @param {Object=} parameters Request parameters.
+         *
+         *  - `id` – `{*}` - PersistedModel id
+         *
+         * @param {Object} postData Request data.
+         *
+         * This method expects a subset of model properties as request parameters.
+         *
+         * @param {function(Array.<Object>,Object)=} successCb
+         *   Success callback with two arguments: `value`, `responseHeaders`.
+         *
+         * @param {function(Object)=} errorCb Error callback with one argument:
+         *   `httpResponse`.
+         *
+         * @returns {Array.<Object>} An empty reference that will be
+         *   populated with the actual data once the response is returned
+         *   from the server.
+         *
+         * <em>
+         * (The remote method definition does not provide any description.
+         * This usually means the response is a `PostsCluster` object.)
+         * </em>
+         */
+        R.postsClusters.createMany = function() {
+          var TargetResource = $injector.get("PostsCluster");
+          var action = TargetResource["::createMany::jobMonitor::postsClusters"];
+          return action.apply(R, arguments);
+        };
+
+        /**
+         * @ngdoc method
+         * @name lbServices.JobMonitor.postsClusters#destroyAll
+         * @methodOf lbServices.JobMonitor.postsClusters
+         *
+         * @description
+         *
+         * Deletes all postsClusters of this model.
+         *
+         * @param {Object=} parameters Request parameters.
+         *
+         *  - `id` – `{*}` - PersistedModel id
+         *
+         * @param {function(Object,Object)=} successCb
+         *   Success callback with two arguments: `value`, `responseHeaders`.
+         *
+         * @param {function(Object)=} errorCb Error callback with one argument:
+         *   `httpResponse`.
+         *
+         * @returns {Object} An empty reference that will be
+         *   populated with the actual data once the response is returned
+         *   from the server.
+         *
+         * This method returns no data.
+         */
+        R.postsClusters.destroyAll = function() {
+          var TargetResource = $injector.get("PostsCluster");
+          var action = TargetResource["::delete::jobMonitor::postsClusters"];
+          return action.apply(R, arguments);
+        };
+
+        /**
+         * @ngdoc method
+         * @name lbServices.JobMonitor.postsClusters#destroyById
+         * @methodOf lbServices.JobMonitor.postsClusters
+         *
+         * @description
+         *
+         * Delete a related item by id for postsClusters.
+         *
+         * @param {Object=} parameters Request parameters.
+         *
+         *  - `id` – `{*}` - PersistedModel id
+         *
+         *  - `fk` – `{*}` - Foreign key for postsClusters
+         *
+         * @param {function(Object,Object)=} successCb
+         *   Success callback with two arguments: `value`, `responseHeaders`.
+         *
+         * @param {function(Object)=} errorCb Error callback with one argument:
+         *   `httpResponse`.
+         *
+         * @returns {Object} An empty reference that will be
+         *   populated with the actual data once the response is returned
+         *   from the server.
+         *
+         * This method returns no data.
+         */
+        R.postsClusters.destroyById = function() {
+          var TargetResource = $injector.get("PostsCluster");
+          var action = TargetResource["::destroyById::jobMonitor::postsClusters"];
+          return action.apply(R, arguments);
+        };
+
+        /**
+         * @ngdoc method
+         * @name lbServices.JobMonitor.postsClusters#findById
+         * @methodOf lbServices.JobMonitor.postsClusters
+         *
+         * @description
+         *
+         * Find a related item by id for postsClusters.
+         *
+         * @param {Object=} parameters Request parameters.
+         *
+         *  - `id` – `{*}` - PersistedModel id
+         *
+         *  - `fk` – `{*}` - Foreign key for postsClusters
+         *
+         * @param {function(Object,Object)=} successCb
+         *   Success callback with two arguments: `value`, `responseHeaders`.
+         *
+         * @param {function(Object)=} errorCb Error callback with one argument:
+         *   `httpResponse`.
+         *
+         * @returns {Object} An empty reference that will be
+         *   populated with the actual data once the response is returned
+         *   from the server.
+         *
+         * <em>
+         * (The remote method definition does not provide any description.
+         * This usually means the response is a `PostsCluster` object.)
+         * </em>
+         */
+        R.postsClusters.findById = function() {
+          var TargetResource = $injector.get("PostsCluster");
+          var action = TargetResource["::findById::jobMonitor::postsClusters"];
+          return action.apply(R, arguments);
+        };
+
+        /**
+         * @ngdoc method
+         * @name lbServices.JobMonitor.postsClusters#updateById
+         * @methodOf lbServices.JobMonitor.postsClusters
+         *
+         * @description
+         *
+         * Update a related item by id for postsClusters.
+         *
+         * @param {Object=} parameters Request parameters.
+         *
+         *  - `id` – `{*}` - PersistedModel id
+         *
+         *  - `fk` – `{*}` - Foreign key for postsClusters
+         *
+         * @param {Object} postData Request data.
+         *
+         * This method expects a subset of model properties as request parameters.
+         *
+         * @param {function(Object,Object)=} successCb
+         *   Success callback with two arguments: `value`, `responseHeaders`.
+         *
+         * @param {function(Object)=} errorCb Error callback with one argument:
+         *   `httpResponse`.
+         *
+         * @returns {Object} An empty reference that will be
+         *   populated with the actual data once the response is returned
+         *   from the server.
+         *
+         * <em>
+         * (The remote method definition does not provide any description.
+         * This usually means the response is a `PostsCluster` object.)
+         * </em>
+         */
+        R.postsClusters.updateById = function() {
+          var TargetResource = $injector.get("PostsCluster");
+          var action = TargetResource["::updateById::jobMonitor::postsClusters"];
+          return action.apply(R, arguments);
+        };
 
     return R;
   }]);
@@ -4829,6 +5105,65 @@ module.factory(
           url: urlBase + "/postsClusters/change-stream",
           method: "POST"
         },
+
+        // INTERNAL. Use JobMonitor.postsClusters.findById() instead.
+        "::findById::jobMonitor::postsClusters": {
+          params: {
+          'fk': '@fk'
+          },
+          url: urlBase + "/jobMonitors/:id/postsClusters/:fk",
+          method: "GET"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.destroyById() instead.
+        "::destroyById::jobMonitor::postsClusters": {
+          params: {
+          'fk': '@fk'
+          },
+          url: urlBase + "/jobMonitors/:id/postsClusters/:fk",
+          method: "DELETE"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.updateById() instead.
+        "::updateById::jobMonitor::postsClusters": {
+          params: {
+          'fk': '@fk'
+          },
+          url: urlBase + "/jobMonitors/:id/postsClusters/:fk",
+          method: "PUT"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters() instead.
+        "::get::jobMonitor::postsClusters": {
+          isArray: true,
+          url: urlBase + "/jobMonitors/:id/postsClusters",
+          method: "GET"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.create() instead.
+        "::create::jobMonitor::postsClusters": {
+          url: urlBase + "/jobMonitors/:id/postsClusters",
+          method: "POST"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.createMany() instead.
+        "::createMany::jobMonitor::postsClusters": {
+          isArray: true,
+          url: urlBase + "/jobMonitors/:id/postsClusters",
+          method: "POST"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.destroyAll() instead.
+        "::delete::jobMonitor::postsClusters": {
+          url: urlBase + "/jobMonitors/:id/postsClusters",
+          method: "DELETE"
+        },
+
+        // INTERNAL. Use JobMonitor.postsClusters.count() instead.
+        "::count::jobMonitor::postsClusters": {
+          url: urlBase + "/jobMonitors/:id/postsClusters/count",
+          method: "GET"
+        },
       }
     );
 
@@ -5007,6 +5342,88 @@ module.factory(
           var action = TargetResource["::get::postsCluster::jobMonitor"];
           return action.apply(R, arguments);
         };
+
+    return R;
+  }]);
+
+/**
+ * @ngdoc object
+ * @name lbServices.Qcr
+ * @header lbServices.Qcr
+ * @object
+ *
+ * @description
+ *
+ * A $resource object for interacting with the `Qcr` model.
+ *
+ * ## Example
+ *
+ * See
+ * {@link http://docs.angularjs.org/api/ngResource.$resource#example $resource}
+ * for an example of using this object.
+ *
+ */
+module.factory(
+  "Qcr",
+  ['LoopBackResource', 'LoopBackAuth', '$injector', function(Resource, LoopBackAuth, $injector) {
+    var R = Resource(
+      urlBase + "/qcr/:id",
+      { 'id': '@id' },
+      {
+
+        /**
+         * @ngdoc method
+         * @name lbServices.Qcr#insert
+         * @methodOf lbServices.Qcr
+         *
+         * @description
+         *
+         * QCR endpoint to receive posts
+         *
+         * @param {Object=} parameters Request parameters.
+         *
+         *   This method does not accept any parameters.
+         *   Supply an empty object or omit this argument altogether.
+         *
+         * @param {Object} postData Request data.
+         *
+         *  - `req` – `{object=}` - the post data
+         *
+         * @param {function(Object,Object)=} successCb
+         *   Success callback with two arguments: `value`, `responseHeaders`.
+         *
+         * @param {function(Object)=} errorCb Error callback with one argument:
+         *   `httpResponse`.
+         *
+         * @returns {Object} An empty reference that will be
+         *   populated with the actual data once the response is returned
+         *   from the server.
+         *
+         * <em>
+         * (The remote method definition does not provide any description.
+         * This usually means the response is a `Qcr` object.)
+         * </em>
+         */
+        "insert": {
+          url: urlBase + "/qcr/insert",
+          method: "POST"
+        },
+      }
+    );
+
+
+
+
+    /**
+    * @ngdoc property
+    * @name lbServices.Qcr#modelName
+    * @propertyOf lbServices.Qcr
+    * @description
+    * The name of the model represented by this $resource,
+    * i.e. `Qcr`.
+    */
+    R.modelName = "Qcr";
+
 
     return R;
   }]);

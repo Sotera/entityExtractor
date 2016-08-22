@@ -63,7 +63,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "postsClusters": {
+      "type": "hasMany",
+      "model": "postsCluster",
+      "foreignKey": "job_monitor_id"
+    }
+  },
   "acls": [],
   "methods": {}
 }
