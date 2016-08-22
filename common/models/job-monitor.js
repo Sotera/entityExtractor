@@ -55,10 +55,10 @@ module.exports = function(JobMonitor) {
         ]
       }
     };
-    
+
     //TODO: fix this hacky lang mess i have made!!!
-    if(jobMonitor.lang){
-      query.lang =jobMonitor.lang
+    if (jobMonitor.lang) {
+      query.lang = jobMonitor.lang
     }
 
     return app.models.SocialMediaPost.updateAll(query, {state: 'new', image_features: [], text_features: []});
@@ -82,8 +82,11 @@ module.exports = function(JobMonitor) {
     }
 
     function onDone() {
+      // TODO: 'done' when there were errors or warnings?
       jobMonitor.updateAttributes({
-        state: 'done', done_at: new Date()
+        state: 'done',
+        done_at: new Date(),
+        error_msg: fMonitor.errors.join(',')
       })
       .catch(err => console.error(err.stack));
     }
