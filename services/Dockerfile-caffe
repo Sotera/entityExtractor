@@ -1,3 +1,5 @@
+#MUST BE BUILT FROM SERVICES DIRECTORY!!!! with -f flag
+
 FROM ubuntu:14.04
 
 USER root
@@ -67,10 +69,10 @@ RUN mkdir /home/caffe-user/src/util
 RUN mkdir /home/caffe-user/src/service
 WORKDIR /home/caffe-user/src/service
 
-COPY *.py ./
+COPY ./caffe-image-featurizer/*.py ./
 
 # match project dir structure to satisfy imports
-COPY ../util/ ../util/
+COPY ./util/ ../util/
 
 RUN chown -R caffe-user:caffe-user /home/caffe-user
 

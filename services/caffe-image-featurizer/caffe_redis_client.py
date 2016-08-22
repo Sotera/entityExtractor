@@ -92,7 +92,7 @@ def process_message(key, job):
 
     job_urls = json.loads(job['urls'])
 
-    for url_obj in job_urls['urls']:
+    for url_obj in job_urls:
         url = url_obj['expanded_url']
 
         if url is None or url.find('instagram') == -1:
