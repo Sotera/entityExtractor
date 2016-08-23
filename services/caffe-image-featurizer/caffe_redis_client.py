@@ -105,8 +105,8 @@ def process_message(key, job):
             break
 
     if image_path is None:
-        job['state'] = 'error'
-        job['error'] = 'no valid images found to process'
+        job['state'] = 'processed'
+        job['data'] = []
         return
 
     # get features:
