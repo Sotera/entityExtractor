@@ -22,6 +22,10 @@ def err_check(job):
         set_err(job, "No 'job_id' in job fields")
 
 def process_message(key, job):
+    if 'type' in job and job['type'] == 'featurizer':
+        job['state'] = 'processed'
+        return
+
     print 'Checking Parameters'
     err_check(job)
     if job['state'] == 'error':
@@ -65,8 +69,10 @@ def process_message(key, job):
             hash_clust.process_vector(doc['id'], doc['hashtags'])
 
     print 'FINISHED SIMILARITY PROCESSING'
-    clusters = hash_clust.to_json()
-    for cluster in clusters:
+    for k, v in hash_clust.hash_groups.iteritems():
+        cluster = {}
+        cluster['term'] = k
+        cluster['post_ids'] = v
         cluster['job_monitor_id'] = job['job_id']
         loopy.post_result(job['result_url'], cluster)
 
@@ -75,7 +81,7 @@ def process_message(key, job):
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
-        process_func=process_message,
-        channels=['genie:clust_hash'])
+                            process_func=process_message,
+                            channels=['genie:feature_hash', 'genie:clust_hash'])
     dispatcher.start()
 
