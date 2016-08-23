@@ -1,7 +1,8 @@
 'use strict';
 
 const FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
-  ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor')
+  ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
+  _ = require('lodash')
 ;
 
 module.exports = function(JobMonitor) {
@@ -34,6 +35,7 @@ module.exports = function(JobMonitor) {
     // update related posts
     if (!context.isNewInstance) {
       updatePosts(jobMonitor, app)
+      .then(() => removeClusters(jobMonitor))
       .then(() => monitor(jobMonitor, app))
       .then(() => next())
       .catch(err => console.error(err.stack));
@@ -41,6 +43,10 @@ module.exports = function(JobMonitor) {
       monitor(jobMonitor, app);
       next();
     }
+  }
+
+  function removeClusters(jobMonitor) {
+    return jobMonitor.postsClusters.destroyAll();
   }
 
   function updatePosts(jobMonitor, app) {
@@ -56,8 +62,7 @@ module.exports = function(JobMonitor) {
       }
     };
 
-    //TODO: fix this hacky lang mess i have made!!!
-    if (jobMonitor.lang) {
+    if (!_.isEmpty(jobMonitor.lang)) {
       query.lang = jobMonitor.lang
     }
 
