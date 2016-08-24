@@ -5,9 +5,7 @@
     "DockerFilePath": "",
     "Hostname": "data-container",
     "HostConfig": {
-      "Binds": [
-        "/downloads:/downloads"
-      ]
+      "Binds": ["/downloads:/downloads"]
     }
   },
   {
@@ -32,39 +30,6 @@
     }
   },
   {
-    "name": "text-featurizer",
-    "Image": "sotera/rorschach:latest",
-    "DockerFilePath": "",
-    "Hostname": "text-featurizer",
-    "HostConfig": {
-      "Links": [
-        "redis:redis"
-      ]
-    }
-  },
-  {
-    "name": "hashtag-clusterer",
-    "Image": "sotera/comedian:4",
-    "DockerFilePath": "",
-    "Hostname": "hashtag-clusterer",
-    "HostConfig": {
-      "Links": [
-        "redis:redis"
-      ]
-    }
-  },
-  {
-    "name": "image-sim",
-    "Image": "sotera/image-similarity-clustering:3",
-    "DockerFilePath": "",
-    "Hostname": "image-sim",
-    "HostConfig": {
-      "Links": [
-        "redis:redis"
-      ]
-    }
-  },
-  {
     "name": "mongo",
     "Image": "jreeme/mongo:2.6",
     "DockerFilePath": "",
@@ -77,6 +42,42 @@
         "27017/tcp": [
           {
             "HostPort": "27017"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "neuraltalk2",
+    "Image": "jacopofar/neuraltalk2-web:latest",
+    "DockerFilePath": "",
+    "Hostname": "neuraltalk2",
+    "Env": [
+      "modelPath=/models/neuraltalk2/model_id1-501-1448236541.t7_cpu.t7"
+    ],
+    "HostConfig": {
+      "VolumesFrom": [
+        "trained-models"
+      ],
+      "PortBindings": {
+        "5000/tcp": [
+          {
+            "HostPort": "5000"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "mitie",
+    "Image": "lukewendling/mitie-server",
+    "DockerFilePath": "",
+    "Hostname": "mitie",
+    "HostConfig": {
+      "PortBindings": {
+        "8888/tcp": [
+          {
+            "HostPort": "8888"
           }
         ]
       }
@@ -110,6 +111,8 @@
       ],
       "Links": [
         "mongo:mongo",
+        "mitie:mitie",
+        "neuraltalk2:neuraltalk2",
         "redis:redis"
       ],
       "PortBindings": {
@@ -132,20 +135,19 @@
         "StrongLoopBranchName": "deploy",
         "StrongLoopServerUrl": "http://localhost:8701",
         "ServiceName": "watchman",
+        "ClusterSize": 8,
         "DoBowerInstall": true,
         "EnvironmentVariables": {
           "PORT": 3001,
           "NODE_ENV": "production",
-          "FLICKR_API_KEY": "0393aca8dd1a303a84230f2e8c1fd0a5",
-          "TRANSLATE_CLIENT_ID": "watchman-translate",
-          "TRANSLATE_CLIENT_SECRET": "hnp1LE7qiLFVElmKkDsn5RbFv4Bo2bnZoG/COBfP6Q8=",
-          "API_ROOT": "http://172.17.0.1:3003/api",
-          "IGNORE_QCR": 1
+          "BASIC_AUTH_ON": "0",
+          "BASIC_AUTH_USER": "USER",
+          "BASIC_AUTH_PASS": "PASS"
         },
-        "Scripts": [
+        "Scripts":[
+
         ]
       }
     ]
   }
 ]
-
