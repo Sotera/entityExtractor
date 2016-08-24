@@ -18,7 +18,7 @@ class Worker(object):
         key = item['data']
         initial_state = kwargs.get('initial_state', 'new')
         process_func = kwargs.get('process_func',
-            lambda: sys.stdout.write('processing placeholder'))
+            lambda key, job: sys.stdout.write('processing placeholder'))
 
         # get object for corresponding item:
         job = self.send.hgetall(key)
@@ -28,7 +28,8 @@ class Worker(object):
             self.send.hmset(key, {'state': 'error', 'error': 'could not find item in redis'})
             print 'COULD NOT FIND ITEM IN REDIS'
             return
-        if job['state'] != initial_state:  # not yet ready
+        # for dupe publishings. job already running.
+        if job['state'] != initial_state:
             print 'NOT YET FINISHED'
             return
 

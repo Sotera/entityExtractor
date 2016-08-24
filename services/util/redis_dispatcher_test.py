@@ -23,12 +23,23 @@ class RedisDispatcherTest(unittest.TestCase):
 
         self.assertIsNone(worker.run(dict(data=1)))
 
-    def test_run_with_incomplete_job(self):
+    def test_run_with_existing_job(self):
         self.redis.hgetall.return_value = dict(state='new')
 
         worker = rd.Worker(self.redis)
 
         self.assertIsNone(worker.run(dict(data=1)))
+
+    def test_run_clear_last_job_values(self):
+        last_job = dict(error='some error msg',
+            state='new', data='some data')
+        self.redis.hgetall.return_value = last_job
+
+        worker = rd.Worker(self.redis)
+        worker.run(dict(data=1))
+
+        self.assertEqual(None, last_job.get('error'))
+        self.assertEqual(None, last_job.get('data'))
 
 if __name__ == '__main__':
     unittest.main()
