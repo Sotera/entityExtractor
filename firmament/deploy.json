@@ -55,7 +55,7 @@
   },
   {
     "name": "feature-sim",
-    "Image": "sotera/feature-similarity-clustering:1",
+    "Image": "sotera/feature-sim:1",
     "DockerFilePath": "",
     "Hostname": "feature-sim",
     "HostConfig": {
