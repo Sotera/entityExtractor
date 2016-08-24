@@ -9,13 +9,13 @@ class TestSimilarityCluster(unittest.TestCase):
         cluster = SimilarityCluster(.9, 0, [1, 1, 1], 0, 0)
         cluster.process_similarity(1, [1, 1, 1], np.linalg.norm([1, 1, 1]))
         self.assertTrue(cluster.valid_cluster)
-        self.assertTrue(len(cluster.similar_image_ids) == 2)
+        self.assertTrue(len(cluster.similar_ids) == 2)
 
     def test_negative_similarity_state(self):
         cluster = SimilarityCluster(.9, 0, [1, 1, 1], 0, 0)
         cluster.process_similarity(1, [5,0,2], np.linalg.norm([5, 0, 2]))
         self.assertTrue(cluster.valid_cluster)
-        self.assertTrue(len(cluster.similar_image_ids) == 1)
+        self.assertTrue(len(cluster.similar_ids) == 1)
 
     def test_empty_starting_vector(self):
         cluster = SimilarityCluster(.9, 0, [], 0, 0)

@@ -4,7 +4,7 @@ import falconn
 import numpy as np
 
 
-class ImageSimilarity:
+class FeatureSimilarity:
     def __init__(self, similarity_threshold, start_time_ms, end_time_ms, similarity_method="custom"):
         self.similarity_threshold = similarity_threshold
         self.high = 10
@@ -42,7 +42,7 @@ class ImageSimilarity:
 
     def organize_cluster(self, cluster_id, cluster_set):
         cluster = cluster_set[cluster_id]
-        cluster_length = len(cluster.similar_image_ids)
+        cluster_length = len(cluster.similar_ids)
         if cluster_length == self.high:
             self.similarity_clusters["high"][cluster_id] = cluster
             del self.similarity_clusters["medium"][cluster_id]
@@ -108,7 +108,7 @@ class ImageSimilarity:
             for index in cluster:
                 if index == cluster[0]:
                     continue
-                similarity_cluster.similar_image_ids.append(self.vector_id_list[index])
+                similarity_cluster.similar_ids.append(self.vector_id_list[index])
                 similarity_cluster.apply_vector_to_average(self.vector_matrix[index])
             serializable_list.append(similarity_cluster.to_serializable_object())
         return serializable_list
@@ -160,10 +160,10 @@ if __name__ == "__main__":
             0
         ]
     ]
-    imageSim = ImageSimilarity(.8)
-    imageSim.process_vector(0, data[0])
-    imageSim.process_vector(1, data[1])
-    imageSim.process_vector(2, data[2])
-    imageSim.process_vector(3, data[3])
+    featureSim = FeatureSimilarity(.8)
+    featureSim.process_vector(0, data[0])
+    featureSim.process_vector(1, data[1])
+    featureSim.process_vector(2, data[2])
+    featureSim.process_vector(3, data[3])
 
     print "done"

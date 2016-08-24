@@ -8,7 +8,7 @@ hr
 .row(style='margin-bottom: 20px' ng-repeat='cluster in clusters')
   .col-md-2 {{cluster.id}}
   .col-md-6(style='height:200px;overflow-y:auto')
-    .post(ng-repeat='postId in cluster.similar_image_ids'
+    .post(ng-repeat='postId in cluster.similar_ids'
       ng-click='showPostDetails($event, postId)' style='margin-bottom:10px')
       | {{postId}}
 

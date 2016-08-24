@@ -9,7 +9,7 @@
 
 import sys
 import os
-from image_similarity import ImageSimilarity
+from feature_similarity import FeatureSimilarity
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
@@ -48,7 +48,7 @@ def process_message(key, job):
         job['state'] = 'error'
         return
 
-    image_similarity = ImageSimilarity(float(job['similarity_threshold']), job['start_time_ms'], job['end_time_ms'],
+    feature_similarity = FeatureSimilarity(float(job['similarity_threshold']), job['start_time_ms'], job['end_time_ms'],
                                        job['similarity_method'])
     query_params = [{
         "query_type": "between",
@@ -79,19 +79,19 @@ def process_message(key, job):
         for doc in page:
             if job['data_type'] == "text" and 'text_features' in doc and 'id' in doc and \
                     len(doc['text_features']) > 0:
-                image_similarity.process_vector(doc['id'], doc['text_features'])
+                feature_similarity.process_vector(doc['id'], doc['text_features'])
                 continue
             if job['data_type'] == "image" and 'image_features' in doc and 'id' in doc and \
                     len(doc['image_features']) > 0:
-                image_similarity.process_vector(doc['id'], doc['image_features'])
+                feature_similarity.process_vector(doc['id'], doc['image_features'])
 
-    clusters = image_similarity.get_clusters()
+    clusters = feature_similarity.get_clusters()
 
     print 'FINISHED SIMILARITY PROCESSING: found {} clusters'.format(len(clusters))
     for cluster in clusters:
         cluster['job_monitor_id'] = job['job_id']
         loopy.post_result(job['result_url'], cluster)
-    job['data'] = image_similarity.to_json()
+    job['data'] = feature_similarity.to_json()
     job['state'] = 'processed'
 
 

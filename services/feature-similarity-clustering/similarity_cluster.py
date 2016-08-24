@@ -12,7 +12,7 @@ class SimilarityCluster:
             self.valid_cluster = False
         self.average_similarity_vector = initial_vector
         self.normalized_average_similarity_vector = np.linalg.norm(initial_vector)
-        self.similar_image_ids = [initial_vector_id]
+        self.similar_ids = [initial_vector_id]
         self.similarity_threshold = similarity_threshold
         self.running_stat = RunningStat()
         self.id = uuid.uuid4()
@@ -25,16 +25,16 @@ class SimilarityCluster:
         are_similar = similarity > self.similarity_threshold
 
         if are_similar:
-            # print "{} is similar to {}".format(vector_id, self.similar_image_ids[0])
+            # print "{} is similar to {}".format(vector_id, self.similar_ids[0])
             self.apply_vector_to_average(vector)
-            self.similar_image_ids.append(vector_id)
+            self.similar_ids.append(vector_id)
             self.running_stat.push(similarity)
 
         return are_similar
 
     def apply_vector_to_average(self, vector):
-        self.average_similarity_vector = [n / (len(self.similar_image_ids)+1)
-                                          for n in [(x * len(self.similar_image_ids)) + y for x, y in
+        self.average_similarity_vector = [n / (len(self.similar_ids)+1)
+                                          for n in [(x * len(self.similar_ids)) + y for x, y in
                                           izip(self.average_similarity_vector, vector)]]
         self.normalized_average_similarity_vector = np.linalg.norm(self.average_similarity_vector)
 
@@ -43,7 +43,7 @@ class SimilarityCluster:
             "variance": self.running_stat.variance(),
             "average_similarity_vector": self.average_similarity_vector,
             "average_similarity": self.running_stat.mean(),
-            "similar_image_ids": self.similar_image_ids,
+            "similar_ids": self.similar_ids,
             "start_time_ms": self.start_time_ms,
             "end_time_ms": self.end_time_ms,
             "id": str(self.id)
