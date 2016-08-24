@@ -54,10 +54,10 @@
     }
   },
   {
-    "name": "image-sim",
-    "Image": "sotera/image-similarity-clustering:3",
+    "name": "feature-sim",
+    "Image": "sotera/feature-similarity-clustering:1",
     "DockerFilePath": "",
-    "Hostname": "image-sim",
+    "Hostname": "feature-sim",
     "HostConfig": {
       "Links": [
         "redis:redis"
