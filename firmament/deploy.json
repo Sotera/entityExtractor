@@ -226,7 +226,7 @@
       "PortBindings": {
         "8701/tcp": [
           {
-            "HostPort": "8702"
+            "HostPort": "8703"
           }
         ]
       }
@@ -236,7 +236,7 @@
         "GitUrl": "https://github.com/Sotera/watchman.git",
         "GitSrcBranchName": "master",
         "StrongLoopBranchName": "deploy",
-        "StrongLoopServerUrl": "http://localhost:8702",
+        "StrongLoopServerUrl": "http://localhost:8703",
         "ServiceName": "watchman-queue",
         "ClusterSize": 1,
         "DoBowerInstall": false,
