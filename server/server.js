@@ -43,8 +43,7 @@ boot(app, __dirname, function(err) {
       try {
         worker = require(worker);
       } catch(e) {
-        console.error('script path \'%s\' is invalid. \
-Must be relative to %s', worker, __dirname);
+        console.error('script path \'%s\' is invalid. Must be relative to %s', worker, __dirname);
       }
       worker.start();
       return;
