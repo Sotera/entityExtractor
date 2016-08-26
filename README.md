@@ -6,11 +6,12 @@ A core set of utilities frequently used in large data processing / ML projects, 
 
 ## Dependencies
 
-1. Node 4+
-1. Strongloop 2+
+1. Node 4
+1. Strongloop 2
 1. Bower
 1. Docker 1.9+ / Firmament2
-1. Mongo 2.6+
+1. Mongo 2.6
+1. Redis 3
 
 ## Install
 
@@ -28,6 +29,9 @@ lb-ng server/server.js client/js/lb-services.js
 # get working copy of .env
 ./script/setup.js
 npm run dev # open localhost:3000
+
+# to process job monitors, in another terminal:
+WORKER_SCRIPT=./workers/job-queue npm run dev
 ```
 
 ## Misc
