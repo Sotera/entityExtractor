@@ -173,6 +173,7 @@
       ],
       "Links": [
         "mongo:mongo",
+        "mitie:mitie",
         "redis:redis"
       ],
       "PortBindings": {
@@ -183,7 +184,7 @@
         ],
         "8701/tcp": [
           {
-            "HostPort": "8701"
+            "HostPort": "8702"
           }
         ]
       }
@@ -193,12 +194,13 @@
         "GitUrl": "https://github.com/Sotera/watchman.git",
         "GitSrcBranchName": "master",
         "StrongLoopBranchName": "deploy",
-        "StrongLoopServerUrl": "http://localhost:8701",
+        "StrongLoopServerUrl": "http://localhost:8702",
         "ServiceName": "watchman",
         "DoBowerInstall": true,
         "EnvironmentVariables": {
           "PORT": 3002,
           "NODE_ENV": "production",
+          "API_ROOT": "http://172.17.0.1:3003/api",
           "WORKER_SCRIPT": "./workers/start-extractor.js"
         },
         "Scripts": [
