@@ -83,6 +83,21 @@
     }
   },
   {
+    "name": "mitie",
+    "Image": "lukewendling/mitie-server",
+    "DockerFilePath": "",
+    "Hostname": "mitie",
+    "HostConfig": {
+      "PortBindings": {
+        "8888/tcp": [
+          {
+            "HostPort": "8888"
+          }
+        ]
+      }
+    }
+  },
+  {
     "name": "caffe",
     "Image": "sotera/caffe_redis_client:9",
     "DockerFilePath": "",
@@ -136,7 +151,57 @@
         "EnvironmentVariables": {
           "PORT": 3001,
           "NODE_ENV": "production",
+          "API_ROOT": "http://172.17.0.1:3003/api",
           "IGNORE_QCR": 1
+        },
+        "Scripts": [
+        ]
+      }
+    ]
+  },
+  {
+    "name": "watchman-feed",
+    "Image": "lukewendling/strong-pm:2",
+    "DockerFilePath": "",
+    "Hostname": "watchman",
+    "ExposedPorts": {
+      "3001/tcp": {}
+    },
+    "HostConfig": {
+      "VolumesFrom": [
+        "data-container"
+      ],
+      "Links": [
+        "mongo:mongo",
+        "mitie:mitie",
+        "redis:redis"
+      ],
+      "PortBindings": {
+        "3001/tcp": [
+          {
+            "HostPort": "3002"
+          }
+        ],
+        "8701/tcp": [
+          {
+            "HostPort": "8702"
+          }
+        ]
+      }
+    },
+    "ExpressApps": [
+      {
+        "GitUrl": "https://github.com/Sotera/watchman.git",
+        "GitSrcBranchName": "master",
+        "StrongLoopBranchName": "deploy",
+        "StrongLoopServerUrl": "http://localhost:8702",
+        "ServiceName": "watchman",
+        "DoBowerInstall": true,
+        "EnvironmentVariables": {
+          "PORT": 3002,
+          "NODE_ENV": "production",
+          "API_ROOT": "http://172.17.0.1:3003/api",
+          "WORKER_SCRIPT": "./workers/start-extractor.js"
         },
         "Scripts": [
         ]

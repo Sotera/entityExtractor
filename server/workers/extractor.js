@@ -6,6 +6,7 @@ const request = require('request'),
   app = require('../../server/server'),
   Extract = app.models.Extract,
   FeedObject = app.models.FeedObject,
+  SocialMediaPost = app.models.SocialMediaPost,
   _ = require('lodash'),
   WAIT = 30; //seconds
 
@@ -30,7 +31,7 @@ const worker = module.exports = {
         console.error(err);
         run(); // keep going
       });
-    };
+    }
   }
 };
 
@@ -71,6 +72,16 @@ function markAsProcessed(feedObject) {
     return;
   } else {
     console.log('Processing:', feedObject.guid);
+    var socialMediaPost = {
+      "post_id": feedObject.id,
+      "post_type": "watchman",
+      "post_url": feedObject.link,
+      "text": feedObject.title,
+      "lang": "en",
+      "featurizer": "text",
+      "timestamp_ms": new Date(feedObject.pubdate).getTime()
+    };
+    SocialMediaPost.create(socialMediaPost);
     return feedObject.updateAttributes({processed: true});
   }
 }
