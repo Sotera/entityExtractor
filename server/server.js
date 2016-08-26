@@ -6,6 +6,8 @@ var loopback = require('loopback');
 var boot = require('loopback-boot');
 var bodyParser = require('body-parser');
 var app = module.exports = loopback();
+var kue = require('kue');
+var path = require('path');
 
 // protect qcr endpoint with basic auth
 require('./basic-auth').auth(app, ['qcr/insert']);
@@ -18,6 +20,8 @@ app.middleware('parse', bodyParser.urlencoded({
 }));
 
 app.start = function() {
+  // mount kue jobs UI
+  app.use('/kue', kue.app);
   // start the web server
   return app.listen(function() {
     app.emit('started');
@@ -37,16 +41,21 @@ boot(app, __dirname, function(err) {
 
   // start the server if `$ node server.js`
   if (require.main === module) {
-    var worker = process.env.WORKER_SCRIPT;
-    if (worker) {
-      console.log('Attempting to start a worker process...');
+    // if WORKER_SCRIPT present, start it instead of api.
+    var scriptPath = process.env.WORKER_SCRIPT,
+      worker;
+    if (scriptPath) {
+      scriptPath = path.join(__dirname, scriptPath);
+      console.log('Attempting to start worker at %s...', scriptPath);
       try {
-        worker = require(worker);
+        worker = require(scriptPath);
       } catch(e) {
-        console.error('script path \'%s\' is invalid. \
-Must be relative to %s', worker, __dirname);
+        console.error('script path \'%s\' invalid? \
+Must be relative to %s', scriptPath, __dirname);
+        console.error(e);
       }
       worker.start();
+      console.log('%s started', scriptPath);
       return;
     } else {
       app.start();

@@ -142,6 +142,47 @@
         ]
       }
     ]
+  },
+  {
+    "name": "watchman-queue",
+    "Image": "lukewendling/strong-pm:2",
+    "DockerFilePath": "",
+    "Hostname": "watchman-queue",
+    "ExposedPorts": {
+    },
+    "HostConfig": {
+      "VolumesFrom": [
+        "data-container"
+      ],
+      "Links": [
+        "mongo:mongo",
+        "redis:redis"
+      ],
+      "PortBindings": {
+        "8701/tcp": [
+          {
+            "HostPort": "8702"
+          }
+        ]
+      }
+    },
+    "ExpressApps": [
+      {
+        "GitUrl": "https://github.com/Sotera/watchman.git",
+        "GitSrcBranchName": "master",
+        "StrongLoopBranchName": "deploy",
+        "StrongLoopServerUrl": "http://localhost:8702",
+        "ServiceName": "watchman-queue",
+        "ClusterSize": 1,
+        "DoBowerInstall": false,
+        "EnvironmentVariables": {
+          "NODE_ENV": "production",
+          "WORKER_SCRIPT": "./workers/job-queue"
+        },
+        "Scripts": [
+        ]
+      }
+    ]
   }
 ]
 
