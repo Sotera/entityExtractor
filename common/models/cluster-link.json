@@ -2,6 +2,22 @@
   "name": "clusterLink",
   "base": "PersistedModel",
   "idInjection": true,
+  "indexes": {
+    "idx_uniq": {
+      "keys": {
+        "source": 1,
+        "target": 1
+      },
+      "options": {
+        "unique": true
+      }
+    },
+    "idx_end_time_ms": {
+      "keys": {
+        "end_time_ms": 1
+      }
+    }
+  },
   "options": {
     "validateUpsert": true
   },
@@ -22,6 +38,10 @@
       "type": [
         "string"
       ]
+    },
+    "end_time_ms": {
+      "type": "number",
+      "required": true
     }
   },
   "validations": [],
