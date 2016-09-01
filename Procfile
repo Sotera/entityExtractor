@@ -1,2 +1,2 @@
-collector: node-dev server/workers/collector.js
-extractor: node-dev server/workers/extractor.js
+web: npm run dev
+queue: npm run queue
