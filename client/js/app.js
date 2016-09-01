@@ -27,6 +27,10 @@ angular.module('watchman', [
     templateUrl: '/app/parser',
     controller: 'ParserCtrl'
   })
+  .when('/diagram', {
+    templateUrl: '/app/diagram',
+    controller: 'DiagramCtrl'
+  });
 
   // configure html5 to get links working on jsfiddle
   // $locationProvider.html5Mode(true);
