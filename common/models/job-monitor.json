@@ -25,12 +25,12 @@
     "start_time": {
       "type": "number",
       "required": true,
-      "description": "start time of associated created (NOT job start time)"
+      "description": "query start time (NOT job start time)"
     },
     "end_time": {
       "type": "number",
       "required": true,
-      "description": "end time of associated created (NOT job end time)"
+      "description": "query end time (NOT job end time)"
     },
     "featurizer": {
       "type": "string",
