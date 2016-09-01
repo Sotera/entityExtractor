@@ -15,9 +15,7 @@
   "mixins": {
     "Timestamp": {}
   },
-  "properties": {
-
-  },
+  "properties": {},
   "validations": [],
   "relations": {
     "jobMonitor": {

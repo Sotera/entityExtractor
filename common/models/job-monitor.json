@@ -52,14 +52,14 @@
     },
     "start": {
       "type": "boolean",
-      "default": true,
       "required": true,
-      "description": "trigger the monitoring process"
+      "description": "trigger the monitoring process",
+      "default": true
     },
     "service_args": {
       "type": "object",
-      "default": {},
-      "description": "service-specific arguments, i.e. similarity_threshold"
+      "description": "service-specific arguments, i.e. similarity_threshold",
+      "default": {}
     }
   },
   "validations": [],
