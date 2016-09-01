@@ -75,5 +75,9 @@
   "qcr": {
     "dataSource": null,
     "public": true
+  },
+  "clusterLink": {
+    "dataSource": "db",
+    "public": true
   }
 }
