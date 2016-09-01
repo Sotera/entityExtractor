@@ -1,6 +1,6 @@
 'use strict';
 
-require('dotenv').config({silent: true});
+require('dotenv').config({silent: false});
 
 var loopback = require('loopback');
 var boot = require('loopback-boot');
