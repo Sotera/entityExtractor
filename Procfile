@@ -1,2 +1,2 @@
-collector: node-dev server/workers/collector.js		 +web: PORT=3000 npm run dev
+collector: node-dev server/workers/collector.js
 extractor: node-dev server/workers/extractor.js
