@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, json
 from cluster_linker import ClusterLinker
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
@@ -10,16 +10,10 @@ def set_err(job, msg):
     job['error'] = msg
 
 def err_check(job):
-    if 'query_url' not in job.keys():
-        set_err(job, "No 'query_url' in job fields")
-    if 'start_time_ms' not in job.keys():
-        set_err(job, "No 'start_time_ms' in job fields")
-    if 'end_time_ms' not in job.keys():
-        set_err(job, "No 'end_time_ms' in job fields")
-    if 'result_url' not in job.keys():
-        set_err(job, "No 'result_url' in job fields")
-    if 'job_id' not in job.keys():
-        set_err(job, "No 'job_id' in job fields")
+    required = {'query_url', 'start_time_ms', 'end_time_ms',
+        'result_url', 'job_id'}
+    if not required.issubset(job):
+        set_err(job, 'Missing some required fields {}'.format(required))
 
 def process_message(key, job):
     print 'Checking Parameters'
@@ -55,10 +49,15 @@ def process_message(key, job):
             linker.add_cluster(doc)
 
     print 'FINISHED LINKING CLUSTERS'
+    for link in linker.get_links():
+        loopy.post_result(job['result_url'], link)
+
+    job['data'] = json.dumps({}) # no need to save anything to job
+    job['state'] = 'processed'
 
 if __name__ == '__main__':
-    #dispatcher = Dispatcher(redis_host='redis',
-    #                        process_func=process_message,
-    #                        channels=['genie:group_clusters'])
-    #dispatcher.start()
-    process_message('abc', {'state':'new', 'job_id':'13', 'start_time_ms':1570916185000, 'end_time_ms':1570916187000, 'query_url':'http://172.17.0.1:3003/api/postsclusters/', 'result_url':'http://172.17.0.1:3003/clusterlinks/'})
+    dispatcher = Dispatcher(redis_host='redis',
+                            process_func=process_message,
+                            channels=['genie:linker'])
+    dispatcher.start()
+    # process_message('abc', {'state':'new', 'job_id':'13', 'start_time_ms':1570916185000, 'end_time_ms':1570916187000, 'query_url':'http://172.17.0.1:3003/api/postsclusters/', 'result_url':'http://172.17.0.1:3003/clusterlinks/'})

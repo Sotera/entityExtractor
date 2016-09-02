@@ -71,6 +71,17 @@
     }
   },
   {
+    "name": "cluster-linker",
+    "Image": "sotera/ozymandias:1",
+    "DockerFilePath": "",
+    "Hostname": "cluster-linker",
+    "HostConfig": {
+      "Links": [
+        "redis:redis"
+      ]
+    }
+  },
+  {
     "name": "feature-sim",
     "Image": "sotera/feature-sim:1",
     "DockerFilePath": "",
