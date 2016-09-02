@@ -4,20 +4,14 @@
 
 require('dotenv').config({silent: true});
 
-//TODO: find a better way to know when all timeframed monitors are done
-const MONITOR_TYPES_COUNT = process.env.MONITOR_TYPES_COUNT;
-
-if (!MONITOR_TYPES_COUNT) {
-  throw new Error('Missing required MONITOR_TYPES_COUNT env var');
-}
-
 const app = require('../server'),
   _ = require('lodash'),
   jobs = require('../../lib/jobs'),
   JobMonitor = app.models.JobMonitor,
   FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
   ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
-  LinkerMonitor = require('../../lib/job-monitors/linker-monitor')
+  LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
+  createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor')
 ;
 
 module.exports = { start };
@@ -28,6 +22,8 @@ if (require.main === module)
 
 function start() {
   const queue = jobs.queue;
+  // let's run linkermonitor creation in this worker too
+  createLinkerMonitor.start(app);
 
   queue
   .on('job complete', id => {
@@ -52,46 +48,7 @@ function start() {
   queue.process('job monitor', (job, done) => {
     startMonitor(job.data.options, done);
   });
-
 }
-
-// let's use this worker to check all JobMonitor
-// changes and try to start a LinkerMonitor when:
-  // 1. a monitor is updated to 'done'
-  // 2. all its related monitors (non-linker, same timeframe) are also done
-
-JobMonitor.createChangeStream((err, changes) => {
-  if (err) return console.error('change stream err:', err);
-
-  changes.on('data', target => {
-    // console.info('JobMonitor changes:', target);
-    const jobMonitor = target.data;
-
-    if (target.type === 'update' &&
-      jobMonitor.state === 'done' &&
-      jobMonitor.featurizer !== 'linker') {
-
-      JobMonitor.count({
-        start_time: jobMonitor.start_time,
-        end_time: jobMonitor.end_time,
-        state: 'done',
-        featurizer: { neq: 'linker' }
-      })
-      .then(count => {
-        if (count === +MONITOR_TYPES_COUNT) {
-          // TODO: re-run if one of the monitors changes.
-          // if multiple monitors change?
-          // if some monitors set start = false
-          return JobMonitor.create({
-            start_time: jobMonitor.start_time,
-            end_time: jobMonitor.end_time,
-            featurizer: 'linker'
-          });
-        }
-      });
-    }
-  });
-});
 
 // options: jobMonitorId
 function startMonitor(options, done) {
