@@ -14,7 +14,8 @@
   .col-md-1 type
   .col-md-1 lang
   .col-md-1 state
-  .col-md-2 args
+  .col-md-1 args
+  .col-md-1 errors
   .col-md-2 query
   .col-md-2 run
 hr
@@ -26,7 +27,8 @@ hr
   .col-md-1 {{monitor.featurizer}}
   .col-md-1 {{monitor.lang}}
   .col-md-1 {{monitor.state}}
-  .col-md-2 {{monitor.service_args}}
+  .col-md-1 {{monitor.service_args}}
+  .col-md-1 {{monitor.error_msg}}
   .col-md-2 {{monitor.start_time | date:'short'}} - {{monitor.end_time | date:'short'}}
   .col-md-2 {{monitor.created | date:'short'}} - {{monitor.done_at | date:'short'}}
 

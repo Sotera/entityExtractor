@@ -23,12 +23,16 @@ class ClusterLinker:
         if ratio > self.thresh:
             d_clust = {
                 'source': small['id'],
-                'target':big_id,
-                'weight':ratio,
-                'common_ids':l_common
+                'target': big_id,
+                'weight': ratio,
+                'common_ids': l_common,
+                'end_time_ms': c1['end_time_ms']
             }
             self.l_clust_links.append(d_clust)
 
+
+    def get_links(self):
+        return self.l_clust_links
 
     def add_cluster(self, clust_new):
         for c in self.l_clusts:

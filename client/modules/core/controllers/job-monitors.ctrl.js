@@ -4,7 +4,7 @@ angular.module('com.module.core')
 function JobMonitorsCtrl($scope, $window, JobMonitor, PostsCluster,
   $routeParams, $location) {
   var limitOptions = [10, 50, 100, 200],
-    typeOptions = ['all', 'text', 'hashtag', 'image'],
+    typeOptions = ['all', 'text', 'hashtag', 'image', 'linker'],
     limit = +($routeParams.limit || limitOptions[0]),
     type = $routeParams.type || typeOptions[0];
 
