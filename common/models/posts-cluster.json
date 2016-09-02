@@ -7,6 +7,11 @@
       "keys": {
         "job_monitor_id": 1
       }
+    },
+    "idx_end_time_ms": {
+      "keys": {
+        "end_time_ms": 1
+      }
     }
   },
   "options": {
@@ -15,7 +20,16 @@
   "mixins": {
     "Timestamp": {}
   },
-  "properties": {},
+  "properties": {
+    "start_time_ms": {
+      "type": "number",
+      "required": true
+    },
+    "end_time_ms": {
+      "type": "number",
+      "required": true
+    }
+  },
   "validations": [],
   "relations": {
     "jobMonitor": {
