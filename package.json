@@ -6,8 +6,7 @@
   "scripts": {
     "pretest": "jshint .",
     "predev": "npm install && bower install",
-    "dev": "nodemon . -w server -w common -w lib --ext js,json",
-    "queue": "nodemon server/workers/job-queue -w server -w common -w lib --ext js,json"
+    "dev": "nodemon . -w server -w common -w lib --ext js,json"
   },
   "private": true,
   "engines": {
