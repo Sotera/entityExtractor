@@ -72,7 +72,7 @@
   },
   {
     "name": "cluster-linker",
-    "Image": "sotera/ozymandias:1",
+    "Image": "sotera/ozymandias:2",
     "DockerFilePath": "",
     "Hostname": "cluster-linker",
     "HostConfig": {
