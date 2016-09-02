@@ -13,22 +13,22 @@ angular.module('com.module.core')
               };
               ClusterLink.find(query)
                 .$promise
-                .then(function(links){
-                  PostsCluster.find()
-                    .$promise
-                    .then(function(nodes){
-                      graphEvents({"links":links,"nodes":nodes});
-                    })
-                    .then(angular.noop)
-                    .catch(console.error);
-                })
+                .then(graphEvents)
                 .then(callback || angular.noop)
                 .catch(console.error);
             }
 
             function graphEvents(graph) {
+              graph.nodes=[];
+              var nodeSet = new Set();
               graph.links.forEach(function(link){
                 link.value = link.weight;
+                nodeSet.add(link.source);
+                nodeSet.add(link.target);
+              });
+
+              nodeSet.forEach(function(node){
+                graph.nodes.push({"id":node});
               });
 
               var svg = d3.select("svg"),
