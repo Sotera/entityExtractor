@@ -1,5 +1,5 @@
 class ClusterLinker:
-    def __init__(self, min_overlap=0.6):
+    def __init__(self, min_overlap):
         self.l_clusts = []
         self.l_clust_links = []
         self.thresh = min_overlap

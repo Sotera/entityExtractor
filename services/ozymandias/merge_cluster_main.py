@@ -29,7 +29,7 @@ def process_message(key, job):
     }]
 
     print "BEGIN LINKING CLUSTERS"
-    linker = ClusterLinker()
+    linker = ClusterLinker(job.get('min_overlap', 0.6))
     loopy = Loopy(job['query_url'], query_params)
 
     if loopy.result_count == 0:
