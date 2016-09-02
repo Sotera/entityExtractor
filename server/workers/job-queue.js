@@ -17,8 +17,7 @@ const app = require('../server'),
   JobMonitor = app.models.JobMonitor,
   FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
   ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
-  LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
-  es = require('event-stream');
+  LinkerMonitor = require('../../lib/job-monitors/linker-monitor')
 ;
 
 module.exports = { start };
@@ -58,13 +57,10 @@ function start() {
 
 // let's use this worker to check all JobMonitor
 // changes and try to start a LinkerMonitor when:
-  // 1. a monitor is updated
-  // 2. a monitor is done
-  // 3. all related monitors (non-linker) for a timeframe are done
+  // 1. a monitor is updated to 'done'
+  // 2. all its related monitors (non-linker, same timeframe) are also done
 
 JobMonitor.createChangeStream((err, changes) => {
-  // changes.pipe(es.stringify()).pipe(process.stdout);
-
   if (err) return console.error('change stream err:', err);
 
   changes.on('data', target => {
