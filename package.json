@@ -21,6 +21,7 @@
     "cors": "^2.5.2",
     "dotenv": "^2.0.0",
     "elasticsearch": "^11.0.1",
+    "event-stream": "^3.3.4",
     "extract-zip": "^1.5.0",
     "feedparser": "^1.1.4",
     "jade": "^1.11.0",
