@@ -85,4 +85,6 @@ class Loopy:
         return result
 
     def post_result(self, url, payload):
-        requests.post(url, json=payload)
+        result = requests.post(url, json=payload)
+        if result.status_code != 200:
+            print result.content

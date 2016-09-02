@@ -8,17 +8,19 @@ angular.module('com.module.core')
           function($scope, ClusterLink, PostsCluster) {
             this.create = create;
             function create(event, callback) {
-              var query = {
+              /*var query = {
                   where: { "start_time_ms": {"between": [Date.now()-3600000,Date.now()]} }
-              };
-              ClusterLink.find(query)
+              };*/
+              ClusterLink.find(/*query*/)
                 .$promise
                 .then(graphEvents)
                 .then(callback || angular.noop)
                 .catch(console.error);
             }
 
-            function graphEvents(graph) {
+            function graphEvents(links) {
+              var graph = {};
+              graph.links = links;
               graph.nodes=[];
               var nodeSet = new Set();
               graph.links.forEach(function(link){
@@ -36,6 +38,10 @@ angular.module('com.module.core')
                 height = +svg.attr("height");
 
               var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+              var zoom = d3.zoom()
+                .scaleExtent([-40, 40])
+                .on("zoom", zoomed);
 
               var simulation = d3.forceSimulation()
                 .force("link", d3.forceLink().id(function(d) { return d.id; }))
@@ -70,12 +76,20 @@ angular.module('com.module.core')
                   return d.id;
                 });
 
+              svg.call(zoom);
+
+              function zoomed() {
+                node.attr("transform", d3.event.transform);
+                link.attr("transform", d3.event.transform);
+              }
+
               simulation
                 .nodes(graph.nodes)
                 .on("tick", ticked);
 
               simulation.force("link")
                 .links(graph.links);
+
 
               function ticked() {
                 link

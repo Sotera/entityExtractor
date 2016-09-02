@@ -80,6 +80,8 @@ def process_message(key, job):
         cluster['term'] = k
         cluster['similar_ids'] = v
         cluster['job_monitor_id'] = job['job_id']
+        cluster['start_time_ms'] = job['start_time_ms']
+        cluster['end_time_ms'] = job['end_time_ms']
         loopy.post_result(job['result_url'], cluster)
 
     job['data'] = hash_clust.to_json()
