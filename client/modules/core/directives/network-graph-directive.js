@@ -8,12 +8,10 @@ angular.module('com.module.core')
           function($scope, ClusterLink, PostsCluster) {
             this.create = create;
             function create(event, callback) {
-              /*var query = {
-                filter: {
+              var query = {
                   where: { "start_time_ms": {"between": [Date.now()-3600000,Date.now()]} }
-                }
-              };*/
-              ClusterLink.find(/*query*/)
+              };
+              ClusterLink.find(query)
                 .$promise
                 .then(function(links){
                   PostsCluster.find()
@@ -28,10 +26,7 @@ angular.module('com.module.core')
                 .catch(console.error);
             }
 
-
-
             function graphEvents(graph) {
-
               graph.links.forEach(function(link){
                 link.value = link.weight;
               });
