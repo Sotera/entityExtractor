@@ -18,7 +18,7 @@ angular.module('com.module.core')
                 .catch(console.error);
             }
 
-            function graphEvents(links) {
+            function getNetworkGraph(links){
               var graph = {};
               graph.links = links;
               graph.nodes=[];
@@ -32,10 +32,22 @@ angular.module('com.module.core')
               nodeSet.forEach(function(node){
                 graph.nodes.push({"id":node});
               });
+              return graph;
+            }
 
-              var svg = d3.select("svg"),
-                width = +svg.attr("width"),
-                height = +svg.attr("height");
+            function graphEvents(links) {
+              var $container = $('.chart-container'),
+                width = $container.width(),
+                height = $container.height(),
+                graph = getNetworkGraph(links),
+                svg = d3.select('.chart-container').append("svg");
+
+              svg.attr("width", '100%')
+                .attr("height", '100%')
+                .attr('viewBox','0 0 '+Math.min(width,height) +' '+Math.min(width,height) )
+                .attr('preserveAspectRatio','xMinYMin')
+                .append("g")
+                .attr("transform", "translate(" + Math.min(width,height) / 2 + "," + Math.min(width,height) / 2 + ")");
 
               var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -65,6 +77,9 @@ angular.module('com.module.core')
                 .attr("r", 5)
                 .attr("fill", function (d) {
                   return color(d.group);
+                })
+                .on("click",function(d){
+                  $scope.showDetails(d);
                 })
                 .call(d3.drag()
                   .on("start", dragstarted)

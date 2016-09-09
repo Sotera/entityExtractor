@@ -28,6 +28,10 @@
     "end_time_ms": {
       "type": "number",
       "required": true
+    },
+    "data_type": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],

@@ -90,6 +90,7 @@ def process_message(key, job):
     print 'FINISHED SIMILARITY PROCESSING: found {} clusters'.format(len(clusters))
     for cluster in clusters:
         cluster['job_monitor_id'] = job['job_id']
+        cluster['data_type'] = job['data_type']
         loopy.post_result(job['result_url'], cluster)
     job['data'] = feature_similarity.to_json()
     job['state'] = 'processed'
