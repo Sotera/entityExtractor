@@ -9,11 +9,13 @@ class ClusterLinker:
             return
         if len(c1['similar_ids']) < len(c2['similar_ids']):
             small = c1
+            big_cluster = c2
             big = set(c2['similar_ids'])
             big_id = c2['id']
         else:
             small = c2
             big = set(c1['similar_ids'])
+            big_cluster = c1
             big_id = c1['id']
         l_common = []
         for id in small['similar_ids']:
@@ -23,7 +25,9 @@ class ClusterLinker:
         if ratio > self.thresh:
             d_clust = {
                 'source': small['id'],
+                'source_data_type': small['data_type'],
                 'target': big_id,
+                'target_data_type': big_cluster['data_type'],
                 'weight': ratio,
                 'common_ids': l_common,
                 'end_time_ms': c1['end_time_ms']

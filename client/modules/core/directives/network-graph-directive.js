@@ -18,20 +18,23 @@ angular.module('com.module.core')
                 .catch(console.error);
             }
 
+            var colors = {
+              "hashtag":"Goldenrod",
+              "text":"SteelBlue",
+              "image":"Maroon"
+            };
             function getNetworkGraph(links){
               var graph = {};
               graph.links = links;
               graph.nodes=[];
-              var nodeSet = new Set();
               graph.links.forEach(function(link){
                 link.value = link.weight;
-                nodeSet.add(link.source);
-                nodeSet.add(link.target);
+                graph.nodes.push({"id":link.source, "group":link.source_data_type});
+                graph.nodes.push({"id":link.target, "group":link.target_data_type});
               });
 
-              nodeSet.forEach(function(node){
-                graph.nodes.push({"id":node});
-              });
+              graph.nodes = _.uniqWith(graph.nodes, _.isEqual);
+
               return graph;
             }
 
@@ -76,7 +79,7 @@ angular.module('com.module.core')
                 .enter().append("circle")
                 .attr("r", 5)
                 .attr("fill", function (d) {
-                  return color(d.group);
+                  return colors[d.group];
                 })
                 .on("click",function(d){
                   $scope.showDetails(d);
@@ -88,7 +91,7 @@ angular.module('com.module.core')
 
               node.append("title")
                 .text(function (d) {
-                  return d.id;
+                  return d.group;
                 });
 
               svg.call(zoom);

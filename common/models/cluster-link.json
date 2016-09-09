@@ -26,7 +26,15 @@
       "type": "string",
       "required": true
     },
+    "source_data_type": {
+      "type": "string",
+      "required": true
+    },
     "target": {
+      "type": "string",
+      "required": true
+    },
+    "target_data_type": {
       "type": "string",
       "required": true
     },
