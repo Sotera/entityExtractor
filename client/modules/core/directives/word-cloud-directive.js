@@ -8,10 +8,11 @@ angular.module('com.module.core')
           function($scope, ClusterLink, PostsCluster) {
 
             this.create = create;
+            this.showNewWords = showNewWords;
             var myWordCloud = wordCloud('.cloud-container');
 
             function create(event, callback) {
-              showNewWords(myWordCloud);
+
             }
 
             function wordCloud(selector) {
@@ -90,21 +91,9 @@ angular.module('com.module.core')
 
             }
 
-//Some sample data - http://en.wikiquote.org/wiki/Opening_lines
-            var words = [
-              "You don't know about me without you have read a book called The Adventures of Tom Sawyer but that ain't no matter.",
-              "The boy with fair hair lowered himself down the last few feet of rock and began to pick his way toward the lagoon.",
-              "When Mr. Bilbo Bilbo Bilbo Bilbo Baggins Baggins Baggins Baggins of Bag End announced that he would shortly be celebrating celebrating his eleventy-first birthday with a party party party of special special magnificence, there was much talk and excitement in Hobbiton Hobbiton Hobbiton Hobbiton.",
-              "It was inevitable: the scent of bitter almonds always reminded him of the fate of unrequited love."
-            ];
-
-//Prepare one of the sample sentences by removing punctuation,
-// creating an array of words and computing a random size attribute.
-            function getWords(i) {
-              var n = 16;
+            function getWords(words) {
               var wordObjs = {};
-              words[i]
-                .replace(/[!\.,:;\?]/g, '')
+              words.replace(/[!\.,:;\?]/g, '')
                 .split(' ')
                 .map(function(d) {
                   if(wordObjs[d]){
@@ -117,14 +106,11 @@ angular.module('com.module.core')
               return _.values(wordObjs);
             }
 
-//This method tells the word cloud to redraw with a new set of words.
-//In reality the new words would probably come from a server request,
-// user input or some other source.
-            function showNewWords(vis, i) {
-              i = i || 0;
-
-              vis.update(getWords(2));
-              setTimeout(function() { showNewWords(vis, i + 1)}, 2000)
+            function showNewWords(words) {
+              if(!words){
+                return;
+              }
+              myWordCloud.update(getWords(words));
             }
 
 
@@ -132,6 +118,9 @@ angular.module('com.module.core')
       };
 
       function link(scope, elem, attrs, ctrls) {
+        scope.$watch(attrs['ngModel'], function (v) {
+          ctrls.showNewWords(v);
+        });
         ctrls.create(null,function(){});
       }
 
