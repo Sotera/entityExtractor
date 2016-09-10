@@ -5,11 +5,6 @@ h3  Diagram
       network-graph
   .col-sm-3
     div(style='width:100%; height:600px')
-      .row() {{cluster.id}}
-        .col-md-6(style='height:200px;overflow-y:auto')
-          .post(ng-repeat='postId in cluster.similar_ids'
-          ng-click='showPostDetails($event, postId)' style='margin-bottom:10px')
-            | {{postId}}
-      .row(style='width:100%; height:256px')
-        div(style='width:100%; height:256px' class="cloud-container")
+      .row(style='width:100%; height:600px')
+        div(style='width:100%; height:600px' class="cloud-container")
           word-cloud(ng-model="clusterText")
