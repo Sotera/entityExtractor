@@ -76,13 +76,14 @@ def process_message(key, job):
             break
         # Do something with the obtained page
         for doc in page:
-            hash_clust.process_vector(doc['id'], doc['hashtags'])
+            hash_clust.process_vector(doc['id'], doc['post_id'], doc['hashtags'])
 
     print 'FINISHED SIMILARITY PROCESSING'
     for k, v in hash_clust.get_clusters().iteritems():
         cluster = {}
         cluster['term'] = k
-        cluster['similar_ids'] = v
+        cluster['similar_ids'] = v['similar_ids']
+        cluster['similar_post_ids'] = v['similar_post_ids']
         cluster['job_monitor_id'] = job['job_id']
         cluster['start_time_ms'] = job['start_time_ms']
         cluster['end_time_ms'] = job['end_time_ms']

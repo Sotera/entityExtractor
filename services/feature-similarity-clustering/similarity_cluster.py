@@ -6,28 +6,30 @@ import uuid
 
 
 class SimilarityCluster:
-    def __init__(self, similarity_threshold, initial_vector_id, initial_vector, start_time_ms, end_time_ms):
+    def __init__(self, similarity_threshold, initial_vector_id, initial_post_id, initial_vector, start_time_ms,
+                 end_time_ms):
         self.valid_cluster = True
         if initial_vector is None or len(initial_vector) == 0:
             self.valid_cluster = False
         self.average_similarity_vector = initial_vector
         self.normalized_average_similarity_vector = np.linalg.norm(initial_vector)
         self.similar_ids = [initial_vector_id]
+        self.similar_post_ids = [initial_post_id]
         self.similarity_threshold = similarity_threshold
         self.running_stat = RunningStat()
         self.id = uuid.uuid4()
         self.start_time_ms = start_time_ms
         self.end_time_ms = end_time_ms
 
-    def process_similarity(self, vector_id, vector, vector_normalized):
+    def process_similarity(self, vector_id, post_id, vector, vector_normalized):
         similarity = self.cosine_similarity(self.average_similarity_vector, self.normalized_average_similarity_vector,
                                             vector, vector_normalized)
         are_similar = similarity > self.similarity_threshold
 
         if are_similar:
-            # print "{} is similar to {}".format(vector_id, self.similar_ids[0])
             self.apply_vector_to_average(vector)
             self.similar_ids.append(vector_id)
+            self.similar_post_ids.append(post_id)
             self.running_stat.push(similarity)
 
         return are_similar
@@ -44,6 +46,7 @@ class SimilarityCluster:
             "average_similarity_vector": self.average_similarity_vector,
             "average_similarity": self.running_stat.mean(),
             "similar_ids": self.similar_ids,
+            "similar_post_ids": self.similar_post_ids,
             "start_time_ms": self.start_time_ms,
             "end_time_ms": self.end_time_ms,
             "id": str(self.id)

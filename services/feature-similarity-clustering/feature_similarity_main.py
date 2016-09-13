@@ -3,8 +3,8 @@
 # http://10.104.1.144:3003/api/socialMediaPosts?filter[where][timestamp_ms][between][0]=1469695563000&filter[where][timestamp_ms][between][1]=1469702566000&filter[where][lang]=en&filter[limit]=5&filter[skip]=0
 # to test:
 # from the redis cli run these commands
-# hmset 1 "state" "new" "similarity_threshold" .5 "similarity_method" "custom" "query_url" "http://10.104.1.144:3003/api/socialMediaPosts/" "lang" "en" "data_type" "text" "start_time_ms" 1469695563000 "end_time_ms" 1469702566000
-# hmset 1 "state" "new" "similarity_threshold" .5 "es_host" "54.234.139.42" "similarity_method" "custom" "es_port" "9200" "es_index" "stream" "es_doc_type" "jul2016-uk" "es_query" "{\"fields\":[\"timestamp_ms\",\"features\",\"id\"],\"query\":{\"bool\":{\"must\":{\"term\":{\"features\":0}},\"filter\":{\"range\":{\"timestamp_ms\":{\"gte\":\"1468617997000\",\"lt\":\"1468618897000\"}}}}}}"
+# hmset 1 "state" "new" "similarity_threshold" .5 "query_url" "http://10.104.1.144:3003/api/socialMediaPosts/" "lang" "en" "data_type" "text" "start_time_ms" 1469695563000 "end_time_ms" 1469702566000
+# hmset 1 "state" "new" "similarity_threshold" .5 "es_host" "54.234.139.42" "es_port" "9200" "es_index" "stream" "es_doc_type" "jul2016-uk" "es_query" "{\"fields\":[\"timestamp_ms\",\"features\",\"id\"],\"query\":{\"bool\":{\"must\":{\"term\":{\"features\":0}},\"filter\":{\"range\":{\"timestamp_ms\":{\"gte\":\"1468617997000\",\"lt\":\"1468618897000\"}}}}}}"
 # publish similarity 1
 
 import sys
@@ -23,8 +23,6 @@ def validate_job(job):
         return "No start_time_ms."
     if 'end_time_ms' not in job.keys():
         return "No end_time_ms."
-    if 'similarity_method' not in job.keys():
-        return "No similarity_method."
     if 'job_id' not in job.keys():
         return "No job_id."
     if 'result_url' not in job.keys():
@@ -48,8 +46,7 @@ def process_message(key, job):
         job['state'] = 'error'
         return
 
-    feature_similarity = FeatureSimilarity(float(job['similarity_threshold']), job['start_time_ms'], job['end_time_ms'],
-                                       job['similarity_method'])
+    feature_similarity = FeatureSimilarity(float(job['similarity_threshold']), job['start_time_ms'], job['end_time_ms'])
     query_params = [{
         "query_type": "between",
         "property_name": "timestamp_ms",
@@ -79,11 +76,11 @@ def process_message(key, job):
         for doc in page:
             if job['data_type'] == "text" and 'text_features' in doc and 'id' in doc and \
                     len(doc['text_features']) > 0:
-                feature_similarity.process_vector(doc['id'], doc['text_features'])
+                feature_similarity.process_vector(doc['id'], doc['post_id'], doc['text_features'])
                 continue
             if job['data_type'] == "image" and 'image_features' in doc and 'id' in doc and \
                     len(doc['image_features']) > 0:
-                feature_similarity.process_vector(doc['id'], doc['image_features'])
+                feature_similarity.process_vector(doc['id'], doc['post_id'], doc['image_features'])
 
     clusters = feature_similarity.get_clusters()
 
