@@ -13,9 +13,10 @@ var path = require('path');
 require('./basic-auth').auth(app, ['qcr/insert']);
 
 // to support JSON-encoded bodies
-app.middleware('parse', bodyParser.json());
+app.middleware('parse', bodyParser.json({limit: 524288000}));
 // to support URL-encoded bodies
 app.middleware('parse', bodyParser.urlencoded({
+  limit: 524288000,
   extended: true
 }));
 
