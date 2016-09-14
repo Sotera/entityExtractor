@@ -42,3 +42,6 @@ class ClusterLinker:
         for c in self.l_clusts:
             self.compare_clusters(c, clust_new)
         self.l_clusts.append(clust_new)
+
+    def add_clusters(self, *clusters):
+        map(self.add_cluster, clusters)

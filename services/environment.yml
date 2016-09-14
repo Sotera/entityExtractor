@@ -1,0 +1,28 @@
+name: watchman
+dependencies:
+- funcsigs=1.0.2=py27_0
+- mkl=11.3.3=0
+- mock=2.0.0=py27_0
+- numpy=1.11.1=py27_0
+- openssl=1.0.2h=1
+- pbr=1.10.0=py27_0
+- pip=8.1.2=py27_0
+- python=2.7.12=1
+- readline=6.2=2
+- requests=2.11.1=py27_0
+- setuptools=26.1.1=py27_0
+- six=1.10.0=py27_0
+- sqlite=3.13.0=0
+- tk=8.5.18=0
+- wheel=0.29.0=py27_0
+- zlib=1.2.8=3
+- pip:
+  - falconn==1.2
+  - futures==3.0.5
+  - morfessor==2.0.2a3
+  - polyglot==16.7.4
+  - pycld2==0.31
+  - pyicu==1.9.3
+  - redis==2.10.5
+prefix: /home/luke/apps/miniconda2/envs/watchman
+

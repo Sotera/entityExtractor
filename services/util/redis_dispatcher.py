@@ -14,13 +14,16 @@ class Worker(object):
     def __init__(self, redis_store):
         self.send = redis_store
 
-    def run(self, item, **kwargs):
-        key = item['data']
+    '''
+    run worker with given msg and args
+    '''
+    def run(self, msg, **kwargs):
+        key = msg['data']
         initial_state = kwargs.get('initial_state', 'new')
         process_func = kwargs.get('process_func',
             lambda key, job: sys.stdout.write('processing placeholder'))
 
-        # get object for corresponding item:
+        # get object for corresponding key:
         job = self.send.hgetall(key)
         print job
         print key
