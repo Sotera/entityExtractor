@@ -83,7 +83,7 @@
   },
   {
     "name": "feature-sim",
-    "Image": "sotera/feature-sim:2",
+    "Image": "sotera/feature-sim:3",
     "DockerFilePath": "",
     "Hostname": "feature-sim",
     "HostConfig": {
@@ -109,7 +109,7 @@
   },
   {
     "name": "caffe",
-    "Image": "sotera/caffe_redis_client:9",
+    "Image": "sotera/caffe_redis_client:10",
     "DockerFilePath": "",
     "Hostname": "caffe",
     "HostConfig": {
