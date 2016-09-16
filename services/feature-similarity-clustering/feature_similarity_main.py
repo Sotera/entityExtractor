@@ -80,7 +80,8 @@ def process_message(key, job):
                 continue
             if job['data_type'] == "image" and 'image_features' in doc and 'id' in doc and \
                     len(doc['image_features']) > 0:
-                feature_similarity.process_vector(doc['id'], doc['post_id'], doc['image_features'])
+                feature_similarity.process_vector(doc['id'], doc['post_id'], doc['image_features'],
+                                                  doc['primary_image_url'])
 
     clusters = feature_similarity.get_clusters()
 

@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import sys
-sys.path.append(os.getenv('CAFFE_PYTHON_PATH', '/home/caffe-user/caffe/python/'))
+sys.path.append(os.getenv('CAFFE_PYTHON_PATH', '/home/jlueders/caffe/python/'))
 import caffe
 
 class CaffeFeaturizer:

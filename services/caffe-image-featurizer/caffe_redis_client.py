@@ -74,7 +74,7 @@ def validate_job(job):
 
 
 def process_message(key, job):
-    caffe_root = os.getenv('CAFFE_HOME', '/home/caffe-user/caffe/')
+    caffe_root = os.getenv('CAFFE_HOME', '/home/jlueders/caffe/')
 
     if not job:
         print 'No Valid Job.'
@@ -92,6 +92,7 @@ def process_message(key, job):
 
     job_urls = job['urls'].split(",")
 
+    image_url = None
     for url in job_urls:
         if url is None or url.find('instagram') == -1:
             continue
@@ -118,7 +119,11 @@ def process_message(key, job):
         job['error'] = 'invalid image or directory path'
         return
     print 'FINISHED FEATURE PROCESSING'
-    job['data'] = features
+    data = {
+        'features': features,
+        'url': image_url
+    }
+    job['data'] = json.dumps(data)
     job['state'] = 'processed'
 
     os.remove(image_path)
