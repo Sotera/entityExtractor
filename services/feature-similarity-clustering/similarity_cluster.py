@@ -17,6 +17,8 @@ class SimilarityCluster:
         self.similar_post_ids = [initial_post_id]
         if initial_image_url is not None:
             self.similar_image_urls = [initial_image_url]
+        else:
+            self.similar_image_urls = None
         self.similarity_threshold = similarity_threshold
         self.running_stat = RunningStat()
         self.id = uuid.uuid4()
