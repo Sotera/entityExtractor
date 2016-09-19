@@ -1,13 +1,18 @@
+spinner(show='showSpinner') //- boolean scope property to toggle spinner
+
 h3  Diagram
 .row
   .col-sm-9
-    div( style='width:100%; height:600px' class='chart-container' )
+    .chart-container(style='width:100%; height:600px')
       network-graph
   .col-sm-3
     div(style='width:100%; height:600px')
-      .row()
-        div()
-          p(style="font-size:30px") # {{clusterTerm}}
+      .row
+        div
+          p(ng-show='clusterTerm' style='font-size:30px') # {{clusterTerm}}
       .row(style='width:100%; height:600px')
-        div(style='width:100%; height:600px' class="cloud-container")
-          word-cloud(ng-model="clusterText")
+        .cloud-container(style='width:100%; height:600px')
+          word-cloud(ng-model='clusterText')
+.row
+  .col-sm-12
+    image-grid(hover-dir='top-left')

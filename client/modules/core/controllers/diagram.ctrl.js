@@ -17,47 +17,55 @@ function DiagramCtrl($scope, PostsCluster, SocialMediaPost) {
         }
       }
     }).$promise
-      .then(function(result){
-        var unique= new Set();
-        result.similar_ids.forEach(function(el, i){
-          unique.add(el);
+      .then(function(cluster) {
+        var unique = new Set();
+        cluster.similar_ids.forEach(function(id){
+          unique.add(id);
         });
-        result.similar_ids = [...unique];
-        if(result.data_type ==="text"){
-          $scope.getClusterText(result);
-        }
-        else if(result.data_type ==="hashtag"){
-          $scope.getClusterHashtags(result);
+        cluster.similar_ids = [...unique];
+        if (cluster.data_type === "text"){
+          $scope.getClusterText(cluster);
+        } else if (cluster.data_type === "hashtag"){
+          $scope.getClusterHashtags(cluster);
+        } else if (cluster.data_type === "image"){
+          $scope.getClusterImages(cluster);
         }
 
-        $scope.cluster = result;
+        $scope.cluster = cluster;
       })
-      .then(angular.noop)
       .catch(console.error);
   };
 
-  $scope.getClusterText = function(cluster){
+  $scope.getClusterText = function(cluster) {
+    $scope.showSpinner = true;
+
     $scope.clusterText = "";
     var ids = cluster.similar_ids.slice(0,10);
-    ids.forEach(function(el, i){
-      SocialMediaPost.findOne({
-        filter: {
-          where: {
-            id: el
-          }
+    SocialMediaPost.find({
+      filter: {
+        where: {
+          id: {inq: ids}
         }
-      }).$promise
-        .then(function(post){
-          $scope.clusterText += post.text;
-        })
-        .then(angular.noop)
-        .then(angular.noop)
-        .catch(console.error);
-    });
+      }
+    }).$promise
+      .then(posts => {
+        var allText = posts.map(p => p.text).join(' ');
+        $scope.clusterText = allText;
+        $scope.showSpinner = false;
+      })
+      .catch(console.error);
   };
 
   //cheat a bit here just to show the hashtag in the cloud
-  $scope.getClusterHashtags = function(cluster){
+  $scope.getClusterHashtags = function(cluster) {
     $scope.clusterTerm = cluster.term;
+  };
+
+  $scope.getClusterImages = function(cluster) {
+    if (cluster.similar_image_urls)
+      $scope.imageUrls = cluster.similar_image_urls;
+    else
+      // TODO: why is this?
+      alert('similar_image_urls not provided');
   };
 }

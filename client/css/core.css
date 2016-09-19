@@ -1,0 +1,35 @@
+.navbar-brand {
+  background-image: url('/images/rancor.png');
+  background-repeat: no-repeat;
+  background-size: 40px;
+  background-position: left center;
+  padding-left: 45px;
+  margin-top: -1px;
+  margin-left: 0px !important;
+  font-size: 22px;
+  color: #07582B !important;
+}
+
+h2 {
+  color: #07582B;
+}
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+img.grid-image {
+  height: 50px;
+  width: 50px;
+}
+
+img.grid-image-hover {
+  height: 180px;
+  width: 180px;
+}
