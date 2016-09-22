@@ -24,21 +24,23 @@ angular.module('com.module.core')
               var finishedCount = 0;
               jobs.forEach(function(job, iter){
                 var query = {where: {end_time_ms: job.end_time}};
-                if(!minDate){
-                  minDate = job.start_time;
-                  maxDate = job.end_time;
-                }
-                minDate = job.start_time < minDate? job.start_time:minDate;
-                maxDate = job.end_time > maxDate? job.end_time:maxDate;
-
                 ClusterLink.count(query)
                   .$promise
                   .then(function(result){
                     finishedCount++;
+                    if(result.count !=0) {
+                      if (!minDate) {
+                        minDate = job.start_time;
+                        maxDate = job.end_time;
+                      }
+                      minDate = job.start_time < minDate ? job.start_time : minDate;
+                      maxDate = job.end_time > maxDate ? job.end_time : maxDate;
 
-                    minCount = result.count < minCount? result.count:minCount;
-                    maxCount = result.count > maxCount? result.count:maxCount;
-                    data.push({"count":result.count,"date":new Date(job.end_time)});
+                      minCount = result.count < minCount ? result.count : minCount;
+                      maxCount = result.count > maxCount ? result.count : maxCount;
+                    }
+                    data.push({"count": result.count, "date": new Date(job.end_time)});
+
                     if(finishedCount==jobs.length){
                       data.sort(function(a,b){
                         if (a.date < b.date) {
@@ -120,7 +122,10 @@ angular.module('com.module.core')
                 });
 
               function redrawChart() {
-
+                if(!d3.event.selection){
+                  $scope.dateRangeSelected(0,0);
+                  return;
+                }
                 var start = navXScale.invert( d3.event.selection[0] );
                 var end = navXScale.invert( d3.event.selection[1] );
                 $scope.dateRangeSelected(start.getTime(),end.getTime());
