@@ -36,6 +36,11 @@ function DiagramCtrl($scope, PostsCluster, SocialMediaPost) {
       .catch(console.error);
   };
 
+  $scope.dateRangeSelected = function(start,end){
+    $scope.loadNetworkGraph(start,end);
+  };
+
+
   $scope.getClusterText = function(cluster) {
     $scope.showSpinner = true;
 

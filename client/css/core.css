@@ -14,6 +14,22 @@ h2 {
   color: #07582B;
 }
 
+.navigator .data {
+  fill: cornflowerblue;
+  stroke-width: 0px;
+}
+
+.navigator .line {
+  fill: none;
+  stroke: black;
+  stroke-width: 1px;
+}
+
+.navigator .viewport {
+  fill: white;
+  fill-opacity: 0.2;
+}
+
 .links line {
   stroke: #999;
   stroke-opacity: 0.6;

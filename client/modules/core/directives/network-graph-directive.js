@@ -6,17 +6,26 @@ angular.module('com.module.core')
         link: link,
         controller: ['$scope', 'ClusterLink','PostsCluster',
           function($scope, ClusterLink, PostsCluster) {
+
             this.create = create;
-            function create(event, callback) {
-              /*var query = {
-                  where: { "start_time_ms": {"between": [Date.now()-3600000,Date.now()]} }
-              };*/
-              ClusterLink.find(/*query*/)
+            function create(event, start, end, callback) {
+              var query = {
+                filter: {
+                  where: { "end_time_ms": {"between": [start,end]} }
+                }
+              };
+              ClusterLink.find(query)
                 .$promise
                 .then(graphEvents)
                 .then(callback || angular.noop)
                 .catch(console.error);
             }
+
+            $scope.loadNetworkGraph = function(start, end) {
+              if($scope.graphSvg)
+                $scope.graphSvg.remove();
+              create(null,start, end, function(){});
+            };
 
             var colors = {
               "hashtag":"Goldenrod",
@@ -44,6 +53,8 @@ angular.module('com.module.core')
                 height = $container.height(),
                 graph = getNetworkGraph(links),
                 svg = d3.select('.chart-container').append("svg");
+
+              $scope.graphSvg = svg;
 
               svg.attr("width", '100%')
                 .attr("height", '100%')
@@ -157,7 +168,7 @@ angular.module('com.module.core')
       };
 
       function link(scope, elem, attrs, ctrls) {
-        ctrls.create(null,function(){});
+
       }
 
     }]);
