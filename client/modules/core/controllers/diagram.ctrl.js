@@ -67,10 +67,11 @@ function DiagramCtrl($scope, PostsCluster, SocialMediaPost) {
   };
 
   $scope.getClusterImages = function(cluster) {
-    if (cluster.similar_image_urls)
+    if (cluster.similar_image_urls) {
       $scope.imageUrls = cluster.similar_image_urls;
-    else
-      // TODO: why is this?
+    } else {// TODO: should only get here if bad/missing data?
+      $scope.imageUrls = null;
       alert('similar_image_urls not provided');
+    }
   };
 }

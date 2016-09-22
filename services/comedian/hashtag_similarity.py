@@ -7,11 +7,12 @@ class HashtagClusters:
 
     def process_vector(self, vector_id, post_id, vector):
         for term in vector:
-            if term in self.hash_groups.keys():
-                self.hash_groups[term]['similar_ids'].append(vector_id)
-                self.hash_groups[term]['similar_post_ids'].append(post_id)
+            tl = term.lower()
+            if tl in self.hash_groups.keys():
+                self.hash_groups[tl]['similar_ids'].append(vector_id)
+                self.hash_groups[tl]['similar_post_ids'].append(post_id)
             else:
-                self.hash_groups[term] = {'similar_ids': [vector_id], 'similar_post_ids': [post_id]}
+                self.hash_groups[tl] = {'similar_ids': [vector_id], 'similar_post_ids': [post_id]}
 
     def get_clusters(self):
         d0 = {}
