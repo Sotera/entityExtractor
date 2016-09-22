@@ -121,8 +121,8 @@ angular.module('com.module.core')
 
               function redrawChart() {
 
-                var start = new Date(navXScale.domain()[0]);
-                var end = new Date(navXScale.domain()[1]);
+                var start = navXScale.invert( d3.event.selection[0] );
+                var end = navXScale.invert( d3.event.selection[1] );
                 $scope.dateRangeSelected(start.getTime(),end.getTime());
               }
 
