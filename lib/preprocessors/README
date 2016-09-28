@@ -1,0 +1,4 @@
+What's in here?
+
+Preprocessors handle source-specific data munging, for instance, adding
+'quoted' tweet elements to the retweet.

@@ -1,6 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
+const _ = require('lodash'),
+  preprocessor = require('../../lib/preprocessors/twitter');
 
 // def: QCR endpoint to inspect post data
 // and create SocialMediaPost entries.
@@ -34,29 +35,35 @@ module.exports = function(Qcr) {
   };
 
   function save(attrs, cb) {
-    const SocialMediaPost = Qcr.app.models.SocialMediaPost,
-      createActions = [],
-      postAttrs = {};
+    const SocialMediaPost = Qcr.app.models.SocialMediaPost;
 
-    _.merge(postAttrs, attrs);
+    let createActions = [],
+      processedAttrs = {};
 
-    postAttrs.state = 'new';
-    postAttrs.timestamp_ms = +(new Date(attrs.timestamp_ms));
-    postAttrs.text = attrs.text || '';
-    postAttrs.image_urls = attrs.image_urls || [];
-    postAttrs.hashtags = attrs.hashtags || [];
+    _.merge(processedAttrs, attrs);
 
-    if (postAttrs.text.length > 0) {
-      postAttrs.featurizer = 'text';
-      createActions.push(SocialMediaPost.create(postAttrs));
+    // QCR-specific modifications
+    processedAttrs.state = 'new';
+    processedAttrs.timestamp_ms = +(new Date(attrs.timestamp_ms));
+    processedAttrs.text = attrs.text || '';
+    processedAttrs.image_urls = attrs.image_urls || [];
+    processedAttrs.hashtags = attrs.hashtags || [];
+
+    // Twitter-specific modifications
+    processedAttrs = preprocessor(processedAttrs);
+    delete processedAttrs.quoted_status;
+
+    if (processedAttrs.text.length > 0) {
+      processedAttrs.featurizer = 'text';
+      createActions.push(SocialMediaPost.create(processedAttrs));
     }
-    if (postAttrs.image_urls.length > 0) {
-      postAttrs.featurizer = 'image';
-      createActions.push(SocialMediaPost.create(postAttrs));
+    if (processedAttrs.image_urls.length > 0) {
+      processedAttrs.featurizer = 'image';
+      createActions.push(SocialMediaPost.create(processedAttrs));
     }
-    if (postAttrs.hashtags.length > 0) {
-      postAttrs.featurizer = 'hashtag';
-      createActions.push(SocialMediaPost.create(postAttrs));
+    if (processedAttrs.hashtags.length > 0) {
+      processedAttrs.featurizer = 'hashtag';
+      createActions.push(SocialMediaPost.create(processedAttrs));
     }
 
     // returns default 200 for everything.
