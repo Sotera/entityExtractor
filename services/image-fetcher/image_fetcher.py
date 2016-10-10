@@ -1,9 +1,11 @@
-import urllib2
-import urllib
+import sys, os
+import urllib2, urllib
 import uuid
 import re
 from bs4 import BeautifulSoup
 from urlparse import urlparse
+sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
+from dirtools import mkdir_p
 
 req_headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
@@ -14,7 +16,7 @@ req_headers = {
     'Connection': 'keep-alive'
 }
 
-def fetch_image(url, download_path=''):
+def fetch_image(url, download_path='./'):
     '''
     Parse a social media page's content to find the user-submitted
     image and download it for processing.
@@ -24,6 +26,7 @@ def fetch_image(url, download_path=''):
     download_path: local dir path, ex. /path/to/downloads/
     returns: dict with keys: image_path, image_url
     '''
+    mkdir_p(download_path)
     image_path = None
     image_url = None
 
@@ -83,7 +86,7 @@ def get_page_image_url(url, soup):
     domain = parsed.netloc.replace('www.', '')
     return SOURCES[domain](soup)
 
-def download_image(image_url, path=''):
+def download_image(image_url, path='./'):
     if not image_url:
         return None
     image_path = create_file_name(path)

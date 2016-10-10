@@ -108,6 +108,20 @@
     }
   },
   {
+    "name": "image-fetcher",
+    "Image": "sotera/image-fetcher:1",
+    "DockerFilePath": "",
+    "Hostname": "image-fetcher",
+    "HostConfig": {
+      "VolumesFrom": [
+        "data-container"
+      ],
+      "Links": [
+        "redis:redis"
+      ]
+    }
+  },
+  {
     "name": "caffe",
     "Image": "sotera/caffe_redis_client:13",
     "DockerFilePath": "",

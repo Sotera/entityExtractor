@@ -14,8 +14,8 @@ from image_fetcher import fetch_image
 
 
 def validate_job(job):
-    if 'urls' not in job:
-        return 'Missing "urls" required field'
+    if 'image_path' not in job:
+        return 'Missing "image_path" required field'
     return None
 
 
@@ -34,31 +34,8 @@ def process_message(key, job):
         job['state'] = 'error'
         return
 
-    # local file path
-    image_path = None
-    # parsed, orig image url from page url
-    image_url = None
+    image_path = job['image_path']
 
-    job_urls = job['urls'].split(',')
-
-    for url in job_urls:
-        if not url: continue
-
-        image_info = fetch_image(url)
-        if image_info:
-            image_path = image_info['image_path']
-            image_url = image_info['image_url']
-
-        # once found, break loop
-        if image_path:
-            break
-
-    if image_path is None:
-        job['state'] = 'processed'
-        job['data'] = []
-        return
-
-    # get features:
     print 'GETTING FEATURES'
     features = caffe_feature_extraction.get_all_features_in_path(caffe_root, image_path)
     if not features:
@@ -68,8 +45,7 @@ def process_message(key, job):
         return
     print 'FINISHED FEATURE PROCESSING'
     data = {
-        'features': features,
-        'url': image_url
+        'features': features
     }
     job['data'] = json.dumps(data)
     job['state'] = 'processed'
@@ -80,9 +56,3 @@ if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
                             channels=['genie:feature_img'])
     dispatcher.start()
-
-    # job = {
-    #     'urls': 'https://twitter.com/SRuhle/status/780407143497367552'
-    # }
-    # process_message(1, job)
-    # print job
