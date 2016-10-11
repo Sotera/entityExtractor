@@ -11,8 +11,8 @@ const app = require('../server'),
   FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
   ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
   LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
-  createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor')
-;
+  createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor'),
+  AggregateMonitor = require('../../lib/job-monitors/aggregate-monitor');
 
 module.exports = { start };
 
@@ -93,10 +93,20 @@ function featurize(jobMonitor, done) {
     jobMonitor.updateAttributes({state: 'featurized'})
     .then(jobMonitor => {
       cMonitor = new ClusterizeMonitor(jobMonitor, app);
-      cMonitor.on('done', onDone);
+      cMonitor.on('clustered', onClustered);
       cMonitor.start();
     })
     .catch(done);
+  }
+
+  function onClustered() {
+    jobMonitor.updateAttributes({state: 'clustered'})
+      .then(jobMonitor => {
+        cMonitor = new ClusterizeMonitor(jobMonitor, app);
+        cMonitor.on('done', onDone);
+        cMonitor.start();
+      })
+      .catch(done);
   }
 
   function onDone() {

@@ -1,8 +1,6 @@
 'use strict';
 
-const FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
-  ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
-  _ = require('lodash'),
+const _ = require('lodash'),
   jobs = require('../../lib/jobs')
 ;
 
