@@ -123,7 +123,7 @@
   },
   {
     "name": "caffe",
-    "Image": "sotera/caffe_redis_client:13",
+    "Image": "sotera/caffe_redis_client:14",
     "DockerFilePath": "",
     "Hostname": "caffe",
     "HostConfig": {
