@@ -10,8 +10,6 @@ import json
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
 from redis_dispatcher import Dispatcher
-from image_fetcher import fetch_image
-
 
 def validate_job(job):
     if 'image_path' not in job:
