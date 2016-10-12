@@ -18,10 +18,7 @@ def validate_job(job):
         return 'Missing "image_path" required field'
     return None
 
-
 def process_message(key, job):
-    caffe_root = os.getenv('CAFFE_HOME', '/home/caffe-user/caffe/')
-
     if not job:
         print 'No Valid Job.'
         return
@@ -36,8 +33,10 @@ def process_message(key, job):
 
     image_path = job['image_path']
 
+    print image_path
+
     print 'GETTING FEATURES'
-    features = caffe_feature_extraction.get_all_features_in_path(caffe_root, image_path)
+    features = caffe_feature_extraction.get_all_features_in_path(image_path)
     if not features:
         print 'INVALID IMAGE OR DIRECTORY PATH'
         job['state'] = 'error'
