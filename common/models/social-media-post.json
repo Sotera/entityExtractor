@@ -26,6 +26,11 @@
       "keys": {
         "lang": 1
       }
+    },
+    "idx_primary_image_url": {
+      "keys": {
+        "primary_image_url": 1
+      }
     }
   },
   "options": {
