@@ -20,7 +20,7 @@ function ClustersCtrl($scope, $routeParams, $window, PostsCluster, JobMonitor, S
     .then(function(post) {
       switch($scope.jobMonitor.featurizer) {
         case 'image':
-          $window.open(post.image_urls[0].post_url);
+          $window.open(post.primary_image_url);
           break;
         case 'text':
           $(target).text(post.text);
