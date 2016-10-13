@@ -6,4 +6,5 @@ temp
 .env
 firmament/docker/**/*.conf
 *.pyc
+*.bak
 tmp
