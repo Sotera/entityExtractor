@@ -8,11 +8,15 @@ const app = require('../server'),
   _ = require('lodash'),
   jobs = require('../../lib/jobs'),
   JobMonitor = app.models.JobMonitor,
+  PreprocessMonitor = require('../../lib/job-monitors/preprocess-monitor'),
   FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
   ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
   LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
   createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor'),
-  AggregateMonitor = require('../../lib/job-monitors/aggregate-monitor');
+  workerConcurrency = process.env.WORKER_CONCURRENCY || 4
+;
+
+console.log('Worker concurrency: %s', workerConcurrency);
 
 module.exports = { start };
 
@@ -45,7 +49,7 @@ function start() {
   });
 
   // process jobs
-  queue.process('job monitor', (job, done) => {
+  queue.process('job monitor', workerConcurrency, (job, done) => {
     startMonitor(job.data.options, done);
   });
 }
@@ -82,36 +86,36 @@ function linkerize(jobMonitor, done) {
 }
 
 function featurize(jobMonitor, done) {
-  let fMonitor = new FeaturizeMonitor(jobMonitor, app),
-    cMonitor;
+  let pMonitor, fMonitor, cMonitor;
 
-  fMonitor.start();
+  pMonitor = new PreprocessMonitor(jobMonitor, app);
+  pMonitor.start();
 
-  fMonitor.on('featurized', onFeaturized);
+  pMonitor.on('preprocessed', onPreprocessed);
+
+  function onPreprocessed() {
+    jobMonitor.updateAttributes({state: 'preprocessed'})
+    .then(jobMonitor => {
+      fMonitor = new FeaturizeMonitor(jobMonitor, app);
+      fMonitor.on('featurized', onFeaturized);
+      fMonitor.start();
+    })
+    .catch(done);
+  }
 
   function onFeaturized() {
     jobMonitor.updateAttributes({state: 'featurized'})
     .then(jobMonitor => {
       cMonitor = new ClusterizeMonitor(jobMonitor, app);
-      cMonitor.on('clustered', onClustered);
+      cMonitor.on('done', onDone);
       cMonitor.start();
     })
     .catch(done);
   }
 
-  function onClustered() {
-    jobMonitor.updateAttributes({state: 'clustered'})
-      .then(jobMonitor => {
-        cMonitor = new ClusterizeMonitor(jobMonitor, app);
-        cMonitor.on('done', onDone);
-        cMonitor.start();
-      })
-      .catch(done);
-  }
-
   function onDone() {
     // TODO: 'done' when there were errors or warnings?
-    let errors = fMonitor.errors.concat(cMonitor.errors);
+    let errors = pMonitor.errors.concat(fMonitor.errors).concat(cMonitor.errors);
     jobMonitor.updateAttributes({
       state: 'done',
       done_at: new Date(),

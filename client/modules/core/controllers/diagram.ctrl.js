@@ -1,75 +1,106 @@
 angular.module('com.module.core')
   .controller('DiagramCtrl', DiagramCtrl);
 
-function DiagramCtrl($scope, PostsCluster, SocialMediaPost) {
-  $scope.cluster = undefined;
+function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
   $scope.clusterText = '';
   $scope.clusterTerm = '';
 
-  $scope.showDetails = function(cluster) {
-    $scope.clusters = PostsCluster.findOne({
+  // obj: represents a cluster but not a loopback model
+  $scope.visualizeCluster = function(obj) {
+    PostsCluster.findOne({
       filter: {
         where: {
-          id: cluster.id
+          id: obj.id
         }
       }
     }).$promise
       .then(function(cluster) {
-        var unique = new Set();
-        cluster.similar_ids.forEach(function(id){
-          unique.add(id);
-        });
-        cluster.similar_ids = [...unique];
-        if (cluster.data_type === 'text'){
-          $scope.getClusterText(cluster);
-        } else if (cluster.data_type === 'hashtag'){
-          $scope.getClusterHashtags(cluster);
-        } else if (cluster.data_type === 'image'){
-          $scope.getClusterImages(cluster);
-        }
+        var viz = visualize(cluster);
 
-        $scope.cluster = cluster;
+        // apparently there are dupes?
+        cluster.similar_ids = _.uniq(cluster.similar_ids);
+
+        if (cluster.data_type === 'text'){
+          viz.forText();
+        } else if (cluster.data_type === 'hashtag'){
+          viz.forHashtags();
+        } else if (cluster.data_type === 'image'){
+          viz.forImages();
+        }
       })
       .catch(console.error);
   };
 
   $scope.dateRangeSelected = function(start, end) {
     $scope.showSpinner = true;
-    $scope.loadNetworkGraph(start, end, function() {$scope.showSpinner = false;});
+    $q.all([
+      $scope.loadNetworkGraph(start, end),
+      $scope.loadCommunityGraph(start, end)
+    ])
+    .then(function() {
+      $scope.showSpinner = false;
+    })
+    .catch(console.error);
   };
 
+  // 'visualize': show me the details
+  $scope.visualize = visualize;
 
-  $scope.getClusterText = function(cluster) {
-    $scope.showSpinner = true;
+  function visualize(clusters) {
+    if (!_.isArray(clusters)) clusters = [clusters];
 
-    $scope.clusterText = '';
-    var ids = cluster.similar_ids.slice(0,50);
-    SocialMediaPost.find({
-      filter: {
-        where: {
-          id: {inq: ids}
+    var functions = {
+      forText() {
+        $scope.showSpinner = true;
+
+        $scope.clusterText = '';
+
+        var similar_ids = _(clusters).map('similar_ids')
+          .flatten().compact().uniq().value();
+
+        var ids = _.sampleSize(similar_ids, 100);
+
+        SocialMediaPost.find({
+          filter: {
+            where: {
+              id: {inq: ids}
+            }
+          }
+        }).$promise
+          .then(posts => {
+            var allText = posts.map(p => p.text).join(' ');
+            $scope.clusterText = allText;
+            $scope.showSpinner = false;
+          })
+          .catch(console.error);
+      },
+
+      forHashtags() {
+        var terms = _(clusters).map('term')
+          .flatten().compact().value().join(', ');
+
+        $scope.clusterTerm = terms;
+      },
+
+      forImages() {
+        var imageUrls = _(clusters).map('similar_image_urls')
+          .flatten().compact().value();
+
+        if (imageUrls.length) {
+          $scope.imageUrls = imageUrls;
+        } else {// TODO: should only get here if bad/missing data?
+          $scope.imageUrls = null;
+          console.info('no similar_image_urls');
         }
+      },
+
+      forAll() {
+        this.forText()
+        this.forHashtags()
+        this.forImages();
       }
-    }).$promise
-      .then(posts => {
-        var allText = posts.map(p => p.text).join(' ');
-        $scope.clusterText = allText;
-        $scope.showSpinner = false;
-      })
-      .catch(console.error);
-  };
+    };
 
-  //cheat a bit here just to show the hashtag in the cloud
-  $scope.getClusterHashtags = function(cluster) {
-    $scope.clusterTerm = cluster.term;
-  };
-
-  $scope.getClusterImages = function(cluster) {
-    if (cluster.similar_image_urls) {
-      $scope.imageUrls = cluster.similar_image_urls;
-    } else {// TODO: should only get here if bad/missing data?
-      $scope.imageUrls = null;
-      alert('similar_image_urls not provided');
-    }
-  };
+    return functions;
+  }
 }

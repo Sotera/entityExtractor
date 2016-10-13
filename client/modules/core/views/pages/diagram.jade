@@ -3,23 +3,28 @@ spinner(show='showSpinner') //- boolean scope property to toggle spinner
 h3 Cluster Linkage
 h5 drag mouse over an area to select
 .row
-  .col-sm-12
+  .col-md-12
     .nav-chart-container(style='width:95%; height:160px')
-      navigation-Chart
+      navigation-chart
 .row
-  .col-sm-9
+  .col-md-5
     .chart-container(style='width:100%; height:600px')
       network-graph
-  .col-sm-3
-    div(style='width:100%; height:600px')
-      .row
-        div
-          p(ng-show='clusterTerm' style='font-size:30px') # {{clusterTerm}}
-      .row(style='width:100%; height:600px')
-        .cloud-container(style='width:100%; height:600px')
-          word-cloud(ng-model='clusterText')
-.row.well(ng-show='imageUrls')
-  .col-sm-2
-  .col-sm-8
-    image-grid(hover-dir='top-left')
-  .col-sm-2
+  .col-md-4
+    .communities-container(style='width:100%; height:600px')
+      communities-graph
+  .col-md-3
+    .row(ng-show='imageUrls' style='width:100%; height:200px')
+      image-grid(hover-dir='top-left')
+    .row
+      p(ng-show='clusterTerm' style='font-size:1.5em') # {{clusterTerm}}
+    .row(style='width:100%; height:600px')
+      .cloud-container(style='width:100%; height:600px')
+        word-cloud(ng-model='clusterText')
+.row
+  .col-md-6
+    .vectors-container(style='width:100%; height:500px')
+      visualize-vectors(slider-min=0 slider-max=4096 clusters='communityClusters' vector-type='image' ng-show='communityClusters')
+  .col-md-6
+    .vectors-container(style='width:100%; height:500px')
+      visualize-vectors(slider-min=0 slider-max=100 clusters='communityClusters' vector-type='text' ng-show='communityClusters')

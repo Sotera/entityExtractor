@@ -1,9 +1,11 @@
-import urllib2
-import urllib
+import sys, os
+import urllib.request, urllib.error, urllib.parse, urllib.request, urllib.parse, urllib.error
 import uuid
 import re
 from bs4 import BeautifulSoup
-from urlparse import urlparse
+from urllib.parse import urlparse
+sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
+from dirtools import mkdir_p
 
 req_headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
@@ -14,7 +16,7 @@ req_headers = {
     'Connection': 'keep-alive'
 }
 
-def fetch_image(url, download_path=''):
+def fetch_image(url, download_path='./'):
     '''
     Parse a social media page's content to find the user-submitted
     image and download it for processing.
@@ -24,6 +26,7 @@ def fetch_image(url, download_path=''):
     download_path: local dir path, ex. /path/to/downloads/
     returns: dict with keys: image_path, image_url
     '''
+    mkdir_p(download_path)
     image_path = None
     image_url = None
 
@@ -68,14 +71,14 @@ def get_image_url(url):
         if image_url:
             return image_url
         else:
-            print 'No Image Found'
+            print('No Image Found')
             return None
     except Exception as e:
-        print 'Error: {}'.format(e)
+        print('Error: {}'.format(e))
 
 def url_to_soup(url):
-    req = urllib2.Request(url, headers=req_headers)
-    res = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(req, timeout=4)
+    req = urllib.request.Request(url, headers=req_headers)
+    res = urllib.request.build_opener(urllib.request.HTTPCookieProcessor).open(req, timeout=4)
     return BeautifulSoup(res.read(), 'html.parser')
 
 def get_page_image_url(url, soup):
@@ -83,17 +86,17 @@ def get_page_image_url(url, soup):
     domain = parsed.netloc.replace('www.', '')
     return SOURCES[domain](soup)
 
-def download_image(image_url, path=''):
+def download_image(image_url, path='./'):
     if not image_url:
         return None
     image_path = create_file_name(path)
-    urllib.urlretrieve(image_url, image_path)
+    urllib.request.urlretrieve(image_url, image_path)
     return image_path
 
 def create_file_name(path):
     return '{}{}.jpg'.format(path, uuid.uuid4())
 
 if __name__ == '__main__':
-    print fetch_image('https://www.instagram.com/p/BJsmWmLDiD3/')
-    print fetch_image('https://twitter.com/Abizy_m/status/775762443817607170')
-    print fetch_image('https://www.swarmapp.com/c/8Ez3xo3RtcP')
+    print(fetch_image('https://www.instagram.com/p/BJsmWmLDiD3/'))
+    print(fetch_image('https://twitter.com/Abizy_m/status/775762443817607170'))
+    print(fetch_image('https://www.swarmapp.com/c/8Ez3xo3RtcP'))

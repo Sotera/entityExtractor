@@ -18,7 +18,8 @@
     "validateUpsert": true
   },
   "mixins": {
-    "Timestamp": {}
+    "Timestamp": {},
+    "DestroyAll": {}
   },
   "properties": {
     "start_time_ms": {

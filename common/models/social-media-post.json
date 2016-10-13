@@ -26,6 +26,11 @@
       "keys": {
         "lang": 1
       }
+    },
+    "idx_primary_image_url": {
+      "keys": {
+        "primary_image_url": 1
+      }
     }
   },
   "options": {
@@ -92,6 +97,12 @@
         "number"
       ],
       "default": []
+    },
+    "primary_image_url": {
+      "type": "string"
+    },
+    "primary_image_download_path": {
+      "type": "string"
     }
   },
   "validations": [],

@@ -12,23 +12,23 @@ angular.module('watchman', [
 .config(function($routeProvider, $locationProvider) {
   $routeProvider
   .when('/', {
-    templateUrl: '/app/home'
+    templateUrl: '/app/pages/home'
   })
   .when('/job-monitors', {
-    templateUrl: '/app/job-monitors',
+    templateUrl: '/app/pages/job-monitors',
     controller: 'JobMonitorsCtrl',
     reloadOnSearch: false
   })
   .when('/job-monitors/:id/clusters', {
-    templateUrl: '/app/clusters',
+    templateUrl: '/app/pages/clusters',
     controller: 'ClustersCtrl'
   })
   .when('/parser', {
-    templateUrl: '/app/parser',
+    templateUrl: '/app/pages/parser',
     controller: 'ParserCtrl'
   })
   .when('/diagram', {
-    templateUrl: '/app/diagram',
+    templateUrl: '/app/pages/diagram',
     controller: 'DiagramCtrl'
   });
 

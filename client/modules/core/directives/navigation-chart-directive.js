@@ -10,6 +10,7 @@ function navigationChartDirective() {
   };
 
   function link(scope, elem, attrs, ctrls) {
+    // run ctrl function immediately
     ctrls.create(null, angular.noop);
   }
 }
@@ -43,10 +44,10 @@ function navigationChartController($scope, ClusterLink, JobMonitor) {
           finishedCount++;
           if (result.count != 0) {
             if (!minDate) {
-              minDate = job.start_time;
+              minDate = job.end_time;
               maxDate = job.end_time;
             }
-            minDate = job.start_time < minDate ? job.start_time : minDate;
+            minDate = job.end_time < minDate ? job.end_time : minDate;
             maxDate = job.end_time > maxDate ? job.end_time : maxDate;
 
             minCount = result.count < minCount ? result.count : minCount;
@@ -173,7 +174,7 @@ function navigationChartController($scope, ClusterLink, JobMonitor) {
       }
       var start = xScale.invert( d3.event.selection[0] );
       var end = xScale.invert( d3.event.selection[1] );
-      $scope.dateRangeSelected(start.getTime(),end.getTime());
+      $scope.dateRangeSelected(start.getTime(), end.getTime());
     }
 
     navChart.append('g')

@@ -1,0 +1,10 @@
+.row
+  .col-md-12
+    h3 {{vectorType}} feature vectors for {{clustersCount}} cluster(s)
+.row
+  .col-md-2.
+    Indices:
+  .col-md-8
+    input(type='range' min='{{sliderMin}}' max='{{sliderMax}}' ng-model='sliderValue' value='{{sliderValue}}' ng-change='sliderChanged()')
+  .col-md-2
+    input(ng-model='sliderValue' class='form-control' disabled)

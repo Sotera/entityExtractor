@@ -11,8 +11,8 @@ class CaffeFeaturizer:
     batch_size = None
     quiet = None
 
-    def __init__(self, caffe_root, quiet=False):
-        self.caffe_root = caffe_root
+    def __init__(self, quiet=False):
+        self.caffe_root = os.getenv('CAFFE_HOME', '/home/caffe-user/caffe/')
         self.model_path = os.getenv('CAFFE_MODEL_PATH', self.caffe_root + 'models/bvlc_reference_caffenet/')
         self.model = os.getenv('CAFFE_MODEL', 'bvlc_reference_caffenet.caffemodel')
 

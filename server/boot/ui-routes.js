@@ -12,8 +12,9 @@ module.exports = function(server) {
     res.render(viewsPath + '/pages/index');
   });
 
-  router.get('/app/:view', function(req, res, next) {
-    res.render(viewsPath + '/pages/' + req.params.view);
+  // allows for /app/pages/mypage, /app/templates/blah, etc.
+  router.get('/app/*?', function(req, res, next) {
+    res.render(path.join(viewsPath, req.params[0]));
   });
 
   server.use(router);

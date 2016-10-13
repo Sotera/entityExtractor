@@ -1,6 +1,6 @@
 import sys, os, json
 from cluster_linker import ClusterLinker
-sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
 from redis_dispatcher import Dispatcher
 from loopy import Loopy
 
@@ -16,31 +16,29 @@ def err_check(job):
         set_err(job, 'Missing some required fields {}'.format(required))
 
 def process_message(key, job):
-    print 'Checking Parameters'
-
     err_check(job)
     if job['state'] == 'error':
         return
 
     query_params = [{
-        "query_type": "between",
-        "property_name": "end_time_ms",
-        "query_value": [job['start_time_ms'], job['end_time_ms']]
+        'query_type': 'between',
+        'property_name': 'end_time_ms',
+        'query_value': [job['start_time_ms'], job['end_time_ms']]
     }]
 
-    print "BEGIN LINKING CLUSTERS"
+    print 'BEGIN LINKING CLUSTERS'
     linker = ClusterLinker(job.get('min_overlap', 0.6))
     loopy = Loopy(job['query_url'], query_params)
 
     if loopy.result_count == 0:
-        print "No data to process"
+        print 'No data to process'
         job['data'] = []
-        job['error'] = "No data found to process."
+        job['error'] = 'No data found to process.'
         job['state'] = 'error'
         return
 
     while True:
-        print "Scrolling...{}".format(loopy.current_page)
+        print 'Scrolling...{}'.format(loopy.current_page)
         page = loopy.get_next_page()
         if page is None:
             break
