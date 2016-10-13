@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys, os, json
 sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
 from redis_dispatcher import Dispatcher
@@ -11,12 +12,12 @@ def validate_job(job):
 
 def process_message(key, job):
     if not job:
-        print 'No Valid Job.'
+        print('No Valid Job.')
         return
 
     error = validate_job(job)
     if error:
-        print 'Error in Job : {}'.format(error)
+        print('Error in Job : {}'.format(error))
         job['data'] = []
         job['error'] = error
         job['state'] = 'error'
