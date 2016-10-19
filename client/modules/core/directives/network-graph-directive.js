@@ -74,6 +74,8 @@ function networkGraphController($scope, ClusterLink) {
       .attr('viewBox', [0, 0, minDim, minDim])
       .attr('preserveAspectRatio','xMinYMin');
 
+    svg.call(addTitle, width);
+
     var zoom = d3.zoom()
       .scaleExtent([-40, 40])
       .on('zoom', zoomed);
@@ -186,4 +188,13 @@ function networkGraphController($scope, ClusterLink) {
       }
     });
   }
+}
+
+function addTitle(selection, width) {
+  selection.append('text')
+    .attr('x', (width / 2))
+    .attr('y', 20)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '20px')
+    .text('Clusters');
 }

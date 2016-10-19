@@ -1,6 +1,6 @@
-import os
 import time
-import json
+# import os
+# import json
 
 from functools import partial
 from caffe_featurizer import CaffeFeaturizer
@@ -42,13 +42,10 @@ def get_caffe_features(file_path):
         print 'ERROR:', e
         return [-1]
 
-def get_all_features_in_path(image_dir_path):
-    if not (os.path.isfile(image_dir_path)):
-        return None
-
+def get_all_features_in_path(image_path):
     start_time = time.time()
 
-    features = get_caffe_features(image_dir_path)
+    features = get_caffe_features(image_path)
 
     end_time = time.time() - start_time
     print "------------------ %f seconds elapsed ------------------------" % end_time

@@ -45,7 +45,8 @@ function communitiesGraphController($scope, ClusterLink, PostsCluster) {
       width = $container.width(),
       height = $container.height(),
       color = d3.scaleOrdinal().range(d3.schemeCategory20),
-      minDim = Math.min(width, height);
+      minDim = Math.min(width, height),
+      worker = new Worker('/js/workers/find-communities.js');
 
     var svg = d3.select('.communities-container').append('svg')
       .attr('width', '100%')
@@ -53,36 +54,51 @@ function communitiesGraphController($scope, ClusterLink, PostsCluster) {
       .attr('viewBox', [0, 0, minDim, minDim])
       .attr('preserveAspectRatio','xMinYMin')
 
+    svg.call(addTitle, width);
+
     $scope.communityGraphSvg = svg;
 
-    var zoom = d3.zoom()
-      .scaleExtent([-40, 40])
-      .on('zoom', zoomed);
+    worker.postMessage({nodes, edges, width, height });
 
-    svg.call(zoom);
+    worker.onmessage = function(event) {
+      switch (event.data.type) {
+        // case "tick": return ticked(event.data);
+        case 'end': return foundCommunities(event.data);
+      }
+    };
 
-    function zoomed() {
-      node.attr('transform', d3.event.transform);
+    // function ticked(data) {
+    //   var progress = data.progress;
+    // }
+
+    function foundCommunities(data) {
+      var communities = data.communities;
+
+      var node = svg.selectAll('circle')
+        .data(communities)
+        .enter()
+        .append('circle')
+        .call(createCircles, color);
+
+      var zoom = d3.zoom()
+        .scaleExtent([-40, 40])
+        .on('zoom', zoomed);
+
+      svg.call(zoom);
+
+      function zoomed() {
+        node.attr('transform', d3.event.transform);
+      }
     }
+  }
 
-    var communities = createCommunities(nodes, edges);
-
-    var node = svg.selectAll('circle')
-      .data(communities)
-      .enter()
-      .append('circle')
-      .call(createCircles, color);
-
-    var simulation = d3.forceSimulation(communities)
-      .force('charge', d3.forceManyBody())
-      .force('center', d3.forceCenter(width / 2, height / 2))
-      .on('tick', ticked);
-
-    function ticked() {
-      node
-        .attr('cx', function(d) { return d.x; })
-        .attr('cy', function(d) { return d.y; });
-    }
+  function addTitle(selection, width) {
+    selection.append('text')
+      .attr('x', (width / 2))
+      .attr('y', 20)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '20px')
+      .text('Communities');
   }
 
   function createCircles(selection, colorize) {
@@ -91,6 +107,8 @@ function communitiesGraphController($scope, ClusterLink, PostsCluster) {
       .attr('fill', '#fff')
       .attr('stroke', function(d, i) { return colorize(i); })
       .attr('stroke-width', 8)
+      .attr('cx', function(d) { return d.x; })
+      .attr('cy', function(d) { return d.y; })
       .attr('r', function(d) {
         var min = 5, len = d.member_ids.length;
         return len < min ? min : len;
@@ -146,27 +164,4 @@ function getGraphData(links) {
   graph.nodes = _.uniq(graph.nodes);
 
   return graph;
-}
-
-
-function createCommunities(nodes, edges) {
-  var communityFinder = jLouvain()
-    .nodes(nodes)
-    .edges(edges);
-
-  var communities = communityFinder();
-
-  // convert to: [{community_id: 1, member_ids: []}, ...]
-  var communityMembers = [];
-
-  _.forOwn(communities, function(v, k) {
-    var matcher = function(members) { return members.community_id == v };
-    var existing = _.find(communityMembers, matcher);
-    if (existing)
-      existing.member_ids.push(k);
-    else
-      communityMembers.push({community_id: v, member_ids: [k]});
-  });
-
-  return communityMembers;
 }

@@ -91,7 +91,11 @@ def download_image(image_url, path='./'):
         return None
     image_path = create_file_name(path)
     urllib.request.urlretrieve(image_url, image_path)
-    return image_path
+    # did download succeed?
+    if os.path.isfile(image_path):
+        return image_path
+    else:
+        return None
 
 def create_file_name(path):
     return '{}{}.jpg'.format(path, uuid.uuid4())
