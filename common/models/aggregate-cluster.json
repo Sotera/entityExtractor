@@ -49,6 +49,11 @@
       "type": [
         "string"
       ]
+    },
+    "similar_post_ids": {
+      "type": [
+        "string"
+      ]
     }
   },
   "validations": [],
