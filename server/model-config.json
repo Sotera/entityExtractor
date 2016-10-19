@@ -79,5 +79,9 @@
   "clusterLink": {
     "dataSource": "db",
     "public": true
+  },
+  "aggregateCluster": {
+    "dataSource": "db",
+    "public": true
   }
 }
