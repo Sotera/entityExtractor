@@ -1,8 +1,7 @@
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
 from loopy import Loopy
-from similarity_cluster import SimilarityCluster
-from numpy import linalg
+from cosine_similarity_aggregator import CosineSimilarityAggregator
 
 def process(job):
     aggregate_clusters_loopy = get_aggregate_clusters_loopy(job)
@@ -26,18 +25,17 @@ def process(job):
             break
 
         for posts_cluster in page:
-            print(posts_cluster['average_similarity_vector'])
             # NOTE: a postscluster can be in 0 or 1 aggcluster
             for agg_cluster in aggregate_clusters:
                 # break if we've already matched this postscluster with an aggcluster
                 if posts_cluster['id'] in agg_cluster['posts_clusters_ids']:
                     break
 
-                sim_cluster = try_aggregate(
+                aggregation = try_aggregate(
                     agg_cluster, posts_cluster, job['similarity_threshold'])
 
-                if sim_cluster:
-                    agg_cluster['average_similarity_vector'] = sim_cluster.average_similarity_vector
+                if aggregation:
+                    agg_cluster['average_similarity_vector'] = aggregation.average_similarity_vector
                     agg_cluster['end_time_ms'] = posts_cluster['end_time_ms']
                     agg_cluster['posts_clusters_ids'].append(posts_cluster['id'])
                     agg_cluster['similar_post_ids'].extend(posts_cluster['similar_post_ids'])
@@ -108,24 +106,17 @@ def shut_down_aggregates(job):
 def try_aggregate(agg_cluster, posts_cluster, similarity_threshold):
     curr_vector = posts_cluster['average_similarity_vector']
 
-    sim_cluster = SimilarityCluster(
+    aggregation = CosineSimilarityAggregator(
         similarity_threshold,
         agg_cluster['posts_clusters_ids'],
-        agg_cluster['posts_clusters_ids'],
-        agg_cluster['average_similarity_vector'],
-        agg_cluster['start_time_ms'],
-        agg_cluster['end_time_ms'])
+        agg_cluster['average_similarity_vector'])
 
-    did_aggregate = sim_cluster.process_similarity(
+    did_aggregate = aggregation.process_similarity(
         posts_cluster['id'],
-        None,
-        curr_vector,
-        linalg.norm(curr_vector))
-
-    print(sim_cluster.to_serializable_object())
+        curr_vector)
 
     if did_aggregate:
-        return sim_cluster
+        return aggregation
     else:
         return
 
