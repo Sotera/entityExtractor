@@ -43,6 +43,9 @@
       "required": true,
       "default": "open"
     },
+    "term": {
+      "type": "string"
+    },
     "average_similarity_vector": {
       "type": [
         "number"
