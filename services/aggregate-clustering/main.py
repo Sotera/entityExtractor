@@ -7,7 +7,9 @@ from aggregator import process
 
 def validate_job(job):
     required = {'query_url', 'job_id', 'end_time_ms', 'max_time_lapse_ms',
-        'result_url', 'similarity_threshold'}
+        'result_url', 'similarity_threshold', 'data_type'}
+    # 'lang' is optional
+
     if not required.issubset(job):
         return 'Missing some required fields {}'.format(required)
 

@@ -55,8 +55,6 @@ def process(job):
                         method='PUT'
                     )
                     break
-
-
             else:
                 # no 'open' aggregate_clusters, or this postscluster didn't match
                 # any aggregates
@@ -68,10 +66,13 @@ def process(job):
                         'average_similarity_vector': posts_cluster['average_similarity_vector'],
                         'posts_clusters_ids': [posts_cluster['id']],
                         'similar_post_ids': posts_cluster['similar_post_ids'],
-                        'data_type': posts_cluster['data_type']
+                        'data_type': posts_cluster['data_type'],
+                        'lang': job.get('lang')
                     }
                 )
 
+
+    # exited top loop
     shut_down_aggregates(job)
 
 def shut_down_aggregates(job):
@@ -125,7 +126,19 @@ def get_aggregate_clusters_loopy(job):
         'query_type': 'where',
         'property_name': 'state',
         'query_value': 'open'
+    },
+    {
+        'query_type': 'where',
+        'property_name': 'data_type',
+        'query_value': job['data_type']
     }]
+
+    if 'lang' in job:
+        query_params.append({
+            'query_type': 'where',
+            'property_name': 'lang',
+            'query_value': job['lang']
+        })
 
     loopy = Loopy(job['result_url'], query_params)
 
@@ -159,6 +172,8 @@ def get_posts_clusters_loopy(job):
 if __name__ == '__main__':
     job = {
         'job_id': '580685e3ac69adc553661c85',
+        'data_type': 'text',
+        'lang': 'en',
         'end_time_ms': '1476307511000',
         'query_url': 'http://172.17.0.1:3000/api/postsclusters',
         'result_url': 'http://172.17.0.1:3000/api/aggregateclusters',
