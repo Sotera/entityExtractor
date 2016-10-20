@@ -31,11 +31,13 @@ def process(job):
                 if posts_cluster['id'] in agg_cluster['posts_clusters_ids']:
                     break
 
-                aggregation = try_aggregate(
-                    agg_cluster, posts_cluster, job['similarity_threshold'])
+                aggregation = try_aggregate(agg_cluster, posts_cluster, job)
 
                 if aggregation:
-                    agg_cluster['average_similarity_vector'] = aggregation.average_similarity_vector
+                    # hashtags don't calc average_similarity_vector
+                    if job['data_type'] != 'hashtag':
+                        agg_cluster['average_similarity_vector'] = aggregation.average_similarity_vector
+
                     agg_cluster['end_time_ms'] = posts_cluster['end_time_ms']
                     agg_cluster['posts_clusters_ids'].append(posts_cluster['id'])
                     agg_cluster['similar_post_ids'].extend(posts_cluster['similar_post_ids'])
@@ -63,7 +65,8 @@ def process(job):
                     json={
                         'start_time_ms': posts_cluster['start_time_ms'],
                         'end_time_ms': posts_cluster['end_time_ms'],
-                        'average_similarity_vector': posts_cluster['average_similarity_vector'],
+                        'average_similarity_vector': posts_cluster.get('average_similarity_vector'),
+                        'term': posts_cluster.get('term'),
                         'posts_clusters_ids': [posts_cluster['id']],
                         'similar_post_ids': posts_cluster['similar_post_ids'],
                         'data_type': posts_cluster['data_type'],
@@ -104,22 +107,28 @@ def shut_down_aggregates(job):
                     method='PUT'
                 )
 
-def try_aggregate(agg_cluster, posts_cluster, similarity_threshold):
-    curr_vector = posts_cluster['average_similarity_vector']
-
-    aggregation = CosineSimilarityAggregator(
-        similarity_threshold,
-        agg_cluster['posts_clusters_ids'],
-        agg_cluster['average_similarity_vector'])
-
-    did_aggregate = aggregation.process_similarity(
-        posts_cluster['id'],
-        curr_vector)
-
-    if did_aggregate:
-        return aggregation
+def try_aggregate(agg_cluster, posts_cluster, job):
+    # hashtags don't calc average_similarity_vector
+    if job['data_type'] == 'hashtag':
+        # aggregate if exact match
+        return agg_cluster['term'] == posts_cluster['term']
     else:
-        return
+        similarity_threshold = job['similarity_threshold']
+        curr_vector = posts_cluster['average_similarity_vector']
+
+        aggregation = CosineSimilarityAggregator(
+            similarity_threshold,
+            agg_cluster['posts_clusters_ids'],
+            agg_cluster['average_similarity_vector'])
+
+        did_aggregate = aggregation.process_similarity(
+            posts_cluster['id'],
+            curr_vector)
+
+        if did_aggregate:
+            return aggregation
+        else:
+            return
 
 def get_aggregate_clusters_loopy(job):
     query_params = [{
@@ -133,7 +142,7 @@ def get_aggregate_clusters_loopy(job):
         'query_value': job['data_type']
     }]
 
-    if 'lang' in job:
+    if 'lang' in job and job['data_type'] == 'text':
         query_params.append({
             'query_type': 'where',
             'property_name': 'lang',
@@ -170,11 +179,21 @@ def get_posts_clusters_loopy(job):
 
 
 if __name__ == '__main__':
+    # job = {
+    #     'job_id': '580685e3ac69adc553661c85',
+    #     'data_type': 'text',
+    #     'lang': 'en',
+    #     'end_time_ms': '1476307511000',
+    #     'query_url': 'http://172.17.0.1:3000/api/postsclusters',
+    #     'result_url': 'http://172.17.0.1:3000/api/aggregateclusters',
+    #     'similarity_threshold': '0.39',
+    #     'max_time_lapse_ms': str(1000*60*60*8) # in hours
+    # }
+
     job = {
-        'job_id': '580685e3ac69adc553661c85',
-        'data_type': 'text',
-        'lang': 'en',
-        'end_time_ms': '1476307511000',
+        'job_id': '58068882dbb537655b9846e5',
+        'data_type': 'hashtag',
+        'end_time_ms': '1476308711000',
         'query_url': 'http://172.17.0.1:3000/api/postsclusters',
         'result_url': 'http://172.17.0.1:3000/api/aggregateclusters',
         'similarity_threshold': '0.39',
