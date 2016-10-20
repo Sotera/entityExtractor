@@ -20,7 +20,7 @@ class SimilarityCluster:
             self.similar_image_urls = [initial_image_url]
         else:
             self.similar_image_urls = None
-        self.similarity_threshold = similarity_threshold
+        self.similarity_threshold = float(similarity_threshold)
         self.start_time_ms = start_time_ms
         self.end_time_ms = end_time_ms
 

@@ -168,11 +168,11 @@ def get_posts_clusters_loopy(job):
 if __name__ == '__main__':
     job = {
         'job_id': '580685e3ac69adc553661c85',
-        'end_time_ms': 1476307511000,
+        'end_time_ms': '1476307511000',
         'query_url': 'http://172.17.0.1:3000/api/postsclusters',
         'result_url': 'http://172.17.0.1:3000/api/aggregateclusters',
-        'similarity_threshold': 0.39,
-        'max_time_lapse_ms': 1000*60*60*8 # in hours
+        'similarity_threshold': '0.39',
+        'max_time_lapse_ms': str(1000*60*60*8) # in hours
     }
 
     process(job)
