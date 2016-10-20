@@ -15,7 +15,6 @@ class Loopy:
         self.page_size = page_size
         self.current_page = 0
         self.total_returned = 0
-        self.params = params
         self.result_count = self.get_count()
         self.total_pages = int(math.ceil(float(self.result_count)/float(page_size)))
 
@@ -93,6 +92,7 @@ class Loopy:
         return result
 
     def post_result(self, url, json, method='POST'):
+        ''' Handles POST or PUT requests '''
         result = requests.request(method, url, json=json)
         if result.status_code != 200:
             print(result.content)
