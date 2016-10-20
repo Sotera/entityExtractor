@@ -38,7 +38,7 @@
     "state": {
       "type": "string",
       "required": true,
-      "default": "ongoing"
+      "default": "open"
     },
     "average_similarity_vector": {
       "type": [

@@ -14,8 +14,8 @@ class SimilarityCluster:
             self.valid_cluster = False
         self.average_similarity_vector = initial_vector
         self.normalized_average_similarity_vector = np.linalg.norm(initial_vector)
-        self.similar_ids = [initial_vector_id]
-        self.similar_post_ids = [initial_post_id]
+        self.similar_ids = initial_vector_id
+        self.similar_post_ids = initial_post_id
         if initial_image_url is not None:
             self.similar_image_urls = [initial_image_url]
         else:
@@ -43,6 +43,7 @@ class SimilarityCluster:
         return are_similar
 
     def apply_vector_to_average(self, vector):
+        # import pdb;pdb.set_trace()
         self.average_similarity_vector = [
             n / (len(self.similar_ids)+1)
             for n in [

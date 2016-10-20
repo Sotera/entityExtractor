@@ -26,26 +26,31 @@ def process(job):
             break
 
         for posts_cluster in page:
+            print(posts_cluster['average_similarity_vector'])
+            # NOTE: a postscluster can be in 0 or 1 aggcluster
             for agg_cluster in aggregate_clusters:
-                # print('if similar, update agg cluster (end date and avg sim vec) and continue')
-
-                # skip if we've already matched this postscluster with aggcluster
+                # break if we've already matched this postscluster with an aggcluster
                 if posts_cluster['id'] in agg_cluster['posts_clusters_ids']:
-                    continue
+                    break
 
                 sim_cluster = try_aggregate(
                     agg_cluster, posts_cluster, job['similarity_threshold'])
 
                 if sim_cluster:
-                    # import pdb;pdb.set_trace()
+                    agg_cluster['average_similarity_vector'] = sim_cluster.average_similarity_vector
+                    agg_cluster['end_time_ms'] = posts_cluster['end_time_ms']
                     agg_cluster['posts_clusters_ids'].append(posts_cluster['id'])
                     agg_cluster['similar_post_ids'].extend(posts_cluster['similar_post_ids'])
+                    # remove dupes
+                    agg_cluster['similar_post_ids'] = list(set(agg_cluster['similar_post_ids']))
+                    # remove nulls and dupes
+                    agg_cluster['posts_clusters_ids']= list(filter(None.__ne__, set(agg_cluster['posts_clusters_ids'])))
 
                     aggregate_clusters_loopy.post_result(
                         url='{}/{}'.format(job['result_url'], agg_cluster['id']),
                         json={
-                            'average_similarity_vector': sim_cluster.average_similarity_vector,
-                            'end_time_ms': posts_cluster['end_time_ms'],
+                            'average_similarity_vector': agg_cluster['average_similarity_vector'],
+                            'end_time_ms': agg_cluster['end_time_ms'],
                             'posts_clusters_ids': agg_cluster['posts_clusters_ids'],
                             'similar_post_ids': agg_cluster['similar_post_ids']
                         },
@@ -55,7 +60,8 @@ def process(job):
 
 
             else:
-                # no 'ongoing' aggregate_clusters, or no similars matched
+                # no 'open' aggregate_clusters, or this postscluster didn't match
+                # any aggregates
                 aggregate_clusters_loopy.post_result(
                     url=job['result_url'],
                     json={
@@ -74,6 +80,10 @@ def shut_down_aggregates(job):
     '''
     Update agg clusters that have not been extended (see end_time_ms)
     for a specified period of time.
+
+    Ideally, we'd run a 'shutdown' routine outside of job monitors:
+        Why? If job monitors run chronologically out of order, this could
+        shutdown agg clusters before they are fully baked.
     '''
     loopy = get_aggregate_clusters_loopy(job)
 
@@ -88,10 +98,10 @@ def shut_down_aggregates(job):
 
         for agg_cluster in page:
             cutoff_time_ms = int(job['end_time_ms']) - int(job['max_time_lapse_ms'])
-            if int(agg_cluster['end_time_ms']) < cutoff_time_ms):
+            if int(agg_cluster['end_time_ms']) < cutoff_time_ms:
                 loopy.post_result(
                     url='{}/{}'.format(job['result_url'], agg_cluster['id']),
-                    json={'state': 'done'},
+                    json={'state': 'closed'},
                     method='PUT'
                 )
 
@@ -100,8 +110,8 @@ def try_aggregate(agg_cluster, posts_cluster, similarity_threshold):
 
     sim_cluster = SimilarityCluster(
         similarity_threshold,
-        None,
-        None,
+        agg_cluster['posts_clusters_ids'],
+        agg_cluster['posts_clusters_ids'],
         agg_cluster['average_similarity_vector'],
         agg_cluster['start_time_ms'],
         agg_cluster['end_time_ms'])
@@ -123,7 +133,7 @@ def get_aggregate_clusters_loopy(job):
     query_params = [{
         'query_type': 'where',
         'property_name': 'state',
-        'query_value': 'ongoing'
+        'query_value': 'open'
     }]
 
     loopy = Loopy(job['result_url'], query_params)
