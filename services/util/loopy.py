@@ -8,13 +8,14 @@ class Loopy:
     pronounced 'Loo Py', not loopy:
     A Python module that makes REST API calls to Loopback apps.
     '''
-    def __init__(self, query_url, params, page_size=100):
+    def __init__(self, query_url, params, page_size=100, order_by='_id ASC'):
         # normalize url
         self.query_url = query_url.strip().rstrip('/') + '/'
         self.params = params
         self.page_size = page_size
         self.current_page = 0
         self.total_returned = 0
+        self.order_by = order_by # ex. 'price DESC'
         self.result_count = self.get_count()
         self.total_pages = int(math.ceil(float(self.result_count)/float(page_size)))
 
@@ -78,8 +79,8 @@ class Loopy:
             page = self.result_count
 
         query_string = self.get_query_string() + \
-                       'filter[limit]={}&filter[skip]={}'.format(page,
-                        self.current_page*self.page_size)
+           'filter[limit]={}&filter[skip]={}&filter[order]={}'.format(page,
+            self.current_page*self.page_size, self.order_by)
         try:
             result = requests.get(self.query_url + query_string).json()
         except Exception as e:
