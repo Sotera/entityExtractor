@@ -70,7 +70,8 @@ module.exports = function(JobMonitor) {
       query.lang = jobMonitor.lang
     }
 
-    return app.models.SocialMediaPost.updateAll(query, {state: 'new', image_features: [], text_features: []});
+    return app.models.SocialMediaPost.updateAll(query,
+      {state: 'new', image_features: [], text_features: []});
   }
 
 };
