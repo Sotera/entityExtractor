@@ -6,7 +6,8 @@
     "idx_uniq": {
       "keys": {
         "source": 1,
-        "target": 1
+        "target": 1,
+        "end_time_ms": 1
       },
       "options": {
         "unique": true
