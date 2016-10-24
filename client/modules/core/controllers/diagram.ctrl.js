@@ -15,7 +15,7 @@ function DiagramCtrl($scope, AggregateCluster, SocialMediaPost, $q) {
       }
     }).$promise
       .then(function(cluster) {
-        var viz = visualize(cluster);
+        let viz = visualize(cluster);
 
         if (cluster.data_type === 'text'){
           viz.forText();
@@ -46,50 +46,62 @@ function DiagramCtrl($scope, AggregateCluster, SocialMediaPost, $q) {
   function visualize(clusters) {
     if (!_.isArray(clusters)) clusters = [clusters];
 
-    var functions = {
+    function sampleSocialMediaPosts(dataType, sampleSize=100) {
+      let similarPostIds = _(clusters).map('similar_post_ids')
+        .flatten().compact().uniq().value();
+
+      let ids = _.sampleSize(similarPostIds, sampleSize);
+
+      return SocialMediaPost.find({
+        filter: {
+          where: {
+            post_id: { inq: ids },
+            featurizer: dataType
+          }
+        }
+      }).$promise;
+    }
+
+    let functions = {
       forText() {
         $scope.showSpinner = true;
 
         $scope.clusterText = '';
 
-        var similar_post_ids = _(clusters).map('similar_post_ids')
-          .flatten().compact().uniq().value();
-
-        var ids = _.sampleSize(similar_post_ids, 100);
-
-        SocialMediaPost.find({
-          filter: {
-            where: {
-              post_id: { inq: ids },
-              featurizer: 'text'
-            }
-          }
-        }).$promise
-          .then(posts => {
-            var allText = posts.map(p => p.text).join(' ');
-            $scope.clusterText = allText;
-            $scope.showSpinner = false;
-          })
-          .catch(console.error);
+        sampleSocialMediaPosts('text')
+        .then(posts => {
+          let allText = posts.map(p => p.text).join(' ');
+          $scope.clusterText = allText;
+          $scope.showSpinner = false;
+        })
+        .catch(console.error);
       },
 
       forHashtags() {
-        var terms = _(clusters).map('term')
+        let terms = _(clusters).map('term')
           .flatten().compact().value().join(', ');
 
         $scope.clusterTerm = terms;
       },
 
       forImages() {
-        var imageUrls = _(clusters).map('similar_image_urls')
-          .flatten().compact().value();
+        $scope.showSpinner = true;
 
-        if (imageUrls.length) {
-          $scope.imageUrls = imageUrls;
-        } else {// TODO: should only get here if bad/missing data?
-          $scope.imageUrls = null;
-          console.info('no similar_image_urls');
-        }
+        sampleSocialMediaPosts('image', 200)
+        .then(posts => {
+          let imageUrls = _(posts).map('primary_image_url')
+            .compact().uniq().value();
+
+          if (imageUrls.length) {
+            $scope.imageUrls = imageUrls;
+          } else {
+            $scope.imageUrls = null;
+            console.info('no similar_image_urls');
+          }
+
+          $scope.showSpinner = false;
+        })
+        .catch(console.error);
       },
 
       forAll() {
