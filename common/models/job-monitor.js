@@ -1,8 +1,6 @@
 'use strict';
 
-const FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
-  ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
-  _ = require('lodash'),
+const _ = require('lodash'),
   jobs = require('../../lib/jobs')
 ;
 
@@ -72,7 +70,8 @@ module.exports = function(JobMonitor) {
       query.lang = jobMonitor.lang
     }
 
-    return app.models.SocialMediaPost.updateAll(query, {state: 'new', image_features: [], text_features: []});
+    return app.models.SocialMediaPost.updateAll(query,
+      {state: 'new', image_features: [], text_features: []});
   }
 
 };

@@ -1,16 +1,16 @@
 {
-  "name": "postsCluster",
+  "name": "aggregateCluster",
   "base": "PersistedModel",
   "idInjection": true,
   "indexes": {
-    "idx_job_monitor_id": {
-      "keys": {
-        "job_monitor_id": 1
-      }
-    },
     "idx_end_time_ms": {
       "keys": {
         "end_time_ms": 1
+      }
+    },
+    "idx_state": {
+      "keys": {
+        "state": 1
       }
     }
   },
@@ -35,6 +35,14 @@
       "required": true,
       "description": "equal to jobMonitor.featurizer. added for convenience."
     },
+    "lang": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string",
+      "required": true,
+      "default": "open"
+    },
     "term": {
       "type": "string"
     },
@@ -43,7 +51,7 @@
         "number"
       ]
     },
-    "similar_ids": {
+    "posts_clusters_ids": {
       "type": [
         "string"
       ]
@@ -56,11 +64,7 @@
   },
   "validations": [],
   "relations": {
-    "jobMonitor": {
-      "type": "belongsTo",
-      "model": "jobMonitor",
-      "foreignKey": "job_monitor_id"
-    }
+
   },
   "acls": [],
   "methods": {}
