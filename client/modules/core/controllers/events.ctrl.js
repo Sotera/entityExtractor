@@ -1,7 +1,7 @@
 angular.module('com.module.core')
-  .controller('DiagramCtrl', DiagramCtrl);
+  .controller('EventsCtrl', EventsCtrl);
 
-function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
+function EventsCtrl($scope, PostsCluster, SocialMediaPost, $q) {
   $scope.clusterText = '';
   $scope.clusterTerm = '';
 

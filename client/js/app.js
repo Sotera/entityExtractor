@@ -30,6 +30,10 @@ angular.module('watchman', [
   .when('/diagram', {
     templateUrl: '/app/pages/diagram',
     controller: 'DiagramCtrl'
+  })
+  .when('/events', {
+    templateUrl: '/app/pages/events',
+    controller: 'EventsCtrl'
   });
 
   // configure html5 to get links working on jsfiddle
