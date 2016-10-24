@@ -4,8 +4,8 @@ angular.module('com.module.core')
     function() {
       return {
         link: link,
-        controller: ['$scope', 'ClusterLink','PostsCluster',
-          function($scope, ClusterLink, PostsCluster) {
+        controller: ['$scope',
+          function($scope) {
 
             this.create = create;
             this.showNewWords = showNewWords;
@@ -174,9 +174,3 @@ angular.module('com.module.core')
       }
 
     }]);
-
-
-
-/*
-
-}*/

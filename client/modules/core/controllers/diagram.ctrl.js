@@ -1,13 +1,13 @@
 angular.module('com.module.core')
   .controller('DiagramCtrl', DiagramCtrl);
 
-function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
+function DiagramCtrl($scope, AggregateCluster, SocialMediaPost, $q) {
   $scope.clusterText = '';
   $scope.clusterTerm = '';
 
   // obj: represents a cluster but not a loopback model
   $scope.visualizeCluster = function(obj) {
-    PostsCluster.findOne({
+    AggregateCluster.findOne({
       filter: {
         where: {
           id: obj.id
@@ -16,9 +16,6 @@ function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
     }).$promise
       .then(function(cluster) {
         var viz = visualize(cluster);
-
-        // apparently there are dupes?
-        cluster.similar_ids = _.uniq(cluster.similar_ids);
 
         if (cluster.data_type === 'text'){
           viz.forText();
@@ -55,15 +52,16 @@ function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
 
         $scope.clusterText = '';
 
-        var similar_ids = _(clusters).map('similar_ids')
+        var similar_post_ids = _(clusters).map('similar_post_ids')
           .flatten().compact().uniq().value();
 
-        var ids = _.sampleSize(similar_ids, 100);
+        var ids = _.sampleSize(similar_post_ids, 100);
 
         SocialMediaPost.find({
           filter: {
             where: {
-              id: {inq: ids}
+              post_id: { inq: ids },
+              featurizer: 'text'
             }
           }
         }).$promise
