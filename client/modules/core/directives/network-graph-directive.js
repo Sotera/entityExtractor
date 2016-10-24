@@ -196,5 +196,5 @@ function addTitle(selection, width) {
     .attr('y', 20)
     .attr('text-anchor', 'middle')
     .style('font-size', '20px')
-    .text('Clusters');
+    .text('Aggregate Clusters');
 }

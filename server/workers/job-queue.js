@@ -11,6 +11,7 @@ const app = require('../server'),
   PreprocessMonitor = require('../../lib/job-monitors/preprocess-monitor'),
   FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
   ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
+  AggregateMonitor = require('../../lib/job-monitors/aggregate-monitor'),
   LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
   createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor'),
   workerConcurrency = process.env.WORKER_CONCURRENCY || 4
@@ -86,7 +87,7 @@ function linkerize(jobMonitor, done) {
 }
 
 function featurize(jobMonitor, done) {
-  let pMonitor, fMonitor, cMonitor;
+  let pMonitor, fMonitor, cMonitor, agMonitor;
 
   pMonitor = new PreprocessMonitor(jobMonitor, app);
   pMonitor.start();
@@ -107,15 +108,28 @@ function featurize(jobMonitor, done) {
     jobMonitor.updateAttributes({state: 'featurized'})
     .then(jobMonitor => {
       cMonitor = new ClusterizeMonitor(jobMonitor, app);
-      cMonitor.on('done', onDone);
+      cMonitor.on('clustered', onClustered);
       cMonitor.start();
+    })
+    .catch(done);
+  }
+
+  function onClustered() {
+    jobMonitor.updateAttributes({state: 'clustered'})
+    .then(jobMonitor => {
+      agMonitor = new AggregateMonitor(jobMonitor, app);
+      agMonitor.on('done', onDone);
+      agMonitor.start();
     })
     .catch(done);
   }
 
   function onDone() {
     // TODO: 'done' when there were errors or warnings?
-    let errors = pMonitor.errors.concat(fMonitor.errors).concat(cMonitor.errors);
+    let errors = pMonitor.errors
+      .concat(fMonitor.errors)
+      .concat(cMonitor.errors)
+      .concat(agMonitor.errors);
     jobMonitor.updateAttributes({
       state: 'done',
       done_at: new Date(),

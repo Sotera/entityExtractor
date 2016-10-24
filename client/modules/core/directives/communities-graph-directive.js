@@ -14,7 +14,7 @@ function communitiesDirective() {
   // }
 }
 
-function communitiesGraphController($scope, ClusterLink, PostsCluster) {
+function communitiesGraphController($scope, ClusterLink, AggregateCluster) {
   function createGraph(event, start, end, callback) {
     var query = {
       filter: {
@@ -133,10 +133,10 @@ function communitiesGraphController($scope, ClusterLink, PostsCluster) {
   }
 
   function visualizeAllClusters(clusterIds) {
-    PostsCluster.find({
+    AggregateCluster.find({
       filter: {
         where: {
-          id: {inq: clusterIds}
+          id: { inq: clusterIds }
         }
       }
     }).$promise

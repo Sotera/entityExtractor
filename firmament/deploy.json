@@ -122,6 +122,17 @@
     }
   },
   {
+    "name": "aggregate-clustering",
+    "Image": "sotera/aggregate-clustering:1",
+    "DockerFilePath": "",
+    "Hostname": "aggregate-clustering",
+    "HostConfig": {
+      "Links": [
+        "redis:redis"
+      ]
+    }
+  },
+  {
     "name": "caffe",
     "Image": "sotera/caffe_redis_client:14",
     "DockerFilePath": "",

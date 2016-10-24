@@ -1,7 +1,7 @@
 .row
   .col-md-8
     h3 {{jobMonitors.length}} Jobs
-    h4 {{clustersCount}} clusters (out of {{totalClustersCount.count}} total)
+    h4 {{clustersCount}} Posts Clusters (out of {{totalClustersCount.count}} total)
   .col-md-2
     | Most recent:
     select(ng-model='limit' class='form-control' ng-options='n for n in limitOptions')
