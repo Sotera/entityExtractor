@@ -1,41 +1,38 @@
 angular.module('com.module.core')
   .controller('EventsCtrl', EventsCtrl);
 
-function EventsCtrl($scope, PostsCluster, SocialMediaPost, $q) {
+function EventsCtrl($scope, AggregateCluster, PostsCluster, SocialMediaPost, $q) {
   $scope.clusterText = '';
   $scope.clusterTerm = '';
-
+  $scope.events = null;
+  $scope.selectedEvents = null;
   // obj: represents a cluster but not a loopback model
-  $scope.visualizeCluster = function(obj) {
-    PostsCluster.findOne({
+
+  $scope.eventSelected = function(evnt){
+    visualizeEvent(evnt);
+  };
+
+  function visualizeEvent(evnt) {
+    AggregateCluster.find({
       filter: {
         where: {
-          id: obj.id
+          id: { inq: evnt.aggregate_clusters }
         }
       }
     }).$promise
-      .then(function(cluster) {
-        var viz = visualize(cluster);
-
-        // apparently there are dupes?
-        cluster.similar_ids = _.uniq(cluster.similar_ids);
-
-        if (cluster.data_type === 'text'){
-          viz.forText();
-        } else if (cluster.data_type === 'hashtag'){
-          viz.forHashtags();
-        } else if (cluster.data_type === 'image'){
-          viz.forImages();
-        }
+      .then(clusters => {
+        $scope.communityClusters = clusters;
+        return clusters;
       })
+      .then($scope.visualize)
+      .then(visual => visual.forAll())
       .catch(console.error);
-  };
+  }
 
   $scope.dateRangeSelected = function(start, end) {
     $scope.showSpinner = true;
     $q.all([
-      $scope.loadNetworkGraph(start, end),
-      $scope.loadCommunityGraph(start, end)
+      getEvents(start,end)
     ])
     .then(function() {
       $scope.showSpinner = false;
@@ -43,32 +40,49 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, $q) {
     .catch(console.error);
   };
 
-  // 'visualize': show me the details
+  function getEvents(start, end){
+    var events = [];
+    $scope.events.forEach(function(aggEvent){
+      if(aggEvent.end_time_ms >= start && aggEvent.end_time_ms<=end){
+        events.push(aggEvent);
+      }
+    });
+    $scope.selectedEvents = events;
+  }
+
+
+
+   // 'visualize': show me the details
   $scope.visualize = visualize;
 
   function visualize(clusters) {
     if (!_.isArray(clusters)) clusters = [clusters];
 
-    var functions = {
+    function sampleSocialMediaPosts(dataType, sampleSize=100) {
+      let similarPostIds = _(clusters).map('similar_post_ids')
+        .flatten().compact().uniq().value();
+
+      let ids = _.sampleSize(similarPostIds, sampleSize);
+
+      return SocialMediaPost.find({
+        filter: {
+          where: {
+            post_id: { inq: ids },
+            featurizer: dataType
+          }
+        }
+      }).$promise;
+    }
+
+    let functions = {
       forText() {
         $scope.showSpinner = true;
 
         $scope.clusterText = '';
 
-        var similar_ids = _(clusters).map('similar_ids')
-          .flatten().compact().uniq().value();
-
-        var ids = _.sampleSize(similar_ids, 100);
-
-        SocialMediaPost.find({
-          filter: {
-            where: {
-              id: {inq: ids}
-            }
-          }
-        }).$promise
+        sampleSocialMediaPosts('text')
           .then(posts => {
-            var allText = posts.map(p => p.text).join(' ');
+            let allText = posts.map(p => p.text).join(' ');
             $scope.clusterText = allText;
             $scope.showSpinner = false;
           })
@@ -76,22 +90,30 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, $q) {
       },
 
       forHashtags() {
-        var terms = _(clusters).map('term')
+        let terms = _(clusters).map('term')
           .flatten().compact().value().join(', ');
 
         $scope.clusterTerm = terms;
       },
 
       forImages() {
-        var imageUrls = _(clusters).map('similar_image_urls')
-          .flatten().compact().value();
+        $scope.showSpinner = true;
 
-        if (imageUrls.length) {
-          $scope.imageUrls = imageUrls;
-        } else {// TODO: should only get here if bad/missing data?
-          $scope.imageUrls = null;
-          console.info('no similar_image_urls');
-        }
+        sampleSocialMediaPosts('image', 200)
+          .then(posts => {
+            let imageUrls = _(posts).map('primary_image_url')
+              .compact().uniq().value();
+
+            if (imageUrls.length) {
+              $scope.imageUrls = imageUrls;
+            } else {
+              $scope.imageUrls = null;
+              console.info('no similar_image_urls');
+            }
+
+            $scope.showSpinner = false;
+          })
+          .catch(console.error);
       },
 
       forAll() {
@@ -104,3 +126,6 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, $q) {
     return functions;
   }
 }
+
+
+

@@ -15,15 +15,110 @@ function eventGraphDirective() {
   }
 }
 
-function eventGraphController($scope, JobMonitor) {
+function eventGraphController($scope, ClusterLink, AggregateCluster) {
   this.create = create;
 
   function create(event, callback) {
-    /*Event.find()
-    .$promise
-    .then(aggregateEvents)
-    .catch(console.error);*/
-    aggregateEvents(mockEvents);
+    createGraph(0,0,aggregateEvents)
+
+  }
+
+  function createGraph(start, end) {
+    return ClusterLink.find()
+      .$promise
+      .then(getGraphData)
+      .then(getEvents)
+      .catch(console.error);
+  }
+
+  function getGraphData(links) {
+    // jLouvain lib expects nodes like ['a', 'b'] and
+    // edges like [{source: 'a', target: 'b'}]
+    var graph = {};
+    graph.links = links;
+    graph.nodes = [];
+    graph.links.forEach(function(link){
+      graph.nodes.push(link.source);
+      graph.nodes.push(link.target);
+    });
+
+    graph.nodes = _.uniq(graph.nodes);
+
+    return graph;
+  }
+
+  function getEvents(graphData) {
+    var nodes = graphData.nodes,
+      edges = graphData.links,
+      worker = new Worker('/js/workers/find-communities.js');
+
+    worker.postMessage({nodes, edges});
+
+    worker.onmessage = function(event) {
+      switch (event.data.type) {
+        // case "tick": return ticked(event.data);
+        case 'end': return foundCommunities(event.data);
+      }
+    };
+
+    function foundCommunities(data) {
+      var communities = data.communities;
+      var events = [];
+      var finished = 0;
+      var working = 0;
+      communities.forEach(function(community){
+        working++;
+        createEvent(community,function(event){
+          finished++;
+          events.push(event);
+          if(finished == working){
+            $scope.events = events;
+            aggregateEvents(events);
+          }
+        });
+      });
+
+    }
+
+    function createEvent(community, callback){
+      var event = {
+        aggregate_clusters:[],
+        start_time_ms:0,
+        end_time_ms:0
+      };
+      var finished = 0;
+      community.member_ids.forEach(function(id) {
+        if(id.length === 24){
+          event.aggregate_clusters.push(id);
+          AggregateCluster.findOne({
+            filter: {
+              where: {
+                id: id
+              }
+            }
+          }).$promise
+            .then(function(cluster) {
+              if(event.start_time_ms===0){
+                event.start_time_ms = cluster.start_time_ms;
+                event.end_time_ms = cluster.end_time_ms;
+              }
+              if(event.start_time_ms>cluster.start_time_ms){
+                event.start_time_ms = cluster.start_time_ms;
+              }
+              if(event.end_time_ms<cluster.end_time_ms){
+                event.end_time_ms = cluster.end_time_ms;
+              }
+            })
+            .then(function(){
+              finished++;
+              if(finished == event.aggregate_clusters.length){
+                callback(event);
+              }
+            })
+            .catch(console.error);
+        }
+      });
+    }
   }
 
   function aggregateEvents(events){
@@ -36,20 +131,20 @@ function eventGraphController($scope, JobMonitor) {
       finishedCount++;
 
       if (!minDate) {
-        minDate = event.end_time;
-        maxDate = event.end_time;
+        minDate = event.end_time_ms;
+        maxDate = event.end_time_ms;
       }
-      minDate = event.end_time < minDate ? event.end_time : minDate;
-      maxDate = event.end_time > maxDate ? event.end_time : maxDate;
+      minDate = event.end_time_ms < minDate ? event.end_time_ms : minDate;
+      maxDate = event.end_time_ms > maxDate ? event.end_time_ms : maxDate;
 
-      var aggregate = dataMap[event.end_time];
+      var aggregate = dataMap[event.end_time_ms];
       if(!aggregate){
         aggregate = {
           count: 0,
-          date: new Date(event.end_time)
+          date: new Date(event.end_time_ms)
         };
         data.push(aggregate);
-        dataMap[event.end_time] = aggregate;
+        dataMap[event.end_time_ms] = aggregate;
       }
       aggregate.count++;
 
@@ -191,60 +286,4 @@ function eventGraphController($scope, JobMonitor) {
       .on('mouseout', tooltip.hide)
   }
 
-  var mockEvents = [
-    {
-      "end_time":1477325364663
-    },
-    {
-      "end_time":1477325364663
-    },
-    {
-      "end_time":1477325364663
-    },
-    {
-      "end_time":1477325374663
-    },
-    {
-      "end_time":1477325374663
-    },
-    {
-      "end_time":1477325374663
-    },
-    {
-      "end_time":1477325374663
-    },
-    {
-      "end_time":1477325384663
-    },
-    {
-      "end_time":1477325384663
-    },
-    {
-      "end_time":1477325384663
-    },
-    {
-      "end_time":1477325384663
-    },
-    {
-      "end_time":1477325394663
-    },
-    {
-      "end_time":1477325394663
-    },
-    {
-      "end_time":1477325394663
-    },
-    {
-      "end_time":1477325394663
-    },
-    {
-      "end_time":1477325394663
-    },
-    {
-      "end_time":1477325394663
-    },
-    {
-      "end_time":1477325394663
-    }
-  ];
 }
