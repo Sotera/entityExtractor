@@ -18,7 +18,7 @@ module.exports = function(Extract) {
         required: true,
         http: { source: 'body' }
       },
-      returns: {type: 'object', root: true},
+      returns: {type: 'array', root: true},
       http: {path: '/entities', verb: 'post'}
     }
   );

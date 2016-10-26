@@ -112,6 +112,8 @@ function eventGraphController($scope, ClusterLink, AggregateCluster) {
             .then(function(){
               finished++;
               if(finished == event.aggregate_clusters.length){
+                //geolocate event
+                
                 callback(event);
               }
             })

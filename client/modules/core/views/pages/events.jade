@@ -15,12 +15,14 @@ h5 drag mouse over an area to select
         tr
           td
             p(ng-click="eventSelected(selectedEvent)") selectedEvent.start_time_ms
-
-  .col-md-9
-    .row(ng-show='imageUrls' style='width:100%; height:200px')
+  .col-md-4
+    event-map(ng-model='eventPoints')
+      iframe(src="http://localhost:3005/index.html", style="width:100%; height:600px;", scrolling="no", frameborder="1", id="map-frame")
+  .col-md-5
+    .row(ng-show='imageUrls' style='width:100%; height:100px')
       image-grid(hover-dir='top-left')
     .row
       p(ng-show='clusterTerm' style='font-size:1.5em') # {{clusterTerm}}
     .row(style='width:100%; height:600px')
-      .cloud-container(style='width:100%; height:600px')
+      .cloud-container(style='width:100%; height:400px')
         word-cloud(ng-model='clusterText')

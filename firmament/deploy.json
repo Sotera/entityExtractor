@@ -34,6 +34,24 @@
     "Hostname": "trained-models"
   },
   {
+    "name": "embed-map",
+    "Image": "lukewendling/embed-map:2",
+    "DockerFilePath": "",
+    "Hostname": "embed-map",
+    "ExposedPorts": {
+      "3000/tcp": {}
+    },
+    "HostConfig": {
+      "PortBindings": {
+        "3000/tcp": [
+          {
+            "HostPort": "3005"
+          }
+        ]
+      }
+    }
+  },
+  {
     "name": "redis",
     "Image": "sotera/redis-watchman:1",
     "DockerFilePath": "",

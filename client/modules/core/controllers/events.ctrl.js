@@ -1,7 +1,8 @@
 angular.module('com.module.core')
   .controller('EventsCtrl', EventsCtrl);
 
-function EventsCtrl($scope, AggregateCluster, PostsCluster, SocialMediaPost, $q) {
+function EventsCtrl($scope, AggregateCluster, Extract, Geocoder, SocialMediaPost, $q) {
+  $scope.eventPoints = {};
   $scope.clusterText = '';
   $scope.clusterTerm = '';
   $scope.events = null;
@@ -55,6 +56,17 @@ function EventsCtrl($scope, AggregateCluster, PostsCluster, SocialMediaPost, $q)
    // 'visualize': show me the details
   $scope.visualize = visualize;
 
+  function getWords(words) {
+
+
+    words = words.replace(/#\S+/g, ' ');
+    words = words.replace(/@\S+/g, ' ');
+    words = words.replace(/\s+/g,' ').trim();
+
+    return words.replace(/[!\.,:;\?]/g, ' ');
+
+  }
+
   function visualize(clusters) {
     if (!_.isArray(clusters)) clusters = [clusters];
 
@@ -89,6 +101,47 @@ function EventsCtrl($scope, AggregateCluster, PostsCluster, SocialMediaPost, $q)
           .catch(console.error);
       },
 
+      forMap(){
+        sampleSocialMediaPosts('text')
+          .then(posts => {
+            return posts.map(p => p.text).join(' ');
+
+          })
+          .then(text=>{
+            var blob = getWords(text);
+            Extract.entities({"text": blob,
+              "mime_type": "text/html",
+              "extract_type": "mitie"})
+              .$promise
+              .then(entities=>{
+                return entities.filter(function(entity){ return entity.label.length >2&&entity.tag==="LOCATION"&&entity.score>=.7});
+              })
+              .then(locations=>{
+                let finished = 0;
+                let features = {};
+                if(locations.length ==0){
+                  $scope.eventPoints = features;
+                  return;
+                }
+                locations.forEach(function(location){
+                  Geocoder.forwardGeo({"address": location.label})
+                    .$promise
+                    .then(geo=>{
+                      finished++;
+                      if(geo.length > 0) {
+                        features[location.label] = { lat: geo[0].latitude, lng: geo[0].longitude, message: location.label, focus: true, draggable: false };
+                      }
+                      if(finished === locations.length){
+                        $scope.eventPoints = features;
+                      }
+                    });
+
+                });
+              });
+          })
+          .catch(console.error);
+      },
+
       forHashtags() {
         let terms = _(clusters).map('term')
           .flatten().compact().value().join(', ');
@@ -117,8 +170,9 @@ function EventsCtrl($scope, AggregateCluster, PostsCluster, SocialMediaPost, $q)
       },
 
       forAll() {
-        this.forText()
-        this.forHashtags()
+        this.forText();
+        this.forMap();
+        this.forHashtags();
         this.forImages();
       }
     };
