@@ -1,6 +1,8 @@
 from __future__ import print_function
 import requests
 import math
+import json
+import urllib
 from switch import switch
 
 class Loopy:
@@ -10,7 +12,7 @@ class Loopy:
     '''
     def __init__(self, query_url, params, page_size=100, order_by='_id ASC'):
         # normalize url
-        self.query_url = query_url.strip().rstrip('/') + '/'
+        self.query_url = query_url.strip().rstrip('/')
         self.params = params
         self.page_size = page_size
         self.current_page = 0
@@ -19,43 +21,34 @@ class Loopy:
         self.result_count = self.get_count()
         self.total_pages = int(math.ceil(float(self.result_count)/float(page_size)))
 
-    def get_query_string(self, filter_prefix='filter'):
-        query_string = '?'
+    def get_query_string(self, limit, skip, order):
+        and_dict = {"and": []}
 
         for param in self.params:
             for case in switch(param['query_type']):
                 if case('between'):
-                    layout = '{}[where][{}][{}][0]={}&{}[where][{}][{}][1]={}&'
-                    query_string += layout.format(
-                        filter_prefix,
-                        param['property_name'],
-                        param['query_type'],
-                        param['query_value'][0],
-                        filter_prefix,
-                        param['property_name'],
-                        param['query_type'],
-                        param['query_value'][1])
+                    between_dict = {param['property_name']: {"between": param['query_value']}}
+                    and_dict['and'].append(between_dict)
                     break
                 if case('where'):
-                    query_string += '{}[{}][{}]={}&'.format(
-                        filter_prefix,
-                        param['query_type'],
-                        param['property_name'],
-                        param['query_value'])
+                    where_dict = {param['property_name']: param['query_value']}
+                    and_dict['and'].append(where_dict)
                     break
                 if case('neq'):
-                    query_string += '{}[where][{}][neq]={}&'.format(
-                        filter_prefix,
-                        param['property_name'],
-                        param['query_value'])
+                    between_dict = {param['property_name']: {"neq": param['query_value']}}
+                    and_dict['and'].append(between_dict)
                     break
                 if case():
                     # default, could also just omit condition or 'if True'
                     print('huh?')
-        return query_string
+        where_dict = {'where': and_dict, 'limit': limit, 'skip': skip, 'order':order}
+
+        query_string = json.dumps(where_dict).replace(" ", "")
+
+        return "?filter=" + urllib.quote_plus(query_string)
 
     def get_count_query_string(self):
-        return 'count' + self.get_query_string(filter_prefix='')
+        return '/count'
 
     def get_count(self):
         count_query_string = self.get_count_query_string()
@@ -78,9 +71,8 @@ class Loopy:
         if self.page_size > self.result_count:
             page = self.result_count
 
-        query_string = self.get_query_string() + \
-           'filter[limit]={}&filter[skip]={}&filter[order]={}'.format(page,
-            self.current_page*self.page_size, self.order_by)
+        query_string = self.get_query_string(page, self.current_page*self.page_size, self.order_by)\
+
         try:
             result = requests.get(self.query_url + query_string).json()
         except Exception as e:
