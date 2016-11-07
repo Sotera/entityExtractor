@@ -80,10 +80,10 @@ class Louvaine:
     def get_img_sum(self, cluster):
         n_posts = len(cluster['similar_post_ids'])
         l_sample = cluster['similar_post_ids']
-        if n_posts > 10:
-            l_sample = sample(cluster['similar_post_ids'], 10)
+        if n_posts > 100:
+            l_sample = sample(cluster['similar_post_ids'], 100)
 
-        imgs = set([])
+        imgs = set()
 
         #TODO: fix query type once S.L. is fixed
         for id in l_sample:
@@ -96,24 +96,28 @@ class Louvaine:
             if page is None:
                 continue
             for doc in page:
-                if doc['featurizer'] != "image":
+                if 'primary_image_url' not in doc:
                     continue
                 imgs.add(doc['primary_image_url'])
                 break
 
-        return list(imgs)
+        return imgs
 
 
     def get_communities(self):
         partition = community.best_partition(self.graph)
         d1 = {}
+
         for n in self.graph.nodes():
+            images = set()
             com = str(partition[n])
+            if n not in self.nodes_detailed:
+                print "{} not found in detailed node list...why????".format(n)
+                continue
             clust = self.nodes_detailed[n]
             if com in d1:
                 d1[com]['aggregate_cluster_ids'].append(n)
                 d1[com]['topic_message_count'] += len(clust['similar_post_ids'])
-
             else:
                 d1[com] = {
                     'name': 'default',
@@ -131,10 +135,13 @@ class Louvaine:
             #Expand Summary data (hashtags, keywords, images, urls, geo)
             if clust['data_type'] == 'hashtag':
                 d1[com]['hashtags'][clust['term']] = len(clust['similar_post_ids'])
+                images |= self.get_img_sum(clust)
             elif clust['data_type'] == 'image':
-                d1[com]['image_urls'].extend(self.get_img_sum(clust))
+                images |= self.get_img_sum(clust)
             elif clust['data_type'] == 'text':
+                images |= self.get_img_sum(clust)
                 word_sum, places, websites = self.get_text_sum(clust)
+
                 for k, v in word_sum.iteritems():
                     if k in d1[com]['keywords']:
                         d1[com]['keywords'][k] += v
@@ -167,6 +174,7 @@ class Louvaine:
                             "weight":weight
                         }
 
+            d1[com]['image_urls'] = list(set(d1[com]['image_urls']) |images)
 
             #Make Sure Time is Correct
             if clust['start_time_ms'] < d1[com]['start_time_ms']:

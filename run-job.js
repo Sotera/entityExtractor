@@ -23,7 +23,7 @@ module.exports = runJob;
 // start if run as a worker process
 if (require.main === module) {
   const defaults = {
-    seedTime: 1477415383381,
+    seedTime: 1478296649899,
     runIntervalMins: 10,
     querySpanMins: 10,
     minPostsCount: 0
