@@ -101,9 +101,12 @@
   },
   {
     "name": "feature-sim",
-    "Image": "sotera/feature-sim:3",
+    "Image": "sotera/feature-sim:4",
     "DockerFilePath": "",
     "Hostname": "feature-sim",
+    "Env": [
+      "TRUNCATE_POSTS=1"
+    ],
     "HostConfig": {
       "Links": [
         "redis:redis"
