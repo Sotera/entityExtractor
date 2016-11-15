@@ -9,6 +9,7 @@
 
 import sys
 import os
+import requests
 from feature_similarity import FeatureSimilarity
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
@@ -58,7 +59,7 @@ def process_message(key, job):
             "property_name": "lang",
             "query_value": job['lang']
         })
-    loopy = Loopy(job['query_url'], query_params)
+    loopy = Loopy(job['query_url'], query_params, 1000)
 
     if loopy.result_count == 0:
         print "No data to process"
@@ -84,6 +85,12 @@ def process_message(key, job):
                 feature_similarity.process_vector(doc['id'], doc['post_id'], doc['image_features'],
                                                   doc['primary_image_url'])
 
+    if 'TRUNCATE_POSTS' in os.environ and os.environ['TRUNCATE_POSTS'] is '1':
+        print 'Truncating posts...'
+        delete_noise(feature_similarity.get_clusters_to_delete(), job)
+    else:
+        print 'Skipping truncate posts because TRUNCATE_POSTS env var is not set...'
+
     clusters = feature_similarity.get_clusters()
 
     print 'FINISHED SIMILARITY PROCESSING: found {} clusters'.format(len(clusters))
@@ -94,6 +101,13 @@ def process_message(key, job):
     job['data'] = feature_similarity.to_json()
     job['state'] = 'processed'
 
+
+def delete_noise(noise_clusters, job):
+    deletable_ids = []
+    for delete_cluster in noise_clusters:
+        deletable_ids.extend(delete_cluster.similar_ids)
+    for post_id in deletable_ids:
+        requests.request("POST", "{}{}".format(job['query_url'], "destroy"), json={'ids': deletable_ids})
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis', process_func=process_message,

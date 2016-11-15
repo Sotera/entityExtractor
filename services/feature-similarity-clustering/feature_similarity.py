@@ -68,6 +68,9 @@ class FeatureSimilarity:
                                         self.start_time_ms, self.end_time_ms, image_url)
         self.similarity_clusters["low"][new_cluster.id] = new_cluster
 
+    def get_clusters_to_delete(self):
+        return self.similarity_clusters["low"].values()
+
     def get_clusters(self):
             return self.get_clusters_custom()
 

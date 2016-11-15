@@ -3,6 +3,7 @@ import numpy as np
 from itertools import starmap,izip
 from operator import mul
 import uuid
+import requests
 
 
 class SimilarityCluster:

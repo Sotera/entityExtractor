@@ -5,7 +5,6 @@ module.exports = function(SocialMediaPost) {
   // instead use Qcr.insert endpoint.
   SocialMediaPost.disableRemoteMethod('create', true);
   SocialMediaPost.disableRemoteMethod('upsert', true);
-  SocialMediaPost.disableRemoteMethod('deleteById', true);
   SocialMediaPost.disableRemoteMethod('updateAll', true);
   SocialMediaPost.disableRemoteMethod('updateAttributes', false);
 };

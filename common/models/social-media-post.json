@@ -37,6 +37,8 @@
     "validateUpsert": true
   },
   "mixins": {
+    "DestroyAll":{},
+    "DestroyWhere":{},
     "Timestamp": {}
   },
   "properties": {
