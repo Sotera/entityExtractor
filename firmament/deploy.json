@@ -104,7 +104,7 @@
   },
   {
     "name": "feature-sim",
-    "Image": "sotera/feature-sim:5",
+    "Image": "sotera/feature-sim:6",
     "DockerFilePath": "",
     "Hostname": "feature-sim",
     "Env": [
@@ -147,7 +147,7 @@
   },
   {
     "name": "aggregate-clustering",
-    "Image": "sotera/aggregate-clustering:2",
+    "Image": "sotera/aggregate-clustering:3",
     "DockerFilePath": "",
     "Hostname": "aggregate-clustering",
     "HostConfig": {
