@@ -61,7 +61,7 @@ def process_message(key, job):
             "property_name": "lang",
             "query_value": job['lang']
         })
-    loopy = Loopy(job['query_url'], query_params)
+    loopy = Loopy(job['query_url'], query_params, 1000)
 
     if loopy.result_count == 0:
         print "No data to process"
