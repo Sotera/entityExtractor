@@ -38,7 +38,6 @@
   },
   "mixins": {
     "DestroyAll":{},
-    "DestroyWhere":{},
     "Timestamp": {}
   },
   "properties": {
