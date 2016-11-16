@@ -106,8 +106,7 @@ def delete_noise(noise_clusters, job):
     deletable_ids = []
     for delete_cluster in noise_clusters:
         deletable_ids.extend(delete_cluster.similar_ids)
-    for post_id in deletable_ids:
-        requests.request("POST", "{}{}".format(job['query_url'], "destroy"), json={'ids': deletable_ids})
+    requests.request("POST", "{}{}".format(job['query_url'], "destroy"), json={'ids': deletable_ids})
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis', process_func=process_message,

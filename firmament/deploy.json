@@ -79,9 +79,12 @@
   },
   {
     "name": "hashtag-clusterer",
-    "Image": "sotera/comedian:9",
+    "Image": "sotera/comedian:11",
     "DockerFilePath": "",
     "Hostname": "hashtag-clusterer",
+    "Env": [
+      "TRUNCATE_POSTS=1"
+    ],
     "HostConfig": {
       "Links": [
         "redis:redis"
@@ -101,7 +104,7 @@
   },
   {
     "name": "feature-sim",
-    "Image": "sotera/feature-sim:4",
+    "Image": "sotera/feature-sim:5",
     "DockerFilePath": "",
     "Hostname": "feature-sim",
     "Env": [
