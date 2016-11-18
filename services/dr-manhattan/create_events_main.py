@@ -16,7 +16,7 @@ def create_events(host, ts_start, ts_end, kafka_url, kafka_topic):
     com = Louvaine(api_path,
        '{}extract/entities'.format(api_path),
        '{}geocoder/forward-geo'.format(api_path))
-    lp_n = Loopy('{}aggregateClusters'.format(api_path), query_params)
+    lp_n = Loopy('{}aggregateClusters'.format(api_path), query_params, page_size=500)
 
     #print "getting aggregate clusters"
     #while True:
@@ -27,7 +27,7 @@ def create_events(host, ts_start, ts_end, kafka_url, kafka_topic):
     #        com.add_node(doc)
 
     nodes_to_add = set()
-    lp_e = Loopy('{}clusterLinks'.format(api_path), query_params)
+    lp_e = Loopy('{}clusterLinks'.format(api_path), query_params, page_size=500)
 
     print "getting aggregate cluster links"
     while True:

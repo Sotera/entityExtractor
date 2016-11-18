@@ -89,6 +89,14 @@ class Loopy:
                         param['property_name'],
                         param['query_value'])
                     break
+                # ex. filter[where][name][inq]=foo&filter[where][name][inq]=bar
+                if case('inq'):
+                    for item in param['query_value']:
+                        query_string += '{}[where][{}][inq]={}&'.format(
+                            filter_prefix,
+                            param['property_name'],
+                            item)
+                    break
                 if case('neq'):
                     query_string += '{}[where][{}][neq]={}&'.format(
                         filter_prefix,
