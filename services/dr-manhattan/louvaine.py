@@ -43,7 +43,6 @@ class Louvaine:
         websites = set([])
         r_o["campaigns"]["total"] += n_posts
 
-        #TODO: fix query type once S.L. is fixed
         query_params = [{
             "query_type":"inq",
             "property_name":"post_id",
