@@ -44,46 +44,46 @@ class Louvaine:
         r_o["campaigns"]["total"] += n_posts
 
         #TODO: fix query type once S.L. is fixed
-        for id in l_sample:
-            query_params = [{"query_type":"between",
-                     "property_name":"post_id",
-                     "query_value":[id, id]
-            }]
-            lp = Loopy(self.url + 'socialMediaPosts', query_params)
-            page = lp.get_next_page()
-            if page is None:
-                continue
+        query_params = [{
+            "query_type":"inq",
+            "property_name":"post_id",
+            "query_value":l_sample
+        }]
+        lp = Loopy(self.url + 'socialMediaPosts', query_params, page_size=500)
+        page = lp.get_next_page()
+        if page is None:
+            continue
 
-            for doc in page:
-                r = requests.post(self.ent_url, data={'text':doc['text']})
+        for doc in page:
+            r = requests.post(self.ent_url, data={'text':doc['text']})
 
-                if 'campaigns' in doc:
-                    for cam in doc['campaigns']:
-                        if cam in r_o["campaigns"]["ids"]:
-                            r_o["campaigns"]["ids"][cam] += 1
-                        else:
-                            r_o["campaigns"]["ids"][cam] = 1
-
-                for res in r.json():
-                    if res['tag'] != 'LOCATION':
-                        continue
-                    rg = requests.post(self.geo_url, data={'address':res['label']})
-                    for place in rg.json():
-                        places.append(place)
-                        break
-
-                for word in [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]:
-                    if word[0] == '#':
-                        continue
-                    if word[:4]=='http':
-                        websites.add(word)
-                    if word[:3]=='www':
-                        websites.add('http://' + word)
-                    if word in words:
-                        words[word] += 1
+            if 'campaigns' in doc:
+                for cam in doc['campaigns']:
+                    if cam in r_o["campaigns"]["ids"]:
+                        r_o["campaigns"]["ids"][cam] += 1
                     else:
-                        words[word] = 1
-                break
+                        r_o["campaigns"]["ids"][cam] = 1
+
+            for res in r.json():
+                if res['tag'] != 'LOCATION':
+                    continue
+                rg = requests.post(self.geo_url, data={'address':res['label']})
+                for place in rg.json():
+                    places.append(place)
+                    break
+
+            for word in [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]:
+                if word[0] == '#':
+                    continue
+                if word[:4]=='http':
+                    websites.add(word)
+                if word[:3]=='www':
+                    websites.add('http://' + word)
+                if word in words:
+                    words[word] += 1
+                else:
+                    words[word] = 1
+            break
 
         for k, v in words.iteritems():
             if v < 5:
