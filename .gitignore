@@ -8,3 +8,4 @@ firmament/docker/**/*.conf
 *.pyc
 *.bak
 tmp
+.swp

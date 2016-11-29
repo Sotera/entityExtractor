@@ -11,24 +11,6 @@
     }
   },
   {
-    "name": "mongo",
-    "Image": "mongo:3.2",
-    "DockerFilePath": "",
-    "Hostname": "mongo",
-    "HostConfig": {
-      "VolumesFrom": [
-        "data-container"
-      ],
-      "PortBindings": {
-        "27017/tcp": [
-          {
-            "HostPort": "27017"
-          }
-        ]
-      }
-    }
-  },
-  {
     "name": "trained-models",
     "Image": "sotera/trained-models:1",
     "DockerFilePath": "",
@@ -184,7 +166,6 @@
         "data-container"
       ],
       "Links": [
-        "mongo:mongo",
         "redis:redis",
         "mitie:mitie"
       ],
@@ -213,7 +194,9 @@
           "PORT": 3001,
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
-          "IGNORE_QCR": 0
+          "IGNORE_QCR": 0,
+          "MONGO_PORT_27017_TCP_ADDR": "TODO",
+          "MONGO_PORT_27017_TCP_PORT": "TODO"
         },
         "Scripts": [
         ]
@@ -233,7 +216,6 @@
         "data-container"
       ],
       "Links": [
-        "mongo:mongo",
         "mitie:mitie",
         "redis:redis"
       ],
@@ -263,7 +245,9 @@
           "PORT": 3002,
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
-          "WORKER_SCRIPT": "./workers/start-extractor.js"
+          "WORKER_SCRIPT": "./workers/start-extractor.js",
+          "MONGO_PORT_27017_TCP_ADDR": "TODO",
+          "MONGO_PORT_27017_TCP_PORT": "TODO"
         },
         "Scripts": [
         ]
@@ -282,7 +266,6 @@
         "data-container"
       ],
       "Links": [
-        "mongo:mongo",
         "redis:redis"
       ],
       "PortBindings": {
@@ -307,7 +290,9 @@
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
           "WORKER_SCRIPT": "./workers/job-queue",
-          "MONITOR_TYPES_COUNT": 4
+          "MONITOR_TYPES_COUNT": 4,
+          "MONGO_PORT_27017_TCP_ADDR": "TODO",
+          "MONGO_PORT_27017_TCP_PORT": "TODO"
         },
         "Scripts": [
         ]
