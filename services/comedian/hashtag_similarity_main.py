@@ -32,7 +32,6 @@ def process_message(key, job):
         job['data'] = []
         return
 
-    print 'Checking Parameters'
     err_check(job)
     if job['state'] == 'error':
         return
@@ -55,13 +54,13 @@ def process_message(key, job):
         "query_value": "null"
     }]
 
-    if 'lang' in job.keys():
+    if 'lang' in job:
         query_params.append({
             "query_type": "where",
             "property_name": "lang",
             "query_value": job['lang']
         })
-    loopy = Loopy(job['query_url'], query_params, paging=False)
+    loopy = Loopy(job['query_url'], query_params)
 
     if loopy.result_count == 0:
         print "No data to process"
@@ -72,7 +71,7 @@ def process_message(key, job):
 
     while True:
         print "Scrolling...{}".format(loopy.total_returned)
-        page = loopy.get_next_block()
+        page = loopy.get_next_page()
         if page is None:
             break
         # Do something with the obtained page

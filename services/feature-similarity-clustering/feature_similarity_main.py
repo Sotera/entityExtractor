@@ -48,8 +48,7 @@ def process_message(key, job):
             'query_value': job['lang']
         })
 
-    # we expect to have many items in query so disable paging and use range searches.
-    loopy = Loopy(job['query_url'], query_params, paging=False)
+    loopy = Loopy(job['query_url'], query_params)
 
     if loopy.result_count == 0:
         print 'No data to process'
@@ -60,7 +59,7 @@ def process_message(key, job):
 
     while True:
         print 'Scrolling...{}'.format(loopy.total_returned)
-        page = loopy.get_next_block()
+        page = loopy.get_next_page()
         if page is None:
             break
         # Do something with the obtained page
