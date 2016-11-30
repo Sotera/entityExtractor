@@ -1,0 +1,25 @@
+FROM node:6.9
+
+ENV TERM=xterm
+
+RUN apt-get update && apt-get install -y \
+  vim \
+  less
+
+# docker build-time args
+ARG SERVICE
+ARG MAIN=main.js
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+COPY $SERVICE .
+
+# create consistent top-level filename
+COPY $SERVICE/$MAIN docker-main.js
+
+RUN npm i
+
+# increase GC limit since we will likely process
+# many relatively large files concurrently.
+CMD ["node", "--max_old_space_size=4096", "."]
