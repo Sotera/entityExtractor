@@ -111,6 +111,7 @@ function createJobSet(startTime, endTime) {
             .then(res => res.body)
           } else {
             jobSet.retries += 1
+            debug('%s of %s retries', jobSet.retries, MAX_RETRIES)
             return client.put(`jobsets/${jobSet.id}`, { retries: jobSet.retries })
             .then(res => res.body)
           }
