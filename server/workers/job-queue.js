@@ -81,8 +81,15 @@ function linkerize(jobMonitor, done) {
       done_at: new Date(),
       error_msg: lMonitor.errors.join(',')
     })
+    .then(updateJobSet)
     .then(() => done())
     .catch(done);
+  }
+
+  function updateJobSet(jobMonitor) {
+    jobMonitor.jobSet((err, jobSet) => {
+      jobSet.updateAttributes({state: 'done', done_at: new Date});
+    });
   }
 }
 
