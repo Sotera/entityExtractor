@@ -97,23 +97,21 @@ function createJobSet(startTime, endTime) {
     return client.get('socialmediaposts/count?' + smPostsParams)
       .then(res => {
         let count = res.body.count
-        if (count < MIN_POSTS)
-          debug('%s posts and we need %s', count, MIN_POSTS)
-        else
-          debug('smposts count:', count)
+        debug('smposts count:', count)
         if (count >= MIN_POSTS) {
           return client.put(`jobsets/${jobSet.id}`, { state: 'running' })
-          .then(res => res.body)
+            .then(res => res.body)
           // triggers monitors creation
         } else {
+          debug('%s posts and we need %s', count, MIN_POSTS)
+          debug('%s of %s retries', jobSet.retries, MAX_RETRIES)
           if (MAX_RETRIES == jobSet.retries) {
             return client.put(`jobsets/${jobSet.id}`, { state: 'skip' })
-            .then(res => res.body)
+              .then(res => res.body)
           } else {
             jobSet.retries += 1
-            debug('%s of %s retries', jobSet.retries, MAX_RETRIES)
             return client.put(`jobsets/${jobSet.id}`, { retries: jobSet.retries })
-            .then(res => res.body)
+              .then(res => res.body)
           }
         }
       })
