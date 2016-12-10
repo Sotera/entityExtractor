@@ -87,8 +87,11 @@ function linkerize(jobMonitor, done) {
   }
 
   function updateJobSet(jobMonitor) {
-    jobMonitor.jobSet((err, jobSet) => {
-      jobSet.updateAttributes({state: 'done', done_at: new Date});
+    return new Promise((res, rej) => {
+      jobMonitor.jobSet((err, jobSet) => {
+        if (err) rej(err);
+        res(jobSet.updateAttributes({state: 'done', done_at: new Date}));
+      });
     });
   }
 }

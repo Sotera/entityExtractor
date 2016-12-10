@@ -16,7 +16,7 @@ module.exports = function(JobSet) {
           if (err)
             return console.error(err);
 
-          // create if no existing
+          // create only if no existing
           if (!monitors.length)
             createJobMonitors(jobSet);
         });
