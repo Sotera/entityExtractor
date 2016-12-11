@@ -1,7 +1,6 @@
 'use strict';
 
-const _ = require('lodash'),
-  jobs = require('../../lib/jobs')
+const jobs = require('../../lib/jobs')
 ;
 
 module.exports = function(JobMonitor) {
@@ -12,7 +11,7 @@ module.exports = function(JobMonitor) {
     const jobMonitor = context.instance;
 
     if (jobMonitor.state === 'new' && jobMonitor.start) {
-      // finish jobsets ASAP. not be necessary since jobsets run sequentially?
+      // finish jobsets ASAP. not necessary since jobsets run sequentially?
       const priority = jobMonitor.featurizer === 'linker' ? 'high' : null;
 
       jobs.create('job monitor', {
