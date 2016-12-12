@@ -21,7 +21,7 @@ class HashtagClusters:
         query_params = [{
             "query_type":"where",
             "property_name":"term",
-            "query_value": term
+            "query_value": term.encode('utf8')
         },
         {
             "query_type":"where",
