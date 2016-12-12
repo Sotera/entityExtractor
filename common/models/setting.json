@@ -1,0 +1,41 @@
+{
+  "name": "setting",
+  "description": "System settings",
+  "base": "PersistedModel",
+  "indexes": {
+    "idx_uniq": {
+      "keys": {
+        "key": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "DestroyAll": {}
+  },
+  "properties": {
+    "key": {
+      "type": "string",
+      "required": true
+    },
+    "value": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "string",
+      "description": "options: int, float, boolean, object, or string. use 'object' for array.",
+      "default": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

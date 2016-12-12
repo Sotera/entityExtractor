@@ -1,7 +1,8 @@
 'use strict';
 
 const _ = require('lodash'),
-  preprocessor = require('../../lib/preprocessors/twitter');
+  preprocessor = require('../../lib/preprocessors/twitter'),
+  debug = require('../../server/util/log').debug;
 
 // def: QCR endpoint to inspect post data
 // and create SocialMediaPost entries.
@@ -31,9 +32,9 @@ module.exports = function(Qcr) {
     postPerSecondCount = 0;
     bootTime = Date.now();
     if(f.target <0)
-      console.log('Filter off!');
+      debug('Filter off!');
     else
-      console.log('Setting target post per second count to ' + f.target + ' posts');
+      debug('Setting target post per second count to ' + f.target + ' posts');
     cb(null, 'Posts Per Second count set to: ' + f.target);
   };
 
@@ -45,7 +46,7 @@ module.exports = function(Qcr) {
 
   let stupidDupeInterval = 10000;
   let interval = setInterval(function(){
-    console.log("clearing dupe set...");
+    debug("clearing dupe set...");
     stupidDupeSet.clear();
   },stupidDupeInterval);
 
@@ -57,11 +58,11 @@ module.exports = function(Qcr) {
     clearInterval(interval);
 
     interval = setInterval(function(){
-      console.log("clearing dupe set...");
+      debug("clearing dupe set...");
       stupidDupeSet.clear();
     },stupidDupeInterval);
 
-    console.log('Set dupe clear interval to: ' + f.target);
+    debug('Set dupe clear interval to: ' + f.target);
     cb(null, 'Set dupe clear interval to: ' + f.target);
   };
 
@@ -87,10 +88,10 @@ module.exports = function(Qcr) {
 
   setInterval(function(){
       pps = postPerSecondCount / ((Date.now() - bootTime)/1000);
-      console.log('--==PPS==--:' + pps);
+      debug('--==PPS==--:' + pps);
     if(postPerSecondTarget>=0) {
       fpps = filteredPostCount / ((Date.now() - bootTime) / 1000);
-      console.log("--==FPPS==--:" + fpps + " Delta:" + postPerSecondDelta);
+      debug("--==FPPS==--:" + fpps + " Delta:" + postPerSecondDelta);
     }
     let avgAge = postAge/postPerSecondCount;
     postPerSecondCount = 0;
@@ -98,10 +99,10 @@ module.exports = function(Qcr) {
     bootTime = Date.now();
     postAge = 0;
 
-    console.log("qcr dupes over the last 5 seconds: " + failures );
-    console.log("dupes ignored over the last 5 seconds: " + postsIgnored);
-    console.log("dupe list size:" + stupidDupeSet.size);
-    console.log("Average Post Age: " + avgAge);
+    debug("qcr dupes over the last 5 seconds: " + failures );
+    debug("dupes ignored over the last 5 seconds: " + postsIgnored);
+    debug("dupe list size:" + stupidDupeSet.size);
+    debug("Average Post Age: " + avgAge);
 
     postsIgnored = 0;
     failures = 0;
