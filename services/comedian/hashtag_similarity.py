@@ -30,7 +30,7 @@ class HashtagClusters:
         },
         {
             "query_type":"between",
-            "property_name":"start_time_ms",
+            "property_name":"end_time_ms",
             "query_value":[q_start_time, self.start_ms]
         }]
         lp = Loopy(self.url + 'postsClusters', query_params, page_size=500)
