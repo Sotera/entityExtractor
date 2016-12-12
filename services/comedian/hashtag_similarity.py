@@ -1,4 +1,4 @@
-import json, sys, os
+import json, sys, os, urllib
 from scipy.special import gdtr
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from loopy import Loopy
@@ -18,10 +18,12 @@ class HashtagClusters:
 
     def get_priors(self, term):
         q_start_time = self.start_ms - self.prior_ms
+
+        term = unicode(term)
         query_params = [{
             "query_type":"where",
             "property_name":"term",
-            "query_value": term.encode('utf8')
+            "query_value": urllib.quote(term.encode('utf-8'), ':/')
         },
         {
             "query_type":"where",
