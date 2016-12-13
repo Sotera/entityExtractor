@@ -32,7 +32,7 @@
     },
     "type": {
       "type": "string",
-      "description": "options: int, float, boolean, object, or string. array not supported.",
+      "description": "options: int, float, boolean, object, or string. use 'object' for array.",
       "default": "string",
       "required": true
     }
