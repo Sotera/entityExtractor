@@ -1,2 +1,4 @@
 redis
 requests
+scipy
+numpy
