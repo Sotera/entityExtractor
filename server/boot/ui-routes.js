@@ -1,4 +1,5 @@
-const path = require('path');
+const path = require('path'),
+  loopback = require('loopback');
 
 module.exports = function(server) {
   server.set('views', path.join(__dirname, '../../client'));
@@ -16,6 +17,8 @@ module.exports = function(server) {
   router.get('/app/*?', function(req, res, next) {
     res.render(path.join(viewsPath, req.params[0]));
   });
+
+  server.use('/threats', loopback.static('/downloads/threats'));
 
   server.use(router);
 };
