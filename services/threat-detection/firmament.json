@@ -1,0 +1,17 @@
+[
+  {
+    "name": "threat-detection",
+    "Image": "sotera/threat-detection:1",
+    "DockerFilePath": "",
+    "Hostname": "threat-detection",
+    "Cmd": ["python", "-u", "main.py"],
+    "HostConfig": {
+      "VolumesFrom": [
+        "data-container"
+      ],
+      "Links": [
+        "redis:redis"
+      ]
+    }
+  }
+]
