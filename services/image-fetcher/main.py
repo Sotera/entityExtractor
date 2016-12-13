@@ -2,12 +2,12 @@
 import sys, os, json
 sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
 from redis_dispatcher import Dispatcher
-from threat_detector import detect
+from image_fetcher import fetch_image
 
 
 def validate_job(job):
-    if 'archive_url' not in job:
-        return 'Missing "archive_url" required field'
+    if 'urls' not in job:
+        return 'Missing "urls" required field'
     return None
 
 def process_message(key, job):
@@ -23,23 +23,41 @@ def process_message(key, job):
         job['state'] = 'error'
         return
 
-    ###
-    # output = detect(job["archive_url"])
-    ###
-    
-    job['data'] = json.dumps(output)
+    # local file path
+    image_path = None
+    # parsed, orig image url from page url
+    image_url = None
+
+    job_urls = job['urls'].split(',')
+
+    for url in job_urls:
+        if not url: continue
+
+        # /downloads should be in shared volume
+        image_info = fetch_image(url, download_path='/downloads/image-fetcher/')
+        if image_info:
+            image_path = image_info['image_path']
+            image_url = image_info['image_url']
+
+        # once found, break loop
+        if image_path:
+            break
+
+    if not image_path:
+        job['state'] = 'processed'
+        job['data'] = []
+        return
+
+    data = {
+        'path': image_path,
+        'url': image_url
+    }
+    job['data'] = json.dumps(data)
     job['state'] = 'processed'
 
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
                             process_func=process_message,
-                            channels=['genie:threat-detection'])
+                            channels=['genie:fetch_image'])
     dispatcher.start()
-
-# redis integration testing from ur terminal
-#redis-cli
-#hmset 123 archive_url https://s3.amazonaws.com/watchman/threat-detection-test.zip
-#publish 123
-# wait for job to finish then
-#hmgetall 123
