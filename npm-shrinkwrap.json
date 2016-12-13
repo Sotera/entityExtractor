@@ -3200,11 +3200,6 @@
         }
       }
     },
-    "string-template": {
-      "version": "1.0.0",
-      "from": "string-template@latest",
-      "resolved": "https://registry.npmjs.org/string-template/-/string-template-1.0.0.tgz"
-    },
     "textract": {
       "version": "1.2.1",
       "from": "textract@>=1.2.1 <2.0.0",

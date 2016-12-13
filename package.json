@@ -43,7 +43,6 @@
     "request-json": "^0.6.1",
     "request-json-light": "^0.5.22",
     "serve-favicon": "^2.0.1",
-    "string-template": "^1.0.0",
     "textract": "^1.2.1"
   },
   "devDependencies": {

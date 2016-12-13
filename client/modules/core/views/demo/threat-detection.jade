@@ -11,7 +11,7 @@ block content
           form#archive-form
             .form-group
               label URL to zip file
-              input#archive-url.form-control(name='images_url' placeholder='https://s3.amazonaws.com/bucket/images.zip' value='https://s3.amazonaws.com/watchman/threat-detection-test.zip')
+              input#archive-url.form-control(name='images_url' placeholder='https://s3.amazonaws.com/bucket/images.zip' value='https://s3.amazonaws.com/watchman/threats/test.zip')
             .form-group
               label.radio-inline
                 input(type='radio' value='day' name='tod' checked)
@@ -28,6 +28,7 @@ block content
 block scripts
   script.
     var $body = $('body')
+    var $imgContainer = $('#images-container')
     var spinner = new Spinner({scale: 3, lines: 10})
 
     $('#archive-form').submit(function(e) {
@@ -37,35 +38,48 @@ block scripts
         archive_url: $('#archive-url').val(),
         time_of_day: $('input[name="tod"]:checked').val()
       })
-      .success(function(data) {
-        console.log(data)
+      .done(function(data) {
         checkJob(data)
       })
+      .fail(handleError)
     })
 
     function checkJob(id) {
       $.post('/api/jobs/status', { job_id: id })
-      .success(function(data) {
-        console.log(data)
+      .done(function(data) {
         if (data.state === 'processed') {
           spinner.stop()
+          console.info(data)
           showImages(JSON.parse(data.data))
+        } else if (data.state === 'error') {
+          handleError(new Error(data.error))
         } else {
           setTimeout(function() { checkJob(id) }, 2000)
         }
       })
+      .fail(handleError)
+    }
+
+    function handleError(err) {
+      spinner.stop()
+      console.error(err)
+      alert('Oops, an error occurred')
     }
 
     function showImages(images) {
-      console.log(images)
-      var $imgContainer = $('#images-container')
       $imgContainer.empty()
+      images.forEach(addToGrid)
+    }
 
-      images.forEach(function(img) {
-        var src = img.name.replace(/\/downloads/i, '')
-        var level = img.classification === 'threat' ? 'bg-danger' : 'bg-success'
-        var div = $('<div class="col-md-2" style="height:200px" onclick="window.open(\'' + src + '\')"><p class="' + level + '">' + img.classification + '</p><img width="100%" src="'
-          + src + '"></div>')
-        $imgContainer.append(div)
-      })
+    function addToGrid(image) {
+      // remove path part not mapped to virtual path
+      var src = image.name.replace(/^\/downloads/i, '')
+      var color = image.classification === 'threat' ?
+        'bg-danger' :
+        'bg-success'
+      var $div = $('<div class="col-md-2" style="height:200px" onclick="window.open(\'' + src + '\')">')
+      var $label = $('<p class="' + color + '">' + image.classification + '</p>')
+      var $img = $('<img width="100%" src="' + src + '">')
+
+      $imgContainer.append($div.append($label.append($img)))
     }
