@@ -1,0 +1,128 @@
+// def: find stored feed data and send to ner
+'use strict';
+
+try {
+  require('dotenv').config({silent: true});
+} catch(ex) {}
+
+const API_ROOT = process.env.API_ROOT;
+
+if (!API_ROOT) {
+  throw new Error('Missing required API_ROOT env var');
+}
+
+const request = require('request'),
+  _ = require('lodash'),
+  JobSetCheckInterval = 5000; //ms
+
+let app,
+    interval,
+    findEventsInterval = 300 *60 * 1000,
+    currentJob,
+    lastEndTime = 0,
+    SocialMediaPost,
+    Event,
+    JobSet;
+
+
+const worker = module.exports = {
+  start(appObject) {
+    app = appObject;
+    SocialMediaPost = app.models.SocialMediaPost;
+    Event = app.models.Event;
+    JobSet = app.models.JobSet;
+
+    run();
+    function run() {
+      interval = setInterval(function(){
+        checkJobSetStatus();
+      },JobSetCheckInterval);
+    }
+  }
+};
+
+function catchUpToEventsIfPossible(){
+  return new Promise(
+    function (resolve, reject) {
+        let args = {
+          where: {
+            end_time_ms:{
+              gt:lastEndTime
+            }
+          }};
+
+        Event.findOne(args)
+          .then(function(err, model){
+            if(err != null){
+              reject(err);
+            }
+            if(!model){
+              resolve(null);
+              return;
+            }
+            resolve(model.end_time_ms + 1);
+          });
+
+    });
+
+}
+function calculateJobsetTimes(startTime){
+  return new Promise(
+    function (resolve, reject) {
+      if (!startTime) {
+        //find the first job set and get the start time
+        JobSet.findOne().then(model=>{
+          if(!model){
+            lastEndTime = startTime;
+            reject("not enough data to run with yet.");
+            return;
+          }
+          resolve(model.start_time_ms, model.start_time_ms + findEventsInterval );
+        })
+      }
+      let endTime = startTime + findEventsInterval;
+      resolve(startTime, endTime);
+    });
+}
+
+function executeEventFinder(startTime,endTime){
+  return new Promise(
+    function (resolve, reject) {
+      let args = ['run', '--rm', 'sotera/dr-manhattan:12', API_ROOT, startTime.toString(), endTime.toString()];
+      console.log('running: docker', args.join(' '));
+
+      currentJob = spawn('docker', args);
+
+      currentJob.stdout.on('data', data => {
+        console.log(`stdout: ${data}`);
+      });
+
+      currentJob.stdout.on('exit', code => {
+        currentJob = null;
+        lastEndTime = endTime;
+        resolve('Job exited with code: ' + code);
+      });
+
+      currentJob.on('error', err => {
+        reject('Failed to start child process' + err);
+      });
+    });
+
+}
+
+function checkJobSetStatus() {
+  if(currentJob != null){
+    return;
+  }
+  catchUpToEventsIfPossible()
+  .then(startTime=>{
+    calculateJobsetTimes(startTime)})
+  .then((startTime,endTime)=>{
+    executeEventFinder(startTime,endTime)})
+  .catch(error => {
+    console.log(error);
+  });
+  // if we have an ending event, run dr-manhattan
+  // set previous start to end...
+
+}
