@@ -1,6 +1,6 @@
 // def: find stored feed data and send to ner
 'use strict';
-
+const spawn = require('child_process').spawn;
 try {
   require('dotenv').config({silent: true});
 } catch(ex) {}
@@ -52,9 +52,10 @@ function catchUpToEventsIfPossible(){
           }};
 
         Event.findOne(args)
-          .then(function(err, model){
+          .then(function(model, err){
             if(err != null){
               reject(err);
+              return;
             }
             if(!model){
               resolve(null);
@@ -71,17 +72,17 @@ function calculateJobsetTimes(startTime){
     function (resolve, reject) {
       if (!startTime) {
         //find the first job set and get the start time
-        JobSet.findOne().then(model=>{
-          if(!model){
+        JobSet.findOne().then((model,err)=>{
+          if(!model || err){
             lastEndTime = startTime;
             reject("not enough data to run with yet.");
             return;
           }
-          resolve(model.start_time_ms, model.start_time_ms + findEventsInterval );
+          resolve({startTime:model.start_time_ms, endTime:model.start_time_ms + findEventsInterval} );
         })
       }
       let endTime = startTime + findEventsInterval;
-      resolve(startTime, endTime);
+      resolve({startTime:startTime, endTime:endTime});
     });
 }
 
@@ -91,13 +92,17 @@ function executeEventFinder(startTime,endTime){
       let args = ['run', '--rm', 'sotera/dr-manhattan:12', API_ROOT, startTime.toString(), endTime.toString()];
       console.log('running: docker', args.join(' '));
 
-      currentJob = spawn('docker', args);
-
+      try {
+        currentJob = spawn('docker', args);
+      }
+      catch(err){
+        console.log(err);
+      }
       currentJob.stdout.on('data', data => {
         console.log(`stdout: ${data}`);
       });
 
-      currentJob.stdout.on('exit', code => {
+      currentJob.stdout.on('exit', (code,signal) => {
         currentJob = null;
         lastEndTime = endTime;
         resolve('Job exited with code: ' + code);
@@ -116,9 +121,9 @@ function checkJobSetStatus() {
   }
   catchUpToEventsIfPossible()
   .then(startTime=>{
-    calculateJobsetTimes(startTime)})
-  .then((startTime,endTime)=>{
-    executeEventFinder(startTime,endTime)})
+    return calculateJobsetTimes(startTime)})
+  .then(times=>{
+    executeEventFinder(times.startTime,times.endTime)})
   .catch(error => {
     console.log(error);
   });
