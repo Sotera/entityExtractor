@@ -7,7 +7,7 @@ from louvaine import Louvaine
 
 def create_events(host, ts_start, ts_end, kafka_url, kafka_topic, debug=False):
     if host[-1] != '/': host += '/'
-    api_path = host + 'api/'
+    api_path = host
     query_params = [{
         "query_type": "between",
         "property_name": "end_time_ms",

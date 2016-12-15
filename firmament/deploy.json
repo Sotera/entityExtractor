@@ -84,7 +84,7 @@
     "DockerFilePath": "",
     "Hostname": "hashtag-clusterer",
     "Env": [
-      "TRUNCATE_POSTS=1"
+      "TRUNCATE_POSTS=0"
     ],
     "HostConfig": {
       "Links": [
@@ -109,7 +109,7 @@
     "DockerFilePath": "",
     "Hostname": "feature-sim",
     "Env": [
-      "TRUNCATE_POSTS=1"
+      "TRUNCATE_POSTS=0"
     ],
     "HostConfig": {
       "Links": [
