@@ -26,7 +26,7 @@ def process(job):
 
         for posts_cluster in page:
             # NOTE: a postscluster can be in 0 or 1 aggcluster
-            if 'stats' in posts_cluster and posts_cluster['stats']['is_unlikely'] == "False":
+            if 'stats' in posts_cluster and posts_cluster['stats']['is_unlikely'] == 0:
                 continue
             for agg_cluster in aggregate_clusters:
                 # break if we've already matched this postscluster with an aggcluster
