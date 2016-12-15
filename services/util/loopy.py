@@ -78,7 +78,7 @@ class Loopy:
             return result['count']
         except Exception as e:
             print(e)
-            print('Woops! Loopy says: error getting count from endpoint')
+            print('Woops! Loopy says: error getting count from endpoint', result)
             return 0
 
     def get_next_page(self):
