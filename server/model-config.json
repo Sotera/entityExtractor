@@ -87,5 +87,13 @@
   "event": {
     "dataSource": "db",
     "public": true
+  },
+  "jobSet": {
+    "dataSource": "db",
+    "public": true
+  },
+  "setting": {
+    "dataSource": "db",
+    "public": true
   }
 }

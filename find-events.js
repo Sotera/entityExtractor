@@ -49,7 +49,7 @@ function findEvents(params) {
     }
 
 
-    let args = ['run', '--rm', 'sotera/dr-manhattan:6', API_ROOT, startTime.toString(), endTime.toString()];
+    let args = ['run', '--rm', 'sotera/dr-manhattan:12', API_ROOT, startTime.toString(), endTime.toString()];
     console.log('running: docker', args.join(' '));
 
     let job = spawn('docker', args);

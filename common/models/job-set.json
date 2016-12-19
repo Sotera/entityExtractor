@@ -1,0 +1,58 @@
+{
+  "name": "jobSet",
+  "description": "A set of jobMonitors",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "indexes": {
+    "idx_uniq": {
+      "keys": {
+        "start_time": 1,
+        "end_time": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "Timestamp": {},
+    "DestroyAll": {}
+  },
+  "properties": {
+    "start_time": {
+      "type": "number",
+      "required": true,
+      "description": "query start time (NOT job start time)"
+    },
+    "end_time": {
+      "type": "number",
+      "required": true,
+      "description": "query end time (NOT job end time)"
+    },
+    "state": {
+      "type": "string",
+      "required": true,
+      "default": "new"
+    },
+    "done_at": {
+      "type": "date"
+    },
+    "retries": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "validations": [],
+  "relations": {
+    "jobMonitors": {
+      "type": "hasMany",
+      "model": "jobMonitor",
+      "foreignKey": "job_set_id"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

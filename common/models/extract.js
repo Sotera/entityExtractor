@@ -144,4 +144,28 @@ module.exports = function(Extract) {
     cb(null, jobId);
   };
 
+  Extract.remoteMethod(
+    'detectThreats',
+    {
+      description: 'Run threat detection on archived images',
+      accepts: {
+        arg: 'args',
+        type: 'object',
+        description: 'object with properties "archive_url", "time_of_day"',
+        required: true,
+        http: { source: 'body' }
+      },
+      returns: {type: 'string', root: true},
+      http: {path: '/threats', verb: 'post'}
+    }
+  );
+
+  Extract.detectThreats = function(args, cb) {
+    var archiveUrl = args.archive_url,
+      timeOfDay = args.time_of_day,
+      jobId;
+
+    jobId = entityExtractor.detectThreats(archiveUrl, timeOfDay);
+    cb(null, jobId);
+  };
 };

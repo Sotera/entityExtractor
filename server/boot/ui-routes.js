@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 
 module.exports = function(server) {
@@ -9,12 +11,17 @@ module.exports = function(server) {
     viewsPath = 'modules/core/views';
 
   router.get('/', function(req, res, next) {
-    res.render(viewsPath + '/pages/index');
+    res.render(path.join(viewsPath, '/pages/index'));
   });
 
   // allows for /app/pages/mypage, /app/templates/blah, etc.
   router.get('/app/*?', function(req, res, next) {
     res.render(path.join(viewsPath, req.params[0]));
+  });
+
+  // demo pages
+  router.get('/demo/*?', function(req, res, next) {
+    res.render(path.join(viewsPath, 'demo', req.params[0]));
   });
 
   server.use(router);

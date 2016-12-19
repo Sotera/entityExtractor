@@ -1,5 +1,6 @@
 {
   "name": "jobMonitor",
+  "description": "A batch of posts represented by start, end time + featurizer type + lang",
   "base": "PersistedModel",
   "idInjection": true,
   "indexes": {
@@ -12,6 +13,11 @@
       },
       "options": {
         "unique": true
+      }
+    },
+    "idx_job_set_id": {
+      "keys": {
+        "job_set_id": 1
       }
     }
   },
@@ -69,6 +75,11 @@
       "type": "hasMany",
       "model": "postsCluster",
       "foreignKey": "job_monitor_id"
+    },
+    "jobSet": {
+      "type": "belongsTo",
+      "model": "jobSet",
+      "foreignKey": "job_set_id"
     }
   },
   "acls": [],
