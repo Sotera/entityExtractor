@@ -1,5 +1,7 @@
 FROM python:2.7
 
+ENV TERM=xterm
+
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
@@ -19,7 +21,5 @@ COPY rorschach .
 
 # match project dir structure to satisfy imports
 COPY util /usr/src/util
-
-ENV TERM=xterm
 
 CMD ["python", "-u", "main.py", "-englishModel", "Aug09_en", "-arabicModel", "Aug09_ar", "-modelPath", "./models/"]
