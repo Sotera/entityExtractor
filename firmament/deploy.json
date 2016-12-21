@@ -134,7 +134,7 @@
   },
   {
     "name": "image-fetcher",
-    "Image": "sotera/image-fetcher:2",
+    "Image": "sotera/image-fetcher:3",
     "DockerFilePath": "",
     "Hostname": "image-fetcher",
     "HostConfig": {

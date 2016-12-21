@@ -1,6 +1,6 @@
 '''
 What does this module do?
-1. Creates pubsub client and listen for messages.
+1. Receives job params from a Redis list.
 2. Kicks off a client-defined long-running job.
 3. Updates redis hash when job completes.
 '''
@@ -12,8 +12,8 @@ import redis, sys, traceback
 Fetch job data and call processing function
 '''
 class Worker(object):
-    def __init__(self, redis_store):
-        self.send = redis_store
+    def __init__(self, redis_client):
+        self.send = redis_client
 
     '''
     run worker with given msg and args
@@ -57,8 +57,7 @@ class Worker(object):
         self.send.hmset(key, job)
 
 '''
-Listen for messages and dispatch workers.
-1 worker per message for parallelization support (TODO).
+Listen for job params and dispatch workers.
 '''
 class Dispatcher(object):
     '''
@@ -75,12 +74,13 @@ class Dispatcher(object):
         self.initial_state = kwargs.get('initial_state', 'new')
 
     def start(self):
+        # decode_responses: retain char encoding from publisher
         pool = redis.ConnectionPool(host=self.redis_host,
             port=self.redis_port, decode_responses=True)
-        redis_store = redis.Redis(connection_pool=pool)
+        redis_client = redis.Redis(connection_pool=pool)
         try:
             # test connection
-            redis_store.ping()
+            redis_client.ping()
         except redis.exceptions.ConnectionError as rexc:
             print('''
             Cannot connect to host "{host}" port {port}.
@@ -88,20 +88,15 @@ class Dispatcher(object):
             '''.format(host=self.redis_host, port=self.redis_port))
             print(rexc)
             return
-        # redis_subscriber = redis.Redis(connection_pool=pool)
-        # pubsub = redis_subscriber.pubsub()
-        # pubsub.subscribe(self.channels)
-        # listen for messages and do work:
-        # for item in pubsub.listen():
-        print('WATCHING QUEUE %s' % self.queues)
+        print('WATCHING QUEUES %s' % self.queues)
         while True:
-            item = redis_store.brpop(self.queues, 10)
-            if item:
-                # redis_store.lrem(queue, 1, item[1])
-                print('MESSAGE HEARD')
-                worker = Worker(redis_store)
-                try:
+            try:
+                # block for 10 sec and reset (is blocking forever ok?)
+                item = redis_client.brpop(self.queues, 10)
+                if item:
+                    print('MESSAGE HEARD')
+                    worker = Worker(redis_client)
                     worker.run(item, process_func=self.process_func, initial_state=self.initial_state)
-                except Exception as e:
-                    print('error running redis worker:', e)
-                    traceback.print_exc()
+            except Exception as e:
+                print('error running redis worker:', e)
+                traceback.print_exc()
