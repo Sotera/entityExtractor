@@ -2,6 +2,7 @@ from similarity_cluster import SimilarityCluster
 import json
 import numpy as np
 
+ZERO_EPSILON = 0.000000001
 
 class FeatureSimilarity:
     def __init__(self, similarity_threshold, start_time_ms, end_time_ms):
@@ -22,9 +23,9 @@ class FeatureSimilarity:
             return
 
     @staticmethod
-    def process_cluster_set(clusters, vector_id, post_id, vector, normalized_vector, image_url=None):
+    def process_cluster_set(clusters, vector_id, post_id, vector, vector_magnitude, image_url=None):
         for cluster in clusters.values():
-            if cluster.process_similarity(vector_id, post_id, vector, normalized_vector, image_url):
+            if cluster.process_similarity(vector_id, post_id, vector, vector_magnitude, image_url):
                 return cluster.id
         return None
 
@@ -40,32 +41,35 @@ class FeatureSimilarity:
             del self.similarity_clusters["low"][cluster_id]
             return
 
+    def create_cluster(self, vector_id, post_id, vector, image_url):
+        return SimilarityCluster(self.similarity_threshold, vector_id, post_id, vector,
+                                        self.start_time_ms, self.end_time_ms, image_url)
+    
     def process_vector_custom(self, vector_id, post_id, vector, image_url=None):
-        normalized_vector = np.linalg.norm(vector)
-        if normalized_vector == 0:
+        vector_magnitude = np.linalg.norm(vector)
+        if vector_magnitude < ZERO_EPSILON:
             print "normalized vector returned 0, skipping."
             return
         match_id = self.process_cluster_set(self.similarity_clusters["high"], vector_id, post_id, vector,
-                                            normalized_vector, image_url)
+                                            vector_magnitude, image_url)
         if match_id is not None:
             self.organize_cluster(match_id, self.similarity_clusters["high"])
             return
 
         match_id = self.process_cluster_set(self.similarity_clusters["medium"], vector_id, post_id, vector,
-                                            normalized_vector, image_url)
+                                            vector_magnitude, image_url)
         if match_id is not None:
             self.organize_cluster(match_id, self.similarity_clusters["medium"])
             return
 
         match_id = self.process_cluster_set(self.similarity_clusters["low"], vector_id, post_id, vector,
-                                            normalized_vector, image_url)
+                                            vector_magnitude, image_url)
         if match_id is not None:
             self.organize_cluster(match_id, self.similarity_clusters["low"])
             return
 
         # found no matches, just add a new cluster to the low group
-        new_cluster = SimilarityCluster(self.similarity_threshold, vector_id, post_id, vector,
-                                        self.start_time_ms, self.end_time_ms, image_url)
+        new_cluster = self.create_cluster(vector_id, post_id, vector, image_url)
         self.similarity_clusters["low"][new_cluster.id] = new_cluster
 
     def get_clusters_to_delete(self):
@@ -86,4 +90,15 @@ class FeatureSimilarity:
 
     def to_json(self):
         return json.dumps(self.get_clusters())
+
+#
+#  Override vector aggregation and comparisons for data_type="image"
+#
+class ImageFeatureSimilarity(FeatureSimilarity):
+    def __init__(self, similarity_threshold, start_time_ms, end_time_ms):
+        super(FeatureSimilarity, self).__init__(self, similarity_threshold, start_time_ms, end_time_ms)
+        
+    def create_cluster(self, vector_id, post_id, vector, image_url):
+        return ImageSimilarityCluster(self.similarity_threshold, vector_id, post_id, vector,
+                                        self.start_time_ms, self.end_time_ms, image_url)
 
