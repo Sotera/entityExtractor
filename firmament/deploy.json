@@ -93,6 +93,20 @@
     }
   },
   {
+    "name": "domain-clusterer",
+    "Image": "sotera/absentfriends:1",
+    "DockerFilePath": "",
+    "Hostname": "domain-clusterer",
+    "Env": [
+      "TRUNCATE_POSTS=1"
+    ],
+    "HostConfig": {
+      "Links": [
+        "redis:redis"
+      ]
+    }
+  },
+  {
     "name": "cluster-linker",
     "Image": "sotera/ozymandias:5",
     "DockerFilePath": "",
