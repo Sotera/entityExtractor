@@ -35,7 +35,7 @@ def process(job):
 
                 if aggregation:
                     # hashtags don't calc average_similarity_vector
-                    if job['data_type'] != 'hashtag':
+                    if job['data_type'] not in ['hashtag', 'domain']:
                         agg_cluster['average_similarity_vector'] = aggregation.average_similarity_vector
 
                     agg_cluster['end_time_ms'] = posts_cluster['end_time_ms']
