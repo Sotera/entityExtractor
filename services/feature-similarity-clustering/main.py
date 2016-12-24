@@ -37,7 +37,8 @@ def process_message(key, job):
     query_params = [{
         'query_type': 'between',
         'property_name': 'timestamp_ms',
-        'query_value': [job['start_time_ms'], job['end_time_ms']]
+        'query_value': [job['start_time_ms'], job['end_time_ms']],
+        'featurizer': job['data_type']
     }]
     if 'lang' in job:
         query_params.append({
@@ -72,9 +73,9 @@ def process_message(key, job):
                 feature_similarity.process_vector(doc['id'], doc['post_id'], doc['image_features'],
                                                   doc['primary_image_url'])
 
-    if 'TRUNCATE_POSTS' in os.environ and os.environ['TRUNCATE_POSTS'] == '1':
+    if int(os.getenv('TRUNCATE_POSTS', 0)):
         print 'Truncating posts...'
-        print delete_noise(feature_similarity.get_clusters_to_delete(), loopy)
+        print truncate_posts(feature_similarity.get_clusters_to_delete(), loopy)
     else:
         print 'Skipping truncate posts because TRUNCATE_POSTS env var is not set...'
 
@@ -89,9 +90,9 @@ def process_message(key, job):
     job['state'] = 'processed'
 
 
-def delete_noise(noise_clusters, loopy):
+def truncate_posts(deletable_clusters, loopy):
     deletable_ids = []
-    for delete_cluster in noise_clusters:
+    for delete_cluster in deletable_clusters:
         deletable_ids.extend(delete_cluster.similar_ids)
     return loopy.post_result('/destroy', {'ids': deletable_ids})
 
