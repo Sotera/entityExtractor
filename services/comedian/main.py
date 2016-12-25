@@ -12,6 +12,8 @@ def set_err(job, msg):
 def err_check(job):
     if 'query_url' not in job:
         set_err(job, "No 'query_url' in job fields")
+    if 'result_url' not in job:
+        set_err(job, "No 'result_url' in job fields")
     if 'start_time_ms' not in job:
         set_err(job, "No 'start_time_ms' in job fields")
     if 'end_time_ms' not in job:
@@ -35,7 +37,7 @@ def process_message(key, job):
 
     print 'FINDING SIMILARITY'
     print 'min_post set to %s' % job['min_post']
-    hash_clust = HashtagClusters(float(job['min_post']), job['query_url'], job['start_time_ms'])
+    hash_clust = HashtagClusters(float(job['min_post']), job['result_url'], job['start_time_ms'])
 
     query_params = [{
         "query_type": "between",
@@ -57,7 +59,7 @@ def process_message(key, job):
             "property_name": "lang",
             "query_value": job['lang']
         })
-    loopy = Loopy(job['query_url'] + 'socialMediaPosts' , query_params)
+    loopy = Loopy(job['query_url'], query_params)
 
     if loopy.result_count == 0:
         print "No data to process"
@@ -75,7 +77,7 @@ def process_message(key, job):
         for doc in page:
             hash_clust.process_vector(doc['id'], doc['post_id'], doc['hashtags'])
 
-    if int(os.getenv('TRUNCATE_POSTS', 0)):
+    if int(os.getenv('TRUNCATE_POSTS') or 0):
         print 'Truncating posts...'
         print truncate_posts(hash_clust.get_deletable_ids(), loopy)
     else:
@@ -94,7 +96,7 @@ def process_message(key, job):
         cluster['data_type'] = 'hashtag'
 
         try:
-            loopy.post_result(job['query_url'] + "postsClusters" if job['query_url'][-1]=="/" else "/postsClusters", cluster)
+            loopy.post_result(job['result_url'], cluster)
         except Exception as e:
             # TODO: we should set data = None when error.
             job['data'] = []
