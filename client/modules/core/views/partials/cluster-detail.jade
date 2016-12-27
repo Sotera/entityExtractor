@@ -6,13 +6,13 @@
 //- if image
 .col-md-6(style='height:200px;overflow-y:auto' ng-if='jobMonitor.featurizer === "image"')
   .row
-    .col-md-1(ng-repeat='postId in cluster.similar_ids track by $index')
-      img(id='{{"post-" + postId}}' style='width:90px' ng-click='openImage($event)'
-        src='http://placehold.it/90x90')
+    .col-md-1.thumbnail(ng-repeat='postId in cluster.similar_ids track by $index')
+      img(id='{{"post-" + postId}}' ng-click='openImage($event)'
+        src='http://placehold.it/50x50')
 //- else
 .col-md-6(style='height:200px;overflow-y:auto' ng-if='jobMonitor.featurizer !== "image"')
-  .post(ng-repeat='postId in cluster.similar_ids track by $index' style='margin-bottom:10px'
-    ng-click='openOrigPost($event)')
+  .post(ng-repeat='postId in cluster.similar_ids track by $index'
+    style='margin-bottom:10px' ng-click='openOrigPost($event)')
     span(id='{{"post-" + postId}}')
 
 .col-md-4
