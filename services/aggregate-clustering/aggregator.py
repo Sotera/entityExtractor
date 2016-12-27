@@ -26,13 +26,13 @@ def process(job):
 
         for posts_cluster in page:
             # NOTE: a postscluster can be in 0 or 1 aggcluster
+            if 'stats' in posts_cluster and posts_cluster['stats']['is_unlikely'] == 0:
+                continue
             for agg_cluster in aggregate_clusters:
                 # break if we've already matched this postscluster with an aggcluster
                 if posts_cluster['id'] in agg_cluster['posts_clusters_ids']:
                     break
-
                 aggregation = try_aggregate(agg_cluster, posts_cluster, job)
-
                 if aggregation:
                     # hashtags don't calc average_similarity_vector
                     if job['data_type'] != 'hashtag':
@@ -44,7 +44,7 @@ def process(job):
                     # remove dupes
                     agg_cluster['similar_post_ids'] = list(set(agg_cluster['similar_post_ids']))
                     # remove nulls and dupes
-                    agg_cluster['posts_clusters_ids']= list(filter(None.__ne__, set(agg_cluster['posts_clusters_ids'])))
+                    agg_cluster['posts_clusters_ids'] = [x for x in set(agg_cluster['posts_clusters_ids']) if x is not None]
 
                     aggregate_clusters_loopy.post_result(
                         url='/{}'.format(agg_cluster['id']),
@@ -73,8 +73,7 @@ def process(job):
                         'lang': job.get('lang')
                     }
                 )
-
-
+    print("POST CLUSTER ITERATION COMPLETE")
     # exited top loop
     shut_down_aggregates(job)
 

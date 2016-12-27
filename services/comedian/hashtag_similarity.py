@@ -95,7 +95,7 @@ class HashtagClusters:
                 vSim['stats']['total_posts'] = self.total_posts
                 lam = float(n_terms)/self.total_posts
                 vSim['stats']['likelihood'] = gdtr(vSim['stats']['prior_beta'], vSim['stats']['prior_alpha'], lam)
-                vSim['stats']['is_unlikely'] = str(vSim['stats']['likelihood'] > self.l_thresh)
+                vSim['stats']['is_unlikely'] = 1 if vSim['stats']['likelihood'] > self.l_thresh else 0
                 d0[k] = vSim
         return d0
 

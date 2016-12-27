@@ -1,13 +1,12 @@
 'use strict';
 
-const debug = require('debug')('load-settings');
-
+// runs async so we have settings for later boot scripts
 module.exports = function(app, cb) {
   const Setting = app.models.Setting;
 
   // Please use snake_case key names
 
-  const newSettings = [
+  const settings = [
     {
       key: 'job_monitors',
       type: 'object',
@@ -22,12 +21,12 @@ module.exports = function(app, cb) {
     }
   ];
 
-  newSettings.forEach(setting => {
-    Setting.findOrCreate({ where: { key: setting.key } }, setting)
-    .then(debug)
-    .catch(console.error)
-  })
+  const createSettings = settings
+    .map(setting => {
+      return Setting.findOrCreate({ where: { key: setting.key } }, setting);
+    });
 
-  // fire and forget
-  cb();
+  Promise.all(createSettings)
+    .then(() => cb())
+    .catch(console.error);
 };

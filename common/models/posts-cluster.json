@@ -8,9 +8,16 @@
         "job_monitor_id": 1
       }
     },
-    "idx_end_time_ms": {
+    "idx_aggregate_clustering": {
       "keys": {
         "end_time_ms": 1
+      }
+    },
+    "idx_comedian": {
+      "keys": {
+        "end_time_ms": 1,
+        "data_type": 1,
+        "term":1
       }
     }
   },
