@@ -1,7 +1,10 @@
-angular.module('com.module.core')
-  .controller('ClustersCtrl', ClustersCtrl);
+'use strict';
 
-function ClustersCtrl($scope, $routeParams, $window, PostsCluster, JobMonitor, SocialMediaPost) {
+angular.module('com.module.core')
+.controller('ClustersCtrl', ClustersCtrl);
+
+function ClustersCtrl($scope, $routeParams, PostsCluster, JobMonitor){
+
   $scope.jobMonitor = JobMonitor.findById({ id: $routeParams.id });
 
   $scope.clusters = PostsCluster.find({
@@ -11,24 +14,4 @@ function ClustersCtrl($scope, $routeParams, $window, PostsCluster, JobMonitor, S
       }
     }
   });
-
-  $scope.showPostDetails = function(evt, postId) {
-    var target = evt.target;
-
-    SocialMediaPost.findById({ id: postId })
-    .$promise
-    .then(function(post) {
-      switch($scope.jobMonitor.featurizer) {
-        case 'image':
-          $window.open(post.primary_image_url);
-          break;
-        case 'text':
-          $(target).text(post.text);
-          break;
-        case 'hashtag':
-          $(target).text(post.hashtags);
-          break;
-      }
-    });
-  };
 }

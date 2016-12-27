@@ -1,0 +1,22 @@
+.col-md-2
+  {{cluster.id}}
+  button.btn.btn-info(ng-click='showClusterDetail(cluster)')
+    | Show
+
+//- if image
+.col-md-6(style='height:200px;overflow-y:auto' ng-if='jobMonitor.featurizer === "image"')
+  .row
+    .col-md-1.thumbnail(ng-repeat='postId in cluster.similar_ids track by $index')
+      img(id='{{"post-" + postId}}' ng-click='openImage($event)'
+        src='http://placehold.it/50x50')
+//- else
+.col-md-6(style='height:200px;overflow-y:auto' ng-if='jobMonitor.featurizer !== "image"')
+  .post(ng-repeat='postId in cluster.similar_ids track by $index'
+    style='margin-bottom:10px' ng-click='openOrigPost($event)')
+    span(id='{{"post-" + postId}}')
+
+.col-md-4
+  p type: {{jobMonitor.featurizer}}
+  p lang: {{jobMonitor.lang}}
+  p args: {{jobMonitor.service_args}}
+  p dates: {{jobMonitor.start_time | date:'short'}} - {{jobMonitor.end_time | date:'short'}}
