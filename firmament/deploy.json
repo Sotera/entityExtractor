@@ -69,7 +69,7 @@
   },
   {
     "name": "text-featurizer",
-    "Image": "sotera/rorschach:6",
+    "Image": "sotera/rorschach:7",
     "DockerFilePath": "",
     "Hostname": "text-featurizer",
     "HostConfig": {
