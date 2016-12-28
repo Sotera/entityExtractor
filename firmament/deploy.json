@@ -69,7 +69,7 @@
   },
   {
     "name": "text-featurizer",
-    "Image": "sotera/rorschach:latest",
+    "Image": "sotera/rorschach:6",
     "DockerFilePath": "",
     "Hostname": "text-featurizer",
     "HostConfig": {
@@ -80,7 +80,7 @@
   },
   {
     "name": "hashtag-clusterer",
-    "Image": "sotera/comedian:15",
+    "Image": "sotera/comedian:17",
     "DockerFilePath": "",
     "Hostname": "hashtag-clusterer",
     "Env": [
@@ -94,7 +94,7 @@
   },
   {
     "name": "cluster-linker",
-    "Image": "sotera/ozymandias:3",
+    "Image": "sotera/ozymandias:4",
     "DockerFilePath": "",
     "Hostname": "cluster-linker",
     "HostConfig": {
@@ -105,7 +105,7 @@
   },
   {
     "name": "feature-sim",
-    "Image": "sotera/feature-sim:8",
+    "Image": "sotera/feature-sim:9",
     "DockerFilePath": "",
     "Hostname": "feature-sim",
     "Env": [
@@ -134,7 +134,7 @@
   },
   {
     "name": "image-fetcher",
-    "Image": "sotera/image-fetcher:2",
+    "Image": "sotera/image-fetcher:4",
     "DockerFilePath": "",
     "Hostname": "image-fetcher",
     "HostConfig": {
@@ -148,7 +148,7 @@
   },
   {
     "name": "aggregate-clustering",
-    "Image": "sotera/aggregate-clustering:4",
+    "Image": "sotera/aggregate-clustering:5",
     "DockerFilePath": "",
     "Hostname": "aggregate-clustering",
     "HostConfig": {
@@ -159,7 +159,7 @@
   },
   {
     "name": "caffe",
-    "Image": "sotera/caffe_redis_client:14",
+    "Image": "sotera/caffe_redis_client:15",
     "DockerFilePath": "",
     "Hostname": "caffe",
     "HostConfig": {

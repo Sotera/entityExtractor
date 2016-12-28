@@ -37,7 +37,8 @@ def process_message(key, job):
     query_params = [{
         'query_type': 'between',
         'property_name': 'timestamp_ms',
-        'query_value': [job['start_time_ms'], job['end_time_ms']]
+        'query_value': [job['start_time_ms'], job['end_time_ms']],
+        'featurizer': job['data_type']
     }]
     if 'lang' in job:
         query_params.append({
@@ -67,35 +68,36 @@ def process_message(key, job):
                 feature_similarity.process_vector(doc['id'], doc['post_id'], doc['text_features'])
                 continue
             if job['data_type'] == 'image' and 'image_features' in doc and 'id' in doc and \
-                    len(doc['image_features']) > 0 and 'primary_image_url' in doc.keys() and \
-                    doc['primary_image_url'] is not None:
+                    len(doc['image_features']) > 0 and 'primary_image_url' in doc and \
+                    doc['primary_image_url']:
                 feature_similarity.process_vector(doc['id'], doc['post_id'], doc['image_features'],
                                                   doc['primary_image_url'])
 
-    if 'TRUNCATE_POSTS' in os.environ and os.environ['TRUNCATE_POSTS'] == '1':
+    if int(os.getenv('TRUNCATE_POSTS') or 0):
         print 'Truncating posts...'
-        print delete_noise(feature_similarity.get_clusters_to_delete(), loopy)
+        print truncate_posts(feature_similarity.get_clusters_to_delete(), loopy)
     else:
         print 'Skipping truncate posts because TRUNCATE_POSTS env var is not set...'
 
     clusters = feature_similarity.get_clusters()
 
-    print 'FINISHED SIMILARITY PROCESSING: found {} clusters'.format(len(clusters))
     for cluster in clusters:
         cluster['job_monitor_id'] = job['job_id']
         cluster['data_type'] = job['data_type']
         loopy.post_result(job['result_url'], cluster)
+
     job['data'] = feature_similarity.to_json()
     job['state'] = 'processed'
 
+    print 'FINISHED SIMILARITY PROCESSING: found {} clusters'.format(len(clusters))
 
-def delete_noise(noise_clusters, loopy):
+def truncate_posts(deletable_clusters, loopy):
     deletable_ids = []
-    for delete_cluster in noise_clusters:
+    for delete_cluster in deletable_clusters:
         deletable_ids.extend(delete_cluster.similar_ids)
     return loopy.post_result('/destroy', {'ids': deletable_ids})
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
-                            channels=['genie:clust_txt', 'genie:clust_img'])
+                            queues=['genie:clust_txt', 'genie:clust_img'])
     dispatcher.start()

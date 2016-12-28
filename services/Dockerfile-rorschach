@@ -1,5 +1,11 @@
 FROM python:2.7
 
+ENV TERM=xterm
+
+# docker build-time args
+ARG SERVICE
+ARG MAIN=main.py
+
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
@@ -9,17 +15,15 @@ RUN apt-get update && apt-get install -y \
     nano \
     libicu-dev
 
-COPY rorschach/requirements.txt .
+COPY $SERVICE/requirements.txt .
 RUN pip install --upgrade pip
-RUN pip install numpy
 RUN pip install -U git+https://github.com/aboSamoor/polyglot.git@master
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY rorschach .
-
+COPY $SERVICE .
+# create consistent top-level filename
+COPY $SERVICE/$MAIN docker_main.py
 # match project dir structure to satisfy imports
 COPY util /usr/src/util
-
-ENV TERM=xterm
 
 CMD ["python", "-u", "main.py", "-englishModel", "Aug09_en", "-arabicModel", "Aug09_ar", "-modelPath", "./models/"]

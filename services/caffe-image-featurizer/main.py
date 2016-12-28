@@ -52,5 +52,5 @@ def process_message(key, job):
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
-                            channels=['genie:feature_img'])
+                            queues=['genie:feature_img'])
     dispatcher.start()

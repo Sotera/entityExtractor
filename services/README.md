@@ -5,7 +5,11 @@
 ```
 # use SERVICE arg to select dir
 # MAIN is top-level script
-docker build -t sotera/rorschach:<tag> --build-arg SERVICE=rorschach --build-arg MAIN=myscript.py .
+# myscript.py is typically main.py
+docker build -t sotera/comedian:<tag> --build-arg SERVICE=comedian --build-arg MAIN=myscript.py .
+
+# for rorschach
+docker build -f Dockerfile-rorschach # ... same as above
 
 # for Python 3 modules
 docker build -f Dockerfile-py3 # ... same as above
