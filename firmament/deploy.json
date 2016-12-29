@@ -306,7 +306,8 @@
           "PORT": 3004,
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
-          "WORKER_SCRIPT": "./workers/job-queue"
+          "WORKER_SCRIPT": "./workers/job-queue",
+          "DEBUG": "job-scheduler,event-finder"
         },
         "Scripts": [
         ]
