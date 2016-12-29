@@ -12,8 +12,7 @@ if (!API_ROOT) {
   throw new Error('Missing required API_ROOT env var');
 }
 
-const request = require('request'),
-  _ = require('lodash'),
+const _ = require('lodash'),
   JobSetCheckInterval = 30000; //ms
 
 let app,
