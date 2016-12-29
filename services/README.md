@@ -9,6 +9,7 @@
 docker build -t sotera/comedian:<tag> --build-arg SERVICE=comedian --build-arg MAIN=myscript.py .
 
 # for rorschach
+# download models from s3 or create new models and place them into a /rorschach/models directory
 docker build -f Dockerfile-rorschach # ... same as above
 
 # for Python 3 modules
