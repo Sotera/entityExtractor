@@ -14,7 +14,7 @@ const app = require('../server'),
   AggregateMonitor = require('../../lib/job-monitors/aggregate-monitor'),
   LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
   createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor'),
-  eventFinder = require('./event-finder'),
+  eventFinder = require('../../lib/job-monitors/event-finder'),
   jobScheduler = require('./job-scheduler'),
   workerConcurrency = process.env.WORKER_CONCURRENCY || 4
 ;
