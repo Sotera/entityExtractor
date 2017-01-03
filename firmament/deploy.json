@@ -170,9 +170,12 @@
   },
   {
     "name": "caffe",
-    "Image": "sotera/caffe_redis_client:16",
+    "Image": "sotera/caffe_redis_client:17",
     "DockerFilePath": "",
     "Hostname": "caffe",
+    "Env": [
+      "GPU_ON=0"
+    ],
     "HostConfig": {
       "VolumesFrom": [
         "data-container"
