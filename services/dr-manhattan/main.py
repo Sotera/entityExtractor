@@ -26,8 +26,6 @@ def process_message(key,job):
     host = job['host']
     ts_start = job['start_time']
     ts_end = job['end_time']
-    kafka_url = job['kafka_url']
-    kafka_topic = job['kafka_topic']
     debug = False
 
     if host[-1] != '/': host += '/'
@@ -83,7 +81,9 @@ def process_message(key,job):
     print "Finding communities from {} nodes and {} edges.".format(len(com.graph.nodes()), len(com.graph.edges()))
     l_com = com.save_communities()
     print "Communities Saved!"
-    if kafka_url is not None and kafka_topic is not None:
+    if 'kafka_url' in job.keys() and 'kafka_topic' in job.keys():
+        kafka_url = job['kafka_url']
+        kafka_topic = job['kafka_topic']
         print "Sending events to kafka"
         print "kafka_url"
         print kafka_url
