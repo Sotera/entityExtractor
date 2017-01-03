@@ -1,7 +1,7 @@
 [
   {
     "name": "data-container",
-    "Image": "lukewendling/data-container:2",
+    "Image": "lukewendling/data-container:3",
     "DockerFilePath": "",
     "Hostname": "data-container",
     "HostConfig": {
