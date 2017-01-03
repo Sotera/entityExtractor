@@ -35,7 +35,7 @@ const worker = module.exports = {
 
 const MIN_POSTS = 1000,
   RETRY_MULTIPLIER = 3,
-  QUERY_SPAN = 1000 * 60 * 15, // min
+  QUERY_SPAN = 1000 * 60 * 2, // min
   LOOP_INTERVAL = 1000 * 60, // sec
   MAX_RETRIES = QUERY_SPAN * RETRY_MULTIPLIER / LOOP_INTERVAL;
 

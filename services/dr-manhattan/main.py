@@ -23,11 +23,11 @@ def process_message(key,job):
     if job['state'] == 'error':
         return
 
-    host = job.host
-    ts_start = job.start_time
-    ts_end = job.end_time
-    kafka_url = job.kafka_url
-    kafka_topic = job.kafka_topic
+    host = job['host']
+    ts_start = job['start_time']
+    ts_end = job['end_time']
+    kafka_url = job['kafka_url']
+    kafka_topic = job['kafka_topic']
     debug = False
 
     if host[-1] != '/': host += '/'
@@ -85,6 +85,10 @@ def process_message(key,job):
     print "Communities Saved!"
     if kafka_url is not None and kafka_topic is not None:
         print "Sending events to kafka"
+        print "kafka_url"
+        print kafka_url
+        print "kafka_topic"
+        print kafka_topic
         from event_to_kafka import stream_events
         stream_events(l_com.values(), kafka_url, kafka_topic, debug=debug)
 
