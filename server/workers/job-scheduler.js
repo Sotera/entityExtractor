@@ -6,6 +6,8 @@ try {
 } catch(ex) {}
 
 const API_ROOT = process.env.API_ROOT;
+const JOBSET_QUERYSPAN_MIN = process.env.JOBSET_QUERYSPAN_MIN?+process.env.JOBSET_QUERYSPAN_MIN:30;
+
 let SYSTEM_START_TIME = +process.env.SYSTEM_START_TIME;
 if (!API_ROOT) {
   throw new Error('Missing required API_ROOT env var');
@@ -35,7 +37,7 @@ const worker = module.exports = {
 
 const MIN_POSTS = 1000,
   RETRY_MULTIPLIER = 3,
-  QUERY_SPAN = 1000 * 60 * 2, // min
+  QUERY_SPAN = 1000 * 60 * JOBSET_QUERYSPAN_MIN, // min
   LOOP_INTERVAL = 1000 * 60, // sec
   MAX_RETRIES = QUERY_SPAN * RETRY_MULTIPLIER / LOOP_INTERVAL;
 
