@@ -1,28 +1,28 @@
-// def: find stored feed data and send to ner
 'use strict';
-const debug = require('debug')('job-scheduler');
+
+// def: start and monitor job sets
+
+const debug = require('../util/log').debug,
+  _ = require('lodash');
+
 try {
   require('dotenv').config({silent: true});
 } catch(ex) {}
 
 const API_ROOT = process.env.API_ROOT;
-const JOBSET_QUERYSPAN_MIN = process.env.JOBSET_QUERYSPAN_MIN?+process.env.JOBSET_QUERYSPAN_MIN:30;
-
-let SYSTEM_START_TIME = +process.env.SYSTEM_START_TIME;
 if (!API_ROOT) {
   throw new Error('Missing required API_ROOT env var');
 }
+
+let SYSTEM_START_TIME = +process.env.SYSTEM_START_TIME;
 if (!SYSTEM_START_TIME) {
-  debug('SYSTEM_START_TIME not set, using current timestamp: %s');
+  debug('SYSTEM_START_TIME not set, using current time');
   SYSTEM_START_TIME = Date.now();
 }
 
-const _ = require('lodash'); //ms
-
 let app,
-    SocialMediaPost,
-    JobSet;
-
+  SocialMediaPost,
+  JobSet;
 
 const worker = module.exports = {
   start(appObject) {
@@ -31,11 +31,13 @@ const worker = module.exports = {
     JobSet = app.models.JobSet;
 
     schedule(SYSTEM_START_TIME);
-
   }
 };
 
-const MIN_POSTS = 1000,
+const JOBSET_QUERYSPAN_MIN = process.env.JOBSET_QUERYSPAN_MIN ?
+  +process.env.JOBSET_QUERYSPAN_MIN :
+  30,
+  MIN_POSTS = 1000,
   RETRY_MULTIPLIER = 3,
   QUERY_SPAN = 1000 * 60 * JOBSET_QUERYSPAN_MIN, // min
   LOOP_INTERVAL = 1000 * 60, // sec
@@ -67,25 +69,19 @@ function schedule(startTime) {
   }
 }
 
-
 function createJobSet(startTime, endTime) {
-  let jobSetsParams =
-    {
-      where:{
-        start_time:startTime,
-        end_time:endTime
-      }
-    };
+  let jobSetsParams = {
+    where: {
+      start_time: startTime,
+      end_time: endTime
+    }
+  };
 
-  let smPostsParams =
-    {
-        timestamp_ms:{
-          between:[startTime,endTime]
-        }
-    };
-
-  jobSetsParams = jobSetsParams;
-  smPostsParams = smPostsParams;
+  let smPostsParams = {
+    timestamp_ms: {
+      between: [startTime, endTime]
+    }
+  };
 
   return JobSet.findOne(jobSetsParams)
     .then(jobSet => {
@@ -98,7 +94,7 @@ function createJobSet(startTime, endTime) {
         return JobSet.create({
           start_time: startTime, end_time: endTime
         })
-          .then(result => updateJobSet(result));
+        .then(updateJobSet);
       }
     });
 
@@ -107,18 +103,15 @@ function createJobSet(startTime, endTime) {
       .then(count => {
         debug('smposts count:', count);
         if (count >= MIN_POSTS) {
-          return JobSet.findOne({where:{id:jobSet.id}})
-            .then(res=>res.updateAttribute('state','running'));
+          return jobSet.updateAttribute('state', 'running');
         } else {
           debug('%s posts and we need %s', count, MIN_POSTS);
           debug('%s of %s retries', jobSet.retries, MAX_RETRIES);
           if (MAX_RETRIES == jobSet.retries) {
-            return JobSet.findOne({where:{id:jobSet.id}})
-              .then(res=>res.updateAttribute('state','skip'));
+            return jobSet.updateAttribute('state', 'skip');
           } else {
             jobSet.retries += 1;
-            return JobSet.findOne({where:{id:jobSet.id}})
-              .then(res=>res.updateAttribute('retries',jobSet.retries));
+            return jobSet.updateAttribute('retries', jobSet.retries);
           }
         }
       })
