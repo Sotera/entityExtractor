@@ -317,11 +317,55 @@
         "ClusterSize": 1,
         "DoBowerInstall": false,
         "EnvironmentVariables": {
-          "PORT": 3004,
+          "PORT": 3003,
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
           "WORKER_SCRIPT": "./workers/job-queue",
-          "DEBUG": "job-scheduler,event-finder"
+          "DEBUG": "*job-scheduler*"
+        },
+        "Scripts": [
+        ]
+      }
+    ]
+  },
+  {
+    "name": "watchman-event-finder",
+    "Image": "lukewendling/strong-pm:2",
+    "DockerFilePath": "",
+    "Hostname": "watchman-event-finder",
+    "ExposedPorts": {
+    },
+    "HostConfig": {
+      "VolumesFrom": [
+        "data-container"
+      ],
+      "Links": [
+        "mongo:mongo",
+        "redis:redis"
+      ],
+      "PortBindings": {
+        "8701/tcp": [
+          {
+            "HostPort": "8704"
+          }
+        ]
+      }
+    },
+    "ExpressApps": [
+      {
+        "GitUrl": "https://github.com/Sotera/watchman.git",
+        "GitSrcBranchName": "master",
+        "StrongLoopBranchName": "deploy",
+        "StrongLoopServerUrl": "http://localhost:8704",
+        "ServiceName": "watchman-event-finder",
+        "ClusterSize": 1,
+        "DoBowerInstall": false,
+        "EnvironmentVariables": {
+          "PORT": 3004,
+          "NODE_ENV": "production",
+          "API_ROOT": "http://172.17.0.1:3003/api",
+          "WORKER_SCRIPT": "./workers/event-finder",
+          "DEBUG": "*event-finder*"
         },
         "Scripts": [
         ]
