@@ -119,7 +119,7 @@
   },
   {
     "name": "dr-manhattan",
-    "Image": "sotera/dr-manhattan:17",
+    "Image": "sotera/dr-manhattan:18",
     "DockerFilePath": "",
     "Hostname": "dr-manhattan",
     "HostConfig": {
