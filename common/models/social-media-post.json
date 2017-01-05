@@ -37,10 +37,14 @@
     "validateUpsert": true
   },
   "mixins": {
-    "DestroyAll": {},
-    "Timestamp": {}
+    "DestroyAll": {}
   },
   "properties": {
+    "system_created": {
+      "type": "date",
+      "default": "$now",
+      "description": "internal system timestamp. not using Timestamp mixin, to clearly differentiate from original post time."
+    },
     "post_id": {
       "type": "string",
       "required": true

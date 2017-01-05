@@ -62,6 +62,6 @@ if __name__ == '__main__':
         syntax_vectorizer['en'] = SyntaxVectorizer(args.modelPath, args.englishModel)
     if args.arabicModel != '':
         syntax_vectorizer['ar'] = SyntaxVectorizer(args.modelPath, args.arabicModel)
-    dispatcher = Dispatcher(redis_host='redis',
-        process_func=process_message, channels=['genie:feature_txt'])
+    dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
+        queues=['genie:feature_txt'])
     dispatcher.start()

@@ -1,13 +1,35 @@
-import sys, os, argparse, requests
-sys.path.append(os.path.join(os.path.dirname(__file__), "./"))
-from event_to_kafka import stream_events
+import sys, os, requests, json
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
+from redis_dispatcher import Dispatcher
 from loopy import Loopy
+sys.path.append(os.path.join(os.path.dirname(__file__), "./"))
 from louvaine import Louvaine
 
-def create_events(host, ts_start, ts_end, kafka_url, kafka_topic, debug=False):
+
+def set_err(job, msg):
+    job['state'] = 'error'
+    job['data'] = []
+    job['error'] = msg
+
+
+def err_check(job):
+    required = {'host', 'start_time', 'end_time'}
+    if not required.issubset(job):
+        set_err(job, 'Missing some required fields {}'.format(required))
+
+
+def process_message(key,job):
+    err_check(job)
+    if job['state'] == 'error':
+        return
+
+    host = job['host']
+    ts_start = job['start_time']
+    ts_end = job['end_time']
+    debug = False
+
     if host[-1] != '/': host += '/'
-    api_path = host + 'api/'
+    api_path = host
     query_params = [{
         "query_type": "between",
         "property_name": "end_time_ms",
@@ -16,7 +38,9 @@ def create_events(host, ts_start, ts_end, kafka_url, kafka_topic, debug=False):
     com = Louvaine(api_path,
        '{}extract/entities'.format(api_path),
        '{}geocoder/forward-geo'.format(api_path))
-    lp_n = Loopy('{}aggregateClusters'.format(api_path), query_params, page_size=500)
+
+    # this one line was being run..not sure why..as it was unused???
+    # lp_n = Loopy('{}aggregateClusters'.format(api_path), query_params, page_size=500)
 
     #print "getting aggregate clusters"
     #while True:
@@ -28,6 +52,13 @@ def create_events(host, ts_start, ts_end, kafka_url, kafka_topic, debug=False):
 
     nodes_to_add = set()
     lp_e = Loopy('{}clusterLinks'.format(api_path), query_params, page_size=500)
+
+    if lp_e.result_count == 0:
+        print 'No data to process'
+        job['data'] = []
+        job['error'] = 'No data found to process.'
+        job['state'] = 'error'
+        return
 
     print "getting aggregate cluster links"
     while True:
@@ -50,20 +81,23 @@ def create_events(host, ts_start, ts_end, kafka_url, kafka_topic, debug=False):
     print "Finding communities from {} nodes and {} edges.".format(len(com.graph.nodes()), len(com.graph.edges()))
     l_com = com.save_communities()
     print "Communities Saved!"
-    if kafka_url is not None and kafka_topic is not None:
+    if 'kafka_url' in job.keys() and 'kafka_topic' in job.keys():
+        kafka_url = job['kafka_url']
+        kafka_topic = job['kafka_topic']
         print "Sending events to kafka"
+        print "kafka_url"
+        print kafka_url
+        print "kafka_topic"
+        print kafka_topic
+        from event_to_kafka import stream_events
         stream_events(l_com.values(), kafka_url, kafka_topic, debug=debug)
 
+    job['data'] = json.dumps({})  # no need to save anything to job
+    job['state'] = 'processed'
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("host", help="protocol + host - Ex. http://localhost:3000 or http://watchman:3003")
-    parser.add_argument("start_time", type=int, help="Milisecond timestamp for query start")
-    parser.add_argument("end_time", type=int,help="Milisecond timestamp for query end")
-    parser.add_argument("-kafka_url", type=str, help="If writing events to kafka, specify url (default=None)", default=None)
-    parser.add_argument("-kafka_topic", type=str, help="If writing event to kafka, specify topic (default=None)", default=None)
-    parser.add_argument("--debug", help="Switch on for debugging", action='store_true')
 
-    args = parser.parse_args()
-
-    create_events(args.host, args.start_time, args.end_time, args.kafka_url, args.kafka_topic, debug=args.debug)
+if __name__ == '__main__':
+    dispatcher = Dispatcher(redis_host='redis',
+                            process_func=process_message,
+                            queues=['genie:eventfinder'])
+    dispatcher.start()

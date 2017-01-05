@@ -56,6 +56,6 @@ def process_message(key, job):
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
                             process_func=process_message,
-                            channels=['genie:linker'])
+                            queues=['genie:linker'])
     dispatcher.start()
     # process_message('abc', {'state':'new', 'job_id':'13', 'start_time_ms':1570916185000, 'end_time_ms':1570916187000, 'query_url':'http://172.17.0.1:3003/api/postsclusters/', 'result_url':'http://172.17.0.1:3003/clusterlinks/'})

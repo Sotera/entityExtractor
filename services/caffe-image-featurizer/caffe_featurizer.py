@@ -16,7 +16,7 @@ class CaffeFeaturizer:
         self.model_path = os.getenv('CAFFE_MODEL_PATH', self.caffe_root + 'models/bvlc_reference_caffenet/')
         self.model = os.getenv('CAFFE_MODEL', 'bvlc_reference_caffenet.caffemodel')
 
-        if os.path.isfile("/proc/driver/nvidia/version"):
+        if int(os.getenv('GPU_ON') or 0):
             caffe.set_mode_gpu()
         else:
             caffe.set_mode_cpu()
@@ -24,7 +24,7 @@ class CaffeFeaturizer:
         transformer = caffe.io.Transformer({'data': self.net.blobs['data'].data.shape})
         transformer.set_transpose('data', (2, 0, 1))
         transformer.set_mean('data', np.load(self.caffe_root +
-                                             'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1))
+            'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1))
         transformer.set_raw_scale('data', 255)
         transformer.set_channel_swap('data', (2, 1, 0))
         self.transformer = transformer

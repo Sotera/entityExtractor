@@ -4,14 +4,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from loopy import Loopy
 
 
-
 class HashtagClusters:
     #prior_timeperiod_ms is the time, in miliseconds, to search for previous hashtag clusters of the same type.
-    def __init__(self, min_posts, query_url, start_time_ms, prior_ms=604800000, likelihood_threshold=0.7):
+    def __init__(self, min_posts, result_url, start_time_ms, prior_ms=604800000, likelihood_threshold=0.7):
         self.hash_groups = {}
         self.min_post = min_posts
         self.total_posts = 0
-        self.url = query_url if query_url[-1] == "/" else query_url+"/"
+        self.url = result_url if result_url[-1] == "/" else result_url+"/"
         self.prior_ms = prior_ms
         self.start_ms = int(start_time_ms)
         self.l_thresh = likelihood_threshold
@@ -35,7 +34,7 @@ class HashtagClusters:
             "property_name":"end_time_ms",
             "query_value":[q_start_time, self.start_ms]
         }]
-        lp = Loopy(self.url + 'postsClusters', query_params, page_size=500)
+        lp = Loopy(self.url, query_params)
         #Default parameters are slight to favor real data
         alpha = 0.00001
         beta = 1
@@ -95,7 +94,7 @@ class HashtagClusters:
                 vSim['stats']['total_posts'] = self.total_posts
                 lam = float(n_terms)/self.total_posts
                 vSim['stats']['likelihood'] = gdtr(vSim['stats']['prior_beta'], vSim['stats']['prior_alpha'], lam)
-                vSim['stats']['is_unlikely'] = str(vSim['stats']['likelihood'] > self.l_thresh)
+                vSim['stats']['is_unlikely'] = 1 if vSim['stats']['likelihood'] > self.l_thresh else 0
                 d0[k] = vSim
         return d0
 

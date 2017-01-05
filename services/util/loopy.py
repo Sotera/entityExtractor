@@ -74,11 +74,12 @@ class Loopy:
     def get_count(self):
         count_query_string = 'count' + self.get_query_string(filter_prefix='')
         try:
+            result = None # init for err handler
             result = requests.get(self.query_url + count_query_string).json()
             return result['count']
         except Exception as e:
             print(e)
-            print('Woops! Loopy says: error getting count from endpoint')
+            print('Woops! Loopy says: error getting count from endpoint', result)
             return 0
 
     def get_next_page(self):

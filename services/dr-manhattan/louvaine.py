@@ -57,8 +57,11 @@ class Louvaine:
         for doc in page:
             if doc['featurizer'] != cluster['data_type']:
                 continue
-
-            r = requests.post(self.ent_url, data={'text':doc['text']})
+            r = None
+            try:
+                r = requests.post(self.ent_url, data={'text':doc['text']})
+            except:
+                print 'error getting entities, ignoring'
 
             if 'campaigns' in doc:
                 for cam in doc['campaigns']:
@@ -67,13 +70,14 @@ class Louvaine:
                     else:
                         r_o["campaigns"]["ids"][cam] = 1
 
-            for res in r.json():
-                if res['tag'] != 'LOCATION':
-                    continue
-                rg = requests.post(self.geo_url, data={'address':res['label']})
-                for place in rg.json():
-                    places.append(place)
-                    break
+            if r is not None:
+                for res in r.json():
+                    if res['tag'] != 'LOCATION':
+                        continue
+                    rg = requests.post(self.geo_url, data={'address':res['label']})
+                    for place in rg.json():
+                        places.append(place)
+                        break
 
             for word in [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]:
                 if word[0] == '#':
@@ -96,6 +100,8 @@ class Louvaine:
                 r_o['keywords'][k] = v
 
         for place in places:
+            if type(place) is not dict:
+                continue
             place_name = ''
             weight = 0.0
             if 'city' in place.keys():

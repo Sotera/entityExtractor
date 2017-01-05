@@ -1,7 +1,7 @@
 [
   {
     "name": "data-container",
-    "Image": "lukewendling/data-container:2",
+    "Image": "lukewendling/data-container:3",
     "DockerFilePath": "",
     "Hostname": "data-container",
     "HostConfig": {
@@ -69,7 +69,7 @@
   },
   {
     "name": "text-featurizer",
-    "Image": "sotera/rorschach:latest",
+    "Image": "sotera/rorschach:8",
     "DockerFilePath": "",
     "Hostname": "text-featurizer",
     "HostConfig": {
@@ -80,11 +80,11 @@
   },
   {
     "name": "hashtag-clusterer",
-    "Image": "sotera/comedian:15",
+    "Image": "sotera/comedian:18",
     "DockerFilePath": "",
     "Hostname": "hashtag-clusterer",
     "Env": [
-      "TRUNCATE_POSTS=1"
+      "TRUNCATE_POSTS=0"
     ],
     "HostConfig": {
       "Links": [
@@ -108,7 +108,7 @@
   },
   {
     "name": "cluster-linker",
-    "Image": "sotera/ozymandias:3",
+    "Image": "sotera/ozymandias:5",
     "DockerFilePath": "",
     "Hostname": "cluster-linker",
     "HostConfig": {
@@ -119,12 +119,23 @@
   },
   {
     "name": "feature-sim",
-    "Image": "sotera/feature-sim:8",
+    "Image": "sotera/feature-sim:10",
     "DockerFilePath": "",
     "Hostname": "feature-sim",
     "Env": [
-      "TRUNCATE_POSTS=1"
+      "TRUNCATE_POSTS=0"
     ],
+    "HostConfig": {
+      "Links": [
+        "redis:redis"
+      ]
+    }
+  },
+  {
+    "name": "dr-manhattan",
+    "Image": "sotera/dr-manhattan:19",
+    "DockerFilePath": "",
+    "Hostname": "dr-manhattan",
     "HostConfig": {
       "Links": [
         "redis:redis"
@@ -148,7 +159,7 @@
   },
   {
     "name": "image-fetcher",
-    "Image": "sotera/image-fetcher:2",
+    "Image": "sotera/image-fetcher:5",
     "DockerFilePath": "",
     "Hostname": "image-fetcher",
     "HostConfig": {
@@ -162,7 +173,7 @@
   },
   {
     "name": "aggregate-clustering",
-    "Image": "sotera/aggregate-clustering:4",
+    "Image": "sotera/aggregate-clustering:6",
     "DockerFilePath": "",
     "Hostname": "aggregate-clustering",
     "HostConfig": {
@@ -173,9 +184,12 @@
   },
   {
     "name": "caffe",
-    "Image": "sotera/caffe_redis_client:14",
+    "Image": "sotera/caffe_redis_client:17",
     "DockerFilePath": "",
     "Hostname": "caffe",
+    "Env": [
+      "GPU_ON=0"
+    ],
     "HostConfig": {
       "VolumesFrom": [
         "data-container"
@@ -252,11 +266,6 @@
         "redis:redis"
       ],
       "PortBindings": {
-        "3001/tcp": [
-          {
-            "HostPort": "3002"
-          }
-        ],
         "8701/tcp": [
           {
             "HostPort": "8702"
@@ -317,10 +326,55 @@
         "ClusterSize": 1,
         "DoBowerInstall": false,
         "EnvironmentVariables": {
+          "PORT": 3003,
+          "NODE_ENV": "production",
+          "API_ROOT": "http://172.17.0.1:3003/api",
+          "WORKER_SCRIPT": "./workers/job-queue",
+          "DEBUG": "*job-scheduler*"
+        },
+        "Scripts": [
+        ]
+      }
+    ]
+  },
+  {
+    "name": "watchman-event-finder",
+    "Image": "lukewendling/strong-pm:2",
+    "DockerFilePath": "",
+    "Hostname": "watchman-event-finder",
+    "ExposedPorts": {
+    },
+    "HostConfig": {
+      "VolumesFrom": [
+        "data-container"
+      ],
+      "Links": [
+        "mongo:mongo",
+        "redis:redis"
+      ],
+      "PortBindings": {
+        "8701/tcp": [
+          {
+            "HostPort": "8704"
+          }
+        ]
+      }
+    },
+    "ExpressApps": [
+      {
+        "GitUrl": "https://github.com/Sotera/watchman.git",
+        "GitSrcBranchName": "master",
+        "StrongLoopBranchName": "deploy",
+        "StrongLoopServerUrl": "http://localhost:8704",
+        "ServiceName": "watchman-event-finder",
+        "ClusterSize": 1,
+        "DoBowerInstall": false,
+        "EnvironmentVariables": {
           "PORT": 3004,
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
-          "WORKER_SCRIPT": "./workers/job-queue"
+          "WORKER_SCRIPT": "./workers/event-finder",
+          "DEBUG": "*event-finder*"
         },
         "Scripts": [
         ]

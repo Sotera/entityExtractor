@@ -1,8 +1,9 @@
 'use strict';
+
 angular.module('com.module.core')
-// add behavior to img node to hover above or below original img
 .directive('hoverImage', hoverImageDirective);
 
+// add behavior to img node to hover above or below original img
 function hoverImageDirective() {
   var $body = $('body'); // abs. position from body
 
