@@ -19,6 +19,8 @@ function DiagramCtrl($scope, AggregateCluster, SocialMediaPost, $q) {
 
         if (cluster.data_type === 'text'){
           viz.forText();
+        } else if (cluster.data_type === 'domain'){
+          viz.forDomains();
         } else if (cluster.data_type === 'hashtag'){
           viz.forHashtags();
         } else if (cluster.data_type === 'image'){
@@ -75,6 +77,13 @@ function DiagramCtrl($scope, AggregateCluster, SocialMediaPost, $q) {
           $scope.showSpinner = false;
         })
         .catch(console.error);
+      },
+
+      forDomains() {
+        let terms = _(clusters).map('term')
+          .flatten().compact().value().join(', ');
+
+        $scope.clusterTerm = terms;
       },
 
       forHashtags() {

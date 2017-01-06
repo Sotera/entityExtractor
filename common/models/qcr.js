@@ -178,6 +178,7 @@ module.exports = function(Qcr) {
     processedAttrs.text = attrs.text || '';
     processedAttrs.image_urls = attrs.image_urls || [];
     processedAttrs.hashtags = attrs.hashtags || [];
+    processedAttrs.domains = attrs.domains || [];
 
     // Twitter-specific modifications
     processedAttrs = preprocessor(processedAttrs);
@@ -193,6 +194,10 @@ module.exports = function(Qcr) {
     }
     if (processedAttrs.hashtags.length > 0) {
       processedAttrs.featurizer = 'hashtag';
+      createActions.push(SocialMediaPost.create(processedAttrs));
+    }
+    if (processedAttrs.domains.length > 0) {
+      processedAttrs.featurizer = 'domain';
       createActions.push(SocialMediaPost.create(processedAttrs));
     }
 

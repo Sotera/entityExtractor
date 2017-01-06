@@ -35,7 +35,7 @@ function clusterDetailDirective(SocialMediaPost, $window) {
           where: {
             id: postId
           },
-          fields: ['primary_image_url', 'text', 'hashtags', 'post_url']
+          fields: ['primary_image_url', 'text', 'hashtags', 'post_url', 'domains']
         }
       })
       .$promise
@@ -49,6 +49,9 @@ function clusterDetailDirective(SocialMediaPost, $window) {
             break;
           case 'text':
             $target.text(post.text);
+            break;
+          case 'domain':
+            $target.text(post.domains);
             break;
           case 'hashtag':
             $target.text(post.hashtags);

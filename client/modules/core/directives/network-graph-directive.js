@@ -11,6 +11,7 @@ function networkGraphDirective() {
 
 function networkGraphController($scope, ClusterLink) {
   var colors = {
+    domain: 'SeaGreen',
     hashtag: 'Goldenrod',
     text: 'SteelBlue',
     image: 'Maroon'
