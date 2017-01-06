@@ -28,9 +28,12 @@ def process(job):
             # NOTE: a postscluster can be in 0 or 1 aggcluster
             if 'stats' in posts_cluster and posts_cluster['stats']['is_unlikely'] == 0:
                 continue
+
+            posts_cluster_aggregated = False
             for agg_cluster in aggregate_clusters:
                 # break if we've already matched this postscluster with an aggcluster
                 if posts_cluster['id'] in agg_cluster['posts_clusters_ids']:
+                    posts_cluster_aggregated = True
                     break
                 aggregation = try_aggregate(agg_cluster, posts_cluster, job)
                 if aggregation:
@@ -56,10 +59,18 @@ def process(job):
                             },
                             method='PUT'
                         )
+                        posts_cluster_aggregated = True
                         break
                     except:
-                        print 'error saving to aggregate cluster, it was probably too large.  Moving on.'
-            else:
+                        aggregate_clusters_loopy.post_result(
+                            url='/{}'.format(agg_cluster['id']),
+                            json={'state': 'closed'},
+                            method='PUT'
+                        )
+                        continue
+                        print 'error saving to aggregate cluster, it was probably too large.  Closing it down and Moving on.'
+
+            if not posts_cluster_aggregated:
                 # no 'open' aggregate_clusters, or this postscluster didn't match
                 # any aggregates
                 aggregate_clusters_loopy.post_result(
@@ -100,9 +111,9 @@ def shut_down_aggregates(job):
             break
 
         for agg_cluster in page:
-            agg_cluster_age = int(agg_cluster['end_time_ms']) - int(agg_cluster['start_time_ms'])
+            agg_cluster_age = int(job['end_time_ms']) - int(agg_cluster['start_time_ms'])
             cutoff_time_ms = int(job['end_time_ms']) - int(job['max_time_lapse_ms'])
-            if int(agg_cluster['end_time_ms']) < cutoff_time_ms or agg_cluster_age > int(job['max_agg_cluster_age_ms']):
+            if int(agg_cluster['end_time_ms']) < cutoff_time_ms or agg_cluster_age >= int(job['max_agg_cluster_age_ms']):
                 loopy.post_result(
                     url='/{}'.format(agg_cluster['id']),
                     json={'state': 'closed'},

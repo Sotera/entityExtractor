@@ -159,7 +159,7 @@
   },
   {
     "name": "aggregate-clustering",
-    "Image": "sotera/aggregate-clustering:8",
+    "Image": "sotera/aggregate-clustering:9",
     "DockerFilePath": "",
     "Hostname": "aggregate-clustering",
     "HostConfig": {
