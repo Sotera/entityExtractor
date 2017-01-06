@@ -32,7 +32,7 @@ class SentimentFilter:
             try:
                 return filter(lambda x: len(x)>1, Text(caption).words)
             except:
-                print caption
+                print 'error in tokenize returning empty array'
                 return []
         else:
             return []
@@ -48,7 +48,7 @@ class SentimentFilter:
                 caption = re.sub('[#]', ' #',caption,flags=re.UNICODE)
                 return filter(lambda x: len(x)>1, Text(caption).words)
             except:
-                print caption
+                print 'error in pres_tokenize returning empty array'
                 return []
         else:
             return []

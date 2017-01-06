@@ -30,6 +30,7 @@ def mongo_to_kafka(rec, campaign_thresh = 0.7, debug=False):
             'label':rec['hashtags'][0] if len(rec['hashtags']) > 0 else 'None',
             'startDate': datetime.fromtimestamp(rec['start_time_ms']/1000.0).isoformat(),
             'endDate': datetime.fromtimestamp(rec['end_time_ms']/1000.0).isoformat(),
+            'domains': rec['domains'],
             'hashtags': rec['hashtags'],
             'keywords':rec['keywords'],
             'urls':rec['urls'],

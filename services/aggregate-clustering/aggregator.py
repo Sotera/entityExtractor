@@ -108,7 +108,7 @@ def shut_down_aggregates(job):
 
 def try_aggregate(agg_cluster, posts_cluster, job):
     # hashtags don't calc average_similarity_vector
-    if job['data_type'] == 'hashtag':
+    if job['data_type'] in ['hashtag', 'domain']:
         # aggregate if exact match
         return agg_cluster['term'] == posts_cluster['term']
     else:

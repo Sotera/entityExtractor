@@ -114,6 +114,10 @@ function EventsCtrl($scope, AggregateCluster, Extract, Geocoder, SocialMediaPost
         $scope.eventPoints = features;
       },
 
+      forDomains() {
+        $scope.clusterTerm = $scope.selectedEvent.domains.join(', ');
+      },
+
       forHashtags() {
         $scope.clusterTerm = $scope.selectedEvent.hashtags.join(', ');
       },

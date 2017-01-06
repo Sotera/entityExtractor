@@ -186,6 +186,7 @@ class Louvaine:
                     'start_time_ms': clust['start_time_ms'],
                     'end_time_ms':clust['end_time_ms'],
                     'aggregate_cluster_ids':[n],
+                    'domains':{},
                     'hashtags':{},
                     'keywords':{},
                     'campaigns':{"total":0, 'ids':{}},
@@ -195,11 +196,16 @@ class Louvaine:
                     'importance_score':1.0,
                     'topic_message_count':len(clust['similar_post_ids'])}
 
-            #Expand Summary data (hashtags, keywords, images, urls, geo)
+            #Expand Summary data (hashtags, keywords, images, urls, geo, domains)
             if clust['data_type'] == 'hashtag':
                 d1[com]['hashtags'][clust['term']] = len(clust['similar_post_ids'])
                 images |= self.get_img_sum(clust)
                 #Add full text analysis, many communities have no image/text nodes
+                self.get_text_sum(clust, d1[com])
+            elif clust['data_type'] == 'domain':
+                # TODO: Verify we don't need hashtag or a get_domain_sum function
+                d1[com]['domains'][clust['term']] = len(clust['similar_post_ids'])
+                images |= self.get_img_sum(clust)
                 self.get_text_sum(clust, d1[com])
 
             elif clust['data_type'] == 'image':
@@ -238,6 +244,12 @@ class Louvaine:
                 d1[com]['keywords'] = l_terms
 
             d1[com]['urls'] = list(d1[com]['urls'])
+
+            l_domains = map(lambda x: x[0], sorted([(k, v) for k, v in d1[com]['domains'].iteritems()], key=lambda x: x[1]))
+            if len(l_domains) > 10:
+                d1[com]['domains'] = l_domains[:10]
+            else:
+                d1[com]['domains'] = l_domains
 
             temp = []
             for k, v in d1[com]['location'].iteritems():

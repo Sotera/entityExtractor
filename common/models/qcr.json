@@ -31,6 +31,12 @@
       "type": "string",
       "default": ""
     },
+    "domains": {
+      "type": [
+        "string"
+      ],
+      "default": []
+    },
     "hashtags": {
       "type": [
         "string"
