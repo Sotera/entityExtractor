@@ -98,8 +98,9 @@ def shut_down_aggregates(job):
             break
 
         for agg_cluster in page:
+            agg_cluster_age = int(agg_cluster['end_time_ms']) - int(agg_cluster['start_time_ms'])
             cutoff_time_ms = int(job['end_time_ms']) - int(job['max_time_lapse_ms'])
-            if int(agg_cluster['end_time_ms']) < cutoff_time_ms:
+            if int(agg_cluster['end_time_ms']) < cutoff_time_ms or agg_cluster_age > int(job['max_agg_cluster_age_ms']):
                 loopy.post_result(
                     url='/{}'.format(agg_cluster['id']),
                     json={'state': 'closed'},
@@ -108,6 +109,8 @@ def shut_down_aggregates(job):
 
 def try_aggregate(agg_cluster, posts_cluster, job):
     # hashtags don't calc average_similarity_vector
+    if int(agg_cluster['end_time_ms']) - int(agg_cluster['start_time_ms']) > int(job['max_agg_cluster_age_ms']):
+        return False
     if job['data_type'] == 'hashtag':
         # aggregate if exact match
         return agg_cluster['term'] == posts_cluster['term']

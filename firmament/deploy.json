@@ -159,7 +159,7 @@
   },
   {
     "name": "aggregate-clustering",
-    "Image": "sotera/aggregate-clustering:6",
+    "Image": "sotera/aggregate-clustering:7",
     "DockerFilePath": "",
     "Hostname": "aggregate-clustering",
     "HostConfig": {
@@ -218,7 +218,7 @@
     "ExpressApps": [
       {
         "GitUrl": "https://github.com/Sotera/watchman.git",
-        "GitSrcBranchName": "master",
+        "GitSrcBranchName": "89-agg-cluster-fix",
         "StrongLoopBranchName": "deploy",
         "StrongLoopServerUrl": "http://localhost:8701",
         "ServiceName": "watchman",
@@ -262,7 +262,7 @@
     "ExpressApps": [
       {
         "GitUrl": "https://github.com/Sotera/watchman.git",
-        "GitSrcBranchName": "master",
+        "GitSrcBranchName": "89-agg-cluster-fix",
         "StrongLoopBranchName": "deploy",
         "StrongLoopServerUrl": "http://localhost:8702",
         "ServiceName": "watchman",
@@ -305,7 +305,7 @@
     "ExpressApps": [
       {
         "GitUrl": "https://github.com/Sotera/watchman.git",
-        "GitSrcBranchName": "master",
+        "GitSrcBranchName": "89-agg-cluster-fix",
         "StrongLoopBranchName": "deploy",
         "StrongLoopServerUrl": "http://localhost:8703",
         "ServiceName": "watchman-queue",
@@ -316,7 +316,8 @@
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
           "WORKER_SCRIPT": "./workers/job-queue",
-          "DEBUG": "*job-scheduler*"
+          "DEBUG": "*job-scheduler*",
+          "JOBSET_QUERYSPAN_MIN":2
         },
         "Scripts": [
         ]
@@ -349,7 +350,7 @@
     "ExpressApps": [
       {
         "GitUrl": "https://github.com/Sotera/watchman.git",
-        "GitSrcBranchName": "master",
+        "GitSrcBranchName": "89-agg-cluster-fix",
         "StrongLoopBranchName": "deploy",
         "StrongLoopServerUrl": "http://localhost:8704",
         "ServiceName": "watchman-event-finder",
@@ -360,7 +361,8 @@
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
           "WORKER_SCRIPT": "./workers/event-finder",
-          "DEBUG": "*event-finder*"
+          "DEBUG": "*event-finder*",
+          "EVENT_FINDER_INTERVAL_MIN":5
         },
         "Scripts": [
         ]
