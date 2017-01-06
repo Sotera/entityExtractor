@@ -45,18 +45,20 @@ def process(job):
                     agg_cluster['similar_post_ids'] = list(set(agg_cluster['similar_post_ids']))
                     # remove nulls and dupes
                     agg_cluster['posts_clusters_ids'] = [x for x in set(agg_cluster['posts_clusters_ids']) if x is not None]
-
-                    aggregate_clusters_loopy.post_result(
-                        url='/{}'.format(agg_cluster['id']),
-                        json={
-                            'average_similarity_vector': agg_cluster['average_similarity_vector'],
-                            'end_time_ms': agg_cluster['end_time_ms'],
-                            'posts_clusters_ids': agg_cluster['posts_clusters_ids'],
-                            'similar_post_ids': agg_cluster['similar_post_ids']
-                        },
-                        method='PUT'
-                    )
-                    break
+                    try:
+                        aggregate_clusters_loopy.post_result(
+                            url='/{}'.format(agg_cluster['id']),
+                            json={
+                                'average_similarity_vector': agg_cluster['average_similarity_vector'],
+                                'end_time_ms': agg_cluster['end_time_ms'],
+                                'posts_clusters_ids': agg_cluster['posts_clusters_ids'],
+                                'similar_post_ids': agg_cluster['similar_post_ids']
+                            },
+                            method='PUT'
+                        )
+                        break
+                    except:
+                        print 'error saving to aggregate cluster, it was probably too large.  Moving on.'
             else:
                 # no 'open' aggregate_clusters, or this postscluster didn't match
                 # any aggregates
