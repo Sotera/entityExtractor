@@ -67,8 +67,8 @@ def process(job):
                             json={'state': 'closed'},
                             method='PUT'
                         )
-                        continue
                         print 'error saving to aggregate cluster, it was probably too large.  Closing it down and Moving on.'
+                        continue
 
             if not posts_cluster_aggregated:
                 # no 'open' aggregate_clusters, or this postscluster didn't match
