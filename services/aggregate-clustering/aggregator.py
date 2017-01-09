@@ -29,11 +29,9 @@ def process(job):
             if 'stats' in posts_cluster and posts_cluster['stats']['is_unlikely'] == 0:
                 continue
 
-            posts_cluster_aggregated = False
             for agg_cluster in aggregate_clusters:
                 # break if we've already matched this postscluster with an aggcluster
                 if posts_cluster['id'] in agg_cluster['posts_clusters_ids']:
-                    posts_cluster_aggregated = True
                     break
                 aggregation = try_aggregate(agg_cluster, posts_cluster, job)
                 if aggregation:
@@ -59,7 +57,6 @@ def process(job):
                             },
                             method='PUT'
                         )
-                        posts_cluster_aggregated = True
                         break
                     except:
                         aggregate_clusters_loopy.post_result(
@@ -67,10 +64,9 @@ def process(job):
                             json={'state': 'closed'},
                             method='PUT'
                         )
-                        print 'error saving to aggregate cluster, it was probably too large.  Closing it down and Moving on.'
+                        print('error saving to aggregate cluster, it was probably too large.  Closing it down and Moving on.')
                         continue
-
-            if not posts_cluster_aggregated:
+            else:
                 # no 'open' aggregate_clusters, or this postscluster didn't match
                 # any aggregates
                 aggregate_clusters_loopy.post_result(
