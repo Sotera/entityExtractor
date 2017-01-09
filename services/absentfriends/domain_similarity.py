@@ -35,7 +35,7 @@ class DomainClusters:
             "property_name":"end_time_ms",
             "query_value":[q_start_time, self.start_ms]
         }]
-        lp = Loopy(self.url + 'postsClusters', query_params, page_size=500)
+        lp = Loopy(self.url, query_params)
         #Default parameters are slight to favor real data
         alpha = 0.00001
         beta = 1
@@ -95,7 +95,7 @@ class DomainClusters:
                 vSim['stats']['total_posts'] = self.total_posts
                 lam = float(n_terms)/self.total_posts
                 vSim['stats']['likelihood'] = gdtr(vSim['stats']['prior_beta'], vSim['stats']['prior_alpha'], lam)
-                vSim['stats']['is_unlikely'] = str(vSim['stats']['likelihood'] > self.l_thresh)
+                vSim['stats']['is_unlikely'] = str(vSim['stats']['likelihood'] > self.l_thresh) else 0
                 d0[k] = vSim
         return d0
 
