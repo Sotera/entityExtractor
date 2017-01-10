@@ -33,16 +33,20 @@ def reverse_idna(A):
     return A
 
 def get_domains(urlList):
+    print "absentfriends/main.py:get_domains" + repr((urlist))
     result = set([])
     for url in urlList:
         A = url.split(UNICODE_PERIOD)
         if len(A) > 2:
             A = A[1:]
-        dn = UNICODE_PERIOD.join(reverse_idna(A))
+        dn = UNICODE_PERIOD.join(A)
         result.add(dn)
+    
+    print "absentfriends/main.py:get_domains returns " + repr(list(result))
     return list(result)
         
 def process_message(key, job):
+    print "absentfriends/main.py:process_message" + repr((key, job))
     # if type == 'featurizer', immediately process and return b/c domains
     # are not featurized. allows system to continue with clustering process.
     if job.get('type') == 'featurizer':
@@ -117,6 +121,7 @@ def process_message(key, job):
         cluster['data_type'] = 'domain'
 
         try:
+            "absentfriends/main.py:process_message loopy.post_result" + repr(job['query_url'] + "postsClusters" if job['query_url'][-1]=="/" else "/postsClusters", cluster)
             loopy.post_result(job['query_url'] + "postsClusters" if job['query_url'][-1]=="/" else "/postsClusters", cluster)
         except Exception as e:
             # TODO: we should set data = None when error.

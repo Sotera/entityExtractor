@@ -15,8 +15,11 @@ class DomainClusters:
         self.prior_ms = prior_ms
         self.start_ms = int(start_time_ms)
         self.l_thresh = likelihood_threshold
+        print "DomainClusters.__init__" + repr( (self, min_posts, query_url, start_time_ms, prior_ms, likelihood_threshold) )
 
     def get_priors(self, term):
+        print "DomainClusters.get_priors" + repr( (self, term) )
+        
         q_start_time = self.start_ms - self.prior_ms
 
         term = unicode(term)
@@ -42,7 +45,9 @@ class DomainClusters:
         while True:
             page = lp.get_next_page()
             if page is None:
+                print "DomainClusters.get_priors: " + "page is None"
                 break
+            print "DomainClusters.get_priors: len(page)=" + str(len(page))
             for doc in page:
                 alpha += len(doc['similar_post_ids'])
                 beta += doc['stats']['total_posts']
@@ -50,6 +55,7 @@ class DomainClusters:
 
 
     def process_vector(self, vector_id, post_id, vector):
+        print "DomainClusters.process_vector" + repr( (self, vector_id, post_id, vector) )
         self.total_posts += 1
         for term in vector:
             try:
@@ -71,6 +77,7 @@ class DomainClusters:
                 print "Error processing term:", term
 
     def get_deletable_ids(self):
+        print "DomainClusters.get_deletable_ids" + repr( (self) )
         candidate_ids = []
         deletable_ids = []
         valid_clusters = self.get_clusters()
@@ -84,10 +91,12 @@ class DomainClusters:
                     if post_id in deletable_ids:
                         deletable_ids.remove(post_id)
                     continue
+        print "DomainClusters.get_deletable_ids:  len(deletable_ids)=" + str(len(deletable_ids))
         return deletable_ids
 
 
     def get_clusters(self):
+        print "DomainClusters.get_clusters" + repr( (self) )
         d0 = {}
         for k, vSim in self.tag_groups.iteritems():
             n_terms = len(vSim['similar_post_ids'])
@@ -97,6 +106,8 @@ class DomainClusters:
                 vSim['stats']['likelihood'] = gdtr(vSim['stats']['prior_beta'], vSim['stats']['prior_alpha'], lam)
                 vSim['stats']['is_unlikely'] = str(vSim['stats']['likelihood'] > self.l_thresh) else 0
                 d0[k] = vSim
+        
+        print "DomainClusters.get_clusters returns" + repr( d0 )
         return d0
 
     def to_json(self):
