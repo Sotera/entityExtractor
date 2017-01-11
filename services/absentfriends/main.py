@@ -140,6 +140,6 @@ def delete_noise(noise_clusters, loopy):
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
                             process_func=process_message,
-                            channels=['genie:feature_domain', 'genie:clust_domain'])
+                            queues=['genie:feature_domain', 'genie:clust_domain'])
     dispatcher.start()
 
