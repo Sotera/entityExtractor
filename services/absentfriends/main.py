@@ -12,6 +12,8 @@ def set_err(job, msg):
     job['error'] = msg
 
 def err_check(job):
+    if 'result_url' not in job.keys():
+        set_err(job, "No 'result_url' in job fields")
     if 'query_url' not in job.keys():
         set_err(job, "No 'query_url' in job fields")
     if 'start_time_ms' not in job.keys():
@@ -33,19 +35,22 @@ def reverse_idna(A):
     return A
 
 def get_domains(urlList):
-    print "absentfriends/main.py:get_domains" + repr((urlist))
+    print "absentfriends/main.py:get_domains" + repr((urlList))
     result = set([])
     for url in urlList:
-        A = url.split(UNICODE_PERIOD)
-        if len(A) > 2:
-            A = A[1:]
-        dn = UNICODE_PERIOD.join(A)
-        result.add(dn)
+        if 'expanded_url' in url and url['expanded_url'] is not None:
+            A = url['expanded_url'].split(UNICODE_PERIOD)
+            if len(A) > 2:
+                A = A[1:]
+            dn = UNICODE_PERIOD.join(A)
+            result.add(dn)
     
     print "absentfriends/main.py:get_domains returns " + repr(list(result))
     return list(result)
         
 def process_message(key, job):
+
+
     print "absentfriends/main.py:process_message" + repr((key, job))
     # if type == 'featurizer', immediately process and return b/c domains
     # are not featurized. allows system to continue with clustering process.
@@ -58,9 +63,12 @@ def process_message(key, job):
     if job['state'] == 'error':
         return
 
+    query_url = os.environ['QUERY_URL'] if os.environ['QUERY_URL'] else job['query_url']
+    result_url = os.environ['RESULT_URL'] if os.environ['RESULT_URL'] else job['result_url']
+
     print 'FINDING SIMILARITY'
     print 'min_post set to %s' % job['min_post']
-    domain_clust = DomainClusters(float(job['min_post']), job['query_url'], job['start_time_ms'])
+    domain_clust = DomainClusters(float(job['min_post']), query_url, job['start_time_ms'])
 
     query_params = [{
         "query_type": "between",
@@ -70,19 +78,9 @@ def process_message(key, job):
         "query_type": "where",
         "property_name": "featurizer",
         "query_value": "domain"
-    }, {
-        "query_type": "neq",
-        "property_name": "domains",
-        "query_value": "null"
     }]
 
-    if 'lang' in job:
-        query_params.append({
-            "query_type": "where",
-            "property_name": "lang",
-            "query_value": job['lang']
-        })
-    loopy = Loopy(job['query_url'] + 'socialMediaPosts' , query_params)
+    loopy = Loopy(query_url , query_params)
 
     if loopy.result_count == 0:
         print "No data to process"
@@ -121,8 +119,7 @@ def process_message(key, job):
         cluster['data_type'] = 'domain'
 
         try:
-            "absentfriends/main.py:process_message loopy.post_result" + repr(job['query_url'] + "postsClusters" if job['query_url'][-1]=="/" else "/postsClusters", cluster)
-            loopy.post_result(job['query_url'] + "postsClusters" if job['query_url'][-1]=="/" else "/postsClusters", cluster)
+            loopy.post_result(result_url, cluster)
         except Exception as e:
             # TODO: we should set data = None when error.
             job['data'] = []

@@ -196,7 +196,7 @@ module.exports = function(Qcr) {
       processedAttrs.featurizer = 'hashtag';
       createActions.push(SocialMediaPost.create(processedAttrs));
     }
-    if (processedAttrs.domains.length > 0) {
+    if (processedAttrs.image_urls.length > 0) {
       processedAttrs.featurizer = 'domain';
       createActions.push(SocialMediaPost.create(processedAttrs));
     }
