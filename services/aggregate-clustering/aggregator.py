@@ -28,6 +28,7 @@ def process(job):
             # NOTE: a postscluster can be in 0 or 1 aggcluster
             if 'stats' in posts_cluster and posts_cluster['stats']['is_unlikely'] == 0:
                 continue
+
             for agg_cluster in aggregate_clusters:
                 # break if we've already matched this postscluster with an aggcluster
                 if posts_cluster['id'] in agg_cluster['posts_clusters_ids']:
@@ -45,18 +46,27 @@ def process(job):
                     agg_cluster['similar_post_ids'] = list(set(agg_cluster['similar_post_ids']))
                     # remove nulls and dupes
                     agg_cluster['posts_clusters_ids'] = [x for x in set(agg_cluster['posts_clusters_ids']) if x is not None]
-
-                    aggregate_clusters_loopy.post_result(
-                        url='/{}'.format(agg_cluster['id']),
-                        json={
-                            'average_similarity_vector': agg_cluster['average_similarity_vector'],
-                            'end_time_ms': agg_cluster['end_time_ms'],
-                            'posts_clusters_ids': agg_cluster['posts_clusters_ids'],
-                            'similar_post_ids': agg_cluster['similar_post_ids']
-                        },
-                        method='PUT'
-                    )
-                    break
+                    
+                    try:
+                        aggregate_clusters_loopy.post_result(
+                            url='/{}'.format(agg_cluster['id']),
+                            json={
+                                'average_similarity_vector': agg_cluster['average_similarity_vector'],
+                                'end_time_ms': agg_cluster['end_time_ms'],
+                                'posts_clusters_ids': agg_cluster['posts_clusters_ids'],
+                                'similar_post_ids': agg_cluster['similar_post_ids']
+                            },
+                            method='PUT'
+                        )
+                        break
+                    except:
+                        aggregate_clusters_loopy.post_result(
+                            url='/{}'.format(agg_cluster['id']),
+                            json={'state': 'closed'},
+                            method='PUT'
+                        )
+                        print('error saving to aggregate cluster, it was probably too large.  Closing it down and Moving on.')
+                        continue
             else:
                 # no 'open' aggregate_clusters, or this postscluster didn't match
                 # any aggregates
@@ -98,8 +108,9 @@ def shut_down_aggregates(job):
             break
 
         for agg_cluster in page:
+            agg_cluster_age = int(job['end_time_ms']) - int(agg_cluster['start_time_ms'])
             cutoff_time_ms = int(job['end_time_ms']) - int(job['max_time_lapse_ms'])
-            if int(agg_cluster['end_time_ms']) < cutoff_time_ms:
+            if int(agg_cluster['end_time_ms']) < cutoff_time_ms or agg_cluster_age >= int(job['max_agg_cluster_age_ms']):
                 loopy.post_result(
                     url='/{}'.format(agg_cluster['id']),
                     json={'state': 'closed'},
@@ -108,8 +119,9 @@ def shut_down_aggregates(job):
 
 def try_aggregate(agg_cluster, posts_cluster, job):
     # hashtags don't calc average_similarity_vector
-    if job['data_type'] in ['hashtag', 'domain']:
-        # aggregate if exact match
+    if int(agg_cluster['end_time_ms']) - int(agg_cluster['start_time_ms']) > int(job['max_agg_cluster_age_ms']):
+        return False
+    if job['data_type'] in ['hashtag', 'domain']:        # aggregate if exact match
         return agg_cluster['term'] == posts_cluster['term']
     else:
         similarity_threshold = job['similarity_threshold']
