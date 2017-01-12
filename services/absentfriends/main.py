@@ -1,4 +1,5 @@
 import sys, os, codecs
+from urlparse import urlparse
 from domain_similarity import DomainClusters
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
@@ -26,6 +27,8 @@ def err_check(job):
         set_err(job, "No 'min_post' in job fields")
 
 # Turn IDNA encoded international domain name parts back into unicode strings
+# TODO: Delete this or use it, it is not clear if we will see IDNA encoded URLs in our data sources.
+# This routine is here as reference material at this time.
 def reverse_idna(A):
     n = len(A)
     for i in range(n):
@@ -34,18 +37,18 @@ def reverse_idna(A):
                 A[i] = codecs.decode(A[i].encode("ascii"), "idna")
     return A
 
+# TODO:  Maybe add urlparse(...).path element and urlparse(...).query subelements to the set of things to cluster on?
 def get_domains(urlList):
-    print "absentfriends/main.py:get_domains" + repr((urlList))
     result = set([])
     for url in urlList:
         if 'expanded_url' in url and url['expanded_url'] is not None:
-            A = url['expanded_url'].split(UNICODE_PERIOD)
+            parsed_url = urlparse( url['expanded_url'] )
+            A = parsed_url.netloc.split(UNICODE_PERIOD)
             if len(A) > 2:
                 A = A[1:]
             dn = UNICODE_PERIOD.join(A)
             result.add(dn)
     
-    print "absentfriends/main.py:get_domains returns " + repr(list(result))
     return list(result)
         
 def process_message(key, job):
@@ -63,8 +66,8 @@ def process_message(key, job):
     if job['state'] == 'error':
         return
 
-    query_url = os.environ['QUERY_URL'] if os.environ['QUERY_URL'] else job['query_url']
-    result_url = os.environ['RESULT_URL'] if os.environ['RESULT_URL'] else job['result_url']
+    query_url = os.environ['QUERY_URL'] if 'QUERY_URL' in os.environ else job['query_url']
+    result_url = os.environ['RESULT_URL'] if 'RESULT_URL' in os.environ else job['result_url']
 
     print 'FINDING SIMILARITY'
     print 'min_post set to %s' % job['min_post']

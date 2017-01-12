@@ -94,7 +94,7 @@
   },
   {
     "name": "domain-clusterer",
-    "Image": "sotera/absentfriends:5",
+    "Image": "sotera/absentfriends:6",
     "DockerFilePath": "",
     "Hostname": "domain-clusterer",
     "Env": [
