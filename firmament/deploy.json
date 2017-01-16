@@ -330,6 +330,7 @@
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
           "WORKER_SCRIPT": "./workers/job-queue",
+          "JOBSET_QUERYSPAN_MIN" : 2,
           "DEBUG": "*job-scheduler*"
         },
         "Scripts": [
@@ -374,6 +375,7 @@
           "NODE_ENV": "production",
           "API_ROOT": "http://172.17.0.1:3003/api",
           "WORKER_SCRIPT": "./workers/event-finder",
+          "EVENT_FINDER_INTERVAL_MIN" : 5,
           "DEBUG": "*event-finder*"
         },
         "Scripts": [
