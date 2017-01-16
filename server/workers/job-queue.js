@@ -93,8 +93,9 @@ function linkerize(jobMonitor, done) {
     .then(updateJobSet)
     .then(() => {
       //TODO: Remove this when we turn event finding into a job monitor
-      done();
+      //fire and forget
       findEvents(jobMonitor);
+      done();
     })
     .catch(done);
   }
