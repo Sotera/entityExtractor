@@ -58,7 +58,7 @@ class CaffeFeaturizer:
     def forward(self):
         self.net.forward()
 
-    def featurize(self, layer='prob'):
+    def featurize(self, layer='fc7'):
         feat = [ self.net.blobs[layer].data[i] for i in range(self.batch_size)]
 
         return np.array(feat)
