@@ -1,13 +1,13 @@
 angular.module('com.module.core')
   .controller('DiagramCtrl', DiagramCtrl);
 
-function DiagramCtrl($scope, AggregateCluster, SocialMediaPost, $q) {
+function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
   $scope.clusterText = '';
   $scope.clusterTerm = '';
 
   // obj: represents a cluster but not a loopback model
   $scope.visualizeCluster = function(obj) {
-    AggregateCluster.findOne({
+    PostsCluster.findOne({
       filter: {
         where: {
           id: obj.id

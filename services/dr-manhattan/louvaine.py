@@ -22,10 +22,10 @@ class Louvaine:
         else:
             self.url = base_url + '/'
 
-    def add_node(self, agg_cluster):
-        n_id = agg_cluster['id']
+    def add_node(self, cluster):
+        n_id = cluster['id']
         self.graph.add_node(n_id)
-        self.nodes_detailed[n_id] = agg_cluster
+        self.nodes_detailed[n_id] = cluster
 
 
     def add_edge(self, c_link):
@@ -177,7 +177,7 @@ class Louvaine:
                 continue
             clust = self.nodes_detailed[n]
             if com in d1:
-                d1[com]['aggregate_cluster_ids'].append(n)
+                d1[com]['cluster_ids'].append(n)
                 d1[com]['topic_message_count'] += len(clust['similar_post_ids'])
             else:
                 d1[com] = {
@@ -185,7 +185,7 @@ class Louvaine:
                     'name': 'default',
                     'start_time_ms': clust['start_time_ms'],
                     'end_time_ms':clust['end_time_ms'],
-                    'aggregate_cluster_ids':[n],
+                    'cluster_ids':[n],
                     'hashtags':{},
                     'keywords':{},
                     'campaigns':{"total":0, 'ids':{}},
@@ -253,7 +253,7 @@ class Louvaine:
         d1 = self.get_communities()
         print "Writing communities to mongo"
         for com in d1.values():
-            if len(com['aggregate_cluster_ids']) < 3:
+            if len(com['cluster_ids']) < 3:
                 continue
             res = requests.post(self.url+'events/', json=com)
             print res

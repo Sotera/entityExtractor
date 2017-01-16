@@ -1,7 +1,7 @@
 angular.module('com.module.core')
   .controller('EventsCtrl', EventsCtrl);
 
-function EventsCtrl($scope, AggregateCluster, Extract, Geocoder, SocialMediaPost, $q) {
+function EventsCtrl($scope, PostsCluster, Extract, Geocoder, SocialMediaPost, $q) {
   $scope.eventPoints = {};
   $scope.clusterText = '';
   $scope.clusterTerm = '';
@@ -20,10 +20,10 @@ function EventsCtrl($scope, AggregateCluster, Extract, Geocoder, SocialMediaPost
 
   function visualizeEvent(evnt) {
     $scope.selectedEvent = evnt;
-    AggregateCluster.find({
+    PostsCluster.find({
       filter: {
         where: {
-          id: { inq: evnt.aggregate_cluster_ids }
+          id: { inq: evnt.cluster_ids }
         }
       }
     }).$promise

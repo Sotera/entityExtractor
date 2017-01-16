@@ -11,12 +11,18 @@ const app = require('../server'),
   PreprocessMonitor = require('../../lib/job-monitors/preprocess-monitor'),
   FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
   ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
-  AggregateMonitor = require('../../lib/job-monitors/aggregate-monitor'),
   LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
   createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor'),
   jobScheduler = require('./job-scheduler'),
-  workerConcurrency = process.env.WORKER_CONCURRENCY || 4
-;
+  workerConcurrency = process.env.WORKER_CONCURRENCY || 4;
+
+
+//TODO: Remove these when event finding is turned into a job monitor.
+const redis = require('../../lib/redis'),
+  idGen = require('../util/id-generator'),
+  API_ROOT = process.env.API_ROOT,
+  KAFKA_URL = process.env.KAFKA_URL,
+  KAFKA_TOPIC = process.env.KAFKA_TOPIC;
 
 console.log('Worker concurrency: %s', workerConcurrency);
 
@@ -85,7 +91,12 @@ function linkerize(jobMonitor, done) {
       error_msg: lMonitor.errors.join(',')
     })
     .then(updateJobSet)
-    .then(() => done())
+    .then(() => {
+      //TODO: Remove this when we turn event finding into a job monitor
+      //fire and forget
+      findEvents(jobMonitor);
+      done();
+    })
     .catch(done);
   }
 
@@ -99,8 +110,40 @@ function linkerize(jobMonitor, done) {
   }
 }
 
+function generateJobKey(keyPrefix) {
+  // N.B. not universally unique if queue is in-memory.
+  // assumes rare mishaps are ok.
+  return keyPrefix + idGen.randomish(0, 9999999999);
+}
+
+function findEvents(jobMonitor) {
+  let queueName = 'genie:eventfinder';
+  const key = generateJobKey(queueName);
+
+  const jobAttrs = {
+    host: API_ROOT,
+    start_time: jobMonitor['start_time'].toString(),
+    end_time: jobMonitor['end_time'].toString(),
+    state: 'new'
+  };
+
+  if(KAFKA_URL){
+    jobAttrs.kafka_url = KAFKA_URL;
+  }
+  if(KAFKA_TOPIC){
+    jobAttrs.kafka_topic = KAFKA_TOPIC;
+  }
+
+  redis
+    .hmset(key, jobAttrs)
+    .then(() => redis.lpush(queueName, key))
+    .catch(err => console.error(key, err.stack));
+
+  return key;
+}
+
 function featurize(jobMonitor, done) {
-  let pMonitor, fMonitor, cMonitor, agMonitor;
+  let pMonitor, fMonitor, cMonitor;
 
   pMonitor = new PreprocessMonitor(jobMonitor, app);
   pMonitor.start();
@@ -121,28 +164,18 @@ function featurize(jobMonitor, done) {
     jobMonitor.updateAttributes({state: 'featurized'})
     .then(jobMonitor => {
       cMonitor = new ClusterizeMonitor(jobMonitor, app);
-      cMonitor.on('clustered', onClustered);
+      cMonitor.on('done', onDone);
       cMonitor.start();
     })
     .catch(done);
   }
 
-  function onClustered() {
-    jobMonitor.updateAttributes({state: 'clustered'})
-    .then(jobMonitor => {
-      agMonitor = new AggregateMonitor(jobMonitor, app);
-      agMonitor.on('done', onDone);
-      agMonitor.start();
-    })
-    .catch(done);
-  }
 
   function onDone() {
     // TODO: 'done' when there were errors or warnings?
     let errors = pMonitor.errors
       .concat(fMonitor.errors)
-      .concat(cMonitor.errors)
-      .concat(agMonitor.errors);
+      .concat(cMonitor.errors);
     jobMonitor.updateAttributes({
       state: 'done',
       done_at: new Date(),
