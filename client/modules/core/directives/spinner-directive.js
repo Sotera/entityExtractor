@@ -16,11 +16,11 @@ function spinnerDirective() {
 
   // from the spin.js docs with a few mods
   var opts = {
-      lines: 13 // The number of lines to draw
+      lines: 10 // The number of lines to draw
     , length: 28 // The length of each line
     , width: 14 // The line thickness
     , radius: 42 // The radius of the inner circle
-    , scale: 1 // Scales overall size of the spinner
+    , scale: 5 // Scales overall size of the spinner
     , corners: 1 // Corner roundness (0..1)
     , color: '#000' // #rgb or #rrggbb or array of colors
     , opacity: 0.35 // Opacity of the lines
