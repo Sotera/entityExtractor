@@ -364,7 +364,7 @@
     "ExpressApps": [
       {
         "GitUrl": "https://github.com/Sotera/watchman.git",
-        "GitSrcBranchName": "master",
+        "GitSrcBranchName": "kje",
         "StrongLoopBranchName": "deploy",
         "StrongLoopServerUrl": "http://localhost:8704",
         "ServiceName": "watchman-event-finder",
