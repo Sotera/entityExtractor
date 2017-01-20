@@ -18,9 +18,7 @@ const app = require('../server'),
 //TODO: Remove these when event finding is turned into a job monitor.
 const redis = require('../../lib/redis'),
   idGen = require('../util/id-generator'),
-  API_ROOT = process.env.API_ROOT,
-  KAFKA_URL = process.env.KAFKA_URL,
-  KAFKA_TOPIC = process.env.KAFKA_TOPIC;
+  { API_ROOT, KAFKA_URL, KAFKA_TOPIC } = process.env;
 
 console.log('Worker concurrency: %s', workerConcurrency);
 
@@ -34,7 +32,7 @@ function start() {
   const queue = jobs.queue;
   // let's run linkermonitor creation in this worker too
   createLinkerMonitor.start(app);
-  
+
   queue
   .on('job complete', id => {
     console.log('Job complete:', id);
@@ -112,29 +110,26 @@ function generateJobKey(keyPrefix) {
 }
 
 function findEvents(jobMonitor) {
-  let queueName = 'genie:eventfinder';
-  const key = generateJobKey(queueName);
+  const queueName = 'genie:eventfinder',
+    key = generateJobKey(queueName),
+    jobAttrs = {
+      host: API_ROOT,
+      start_time: jobMonitor['start_time'].toString(),
+      end_time: jobMonitor['end_time'].toString(),
+      state: 'new'
+    };
 
-  const jobAttrs = {
-    host: API_ROOT,
-    start_time: jobMonitor['start_time'].toString(),
-    end_time: jobMonitor['end_time'].toString(),
-    state: 'new'
-  };
-
-  if(KAFKA_URL){
+  if (KAFKA_URL) {
     jobAttrs.kafka_url = KAFKA_URL;
   }
-  if(KAFKA_TOPIC){
+  if (KAFKA_TOPIC) {
     jobAttrs.kafka_topic = KAFKA_TOPIC;
   }
 
-  redis
+  return redis
     .hmset(key, jobAttrs)
     .then(() => redis.lpush(queueName, key))
     .catch(err => console.error(key, err.stack));
-
-  return key;
 }
 
 function featurize(jobMonitor, done) {

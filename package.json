@@ -11,8 +11,8 @@
   },
   "private": true,
   "engines": {
-    "node": "4.5.x",
-    "npm": "2.15.x"
+    "node": "6.9.x",
+    "npm": "3.10.x"
   },
   "dependencies": {
     "bluebird": "^3.4.1",

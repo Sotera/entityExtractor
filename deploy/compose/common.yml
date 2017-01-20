@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   loopback:
-    image: lukewendling/strong-pm:2
+    image: lukewendling/strong-pm:3
     expose:
       - "8701"
       - "3001"

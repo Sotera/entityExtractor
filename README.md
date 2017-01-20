@@ -6,7 +6,7 @@ A core set of utilities frequently used in large data processing / ML projects, 
 
 ## Dependencies
 
-1. Node 4
+1. Node 6
 1. Strongloop 2
 1. Bower
 1. Docker 1.12

@@ -21,10 +21,8 @@ if (!SYSTEM_START_TIME) {
   SYSTEM_START_TIME = Date.now();
 }
 
-let SocialMediaPost,
-  JobSet;
-
-const JOBSET_QUERYSPAN_MIN = process.env.JOBSET_QUERYSPAN_MIN ?
+const { SocialMediaPost, JobSet } = app.models,
+  JOBSET_QUERYSPAN_MIN = process.env.JOBSET_QUERYSPAN_MIN ?
   +process.env.JOBSET_QUERYSPAN_MIN :
   30,
   MIN_POSTS = 1000,
@@ -41,9 +39,6 @@ if (require.main === module)
   start();
 
 function start() {
-  SocialMediaPost = app.models.SocialMediaPost;
-  JobSet = app.models.JobSet;
-
   schedule(SYSTEM_START_TIME)
 }
 
