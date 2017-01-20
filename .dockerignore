@@ -1,0 +1,11 @@
+tmp
+data
+conf
+.*
+*.yml
+test.*
+spark*
+node_modules
+bower_components
+services
+stanford-ner-2014-10-26

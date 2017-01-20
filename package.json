@@ -6,7 +6,8 @@
   "scripts": {
     "pretest": "jshint .",
     "predev": "npm install && bower install",
-    "dev": "nodemon . -w server -w common -w lib --ext js,json"
+    "dev": "nodemon . -w server -w common -w lib --ext js,json",
+    "build": "bower install"
   },
   "private": true,
   "engines": {
@@ -46,7 +47,6 @@
     "textract": "^1.2.1"
   },
   "devDependencies": {
-    "jshint": "^2.5.6",
     "nodemon": "^1.9.2"
   },
   "repository": {

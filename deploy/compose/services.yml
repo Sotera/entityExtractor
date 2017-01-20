@@ -1,0 +1,186 @@
+version: '2.1'
+services:
+  data-container:
+    image: lukewendling/data-container:3
+    hostname: data-container
+
+  mongo:
+    image: mongo:3.2
+    hostname: mongo
+    ports:
+      - "27017:27017"
+    volumes_from:
+      - data-container
+
+  redis:
+    image: sotera/redis-watchman:1
+    hostname: redis
+    ports:
+      - "6379:6379"
+
+  web:
+    extends:
+      file: common.yml
+      service: loopback
+    hostname: watchman
+    depends_on:
+      - redis
+      - mongo
+      - mitie
+    volumes_from:
+      - data-container
+    ports:
+      - "8701:8701"
+      - "3003:3001"
+
+  feed:
+    extends:
+      file: common.yml
+      service: loopback
+    hostname: feeds
+    depends_on:
+      - redis
+      - mongo
+      - mitie
+    volumes_from:
+      - data-container
+    ports:
+      - "8702:8701"
+
+  queue:
+    extends:
+      file: common.yml
+      service: loopback
+    hostname: queue
+    depends_on:
+      - redis
+      - mongo
+    volumes_from:
+      - data-container
+    ports:
+      - "8703:8701"
+
+  event-finder:
+    extends:
+      file: common.yml
+      service: loopback
+    hostname: event-finder
+    depends_on:
+      - redis
+      - mongo
+    volumes_from:
+      - data-container
+    ports:
+      - "8704:8701"
+
+  scheduler:
+    extends:
+      file: common.yml
+      service: loopback
+    hostname: scheduler
+    depends_on:
+      - redis
+      - mongo
+      - queue
+    volumes_from:
+      - data-container
+    ports:
+      - "8705:8701"
+
+  mitie:
+    image: lukewendling/mitie-server
+    hostname: mitie
+    ports:
+      - "8888:8888"
+
+  trained-models:
+    image: sotera/trained-models:1
+    hostname: trained-models
+
+  embed-map:
+    image: lukewendling/embed-map:2
+    hostname: embed-map
+    expose:
+      - "3000"
+    ports:
+      - "3005:3000"
+
+  dr-manhattan:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/dr-manhattan:19
+    hostname: dr-manhattan
+    depends_on:
+      - redis
+
+  text-featurizer:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/rorschach:8
+    hostname: text-featurizer
+    depends_on:
+      - redis
+
+  hashtag-clusterer:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/comedian:18
+    hostname: hashtag-clusterer
+    environment:
+      - TRUNCATE_POSTS=1
+    depends_on:
+      - redis
+
+  cluster-linker:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/ozymandias:5
+    hostname: cluster-linker
+    depends_on:
+      - redis
+
+  feature-sim:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/feature-sim:10
+    hostname: feature-sim
+    environment:
+      - TRUNCATE_POSTS=1
+    depends_on:
+      - redis
+
+  image-fetcher:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/image-fetcher:5
+    hostname: image-fetcher
+    depends_on:
+      - redis
+    volumes_from:
+      - data-container
+
+  caffe:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/caffe_redis_client:17
+    hostname: caffe
+    depends_on:
+      - redis
+    volumes_from:
+      - data-container
+
+  aggregate-clustering:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/aggregate-clustering:10
+    hostname: aggregate-clustering
+    depends_on:
+      - redis

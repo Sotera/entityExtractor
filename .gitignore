@@ -4,8 +4,9 @@ temp
 .idea
 *.log
 .env
-firmament/docker/**/*.conf
 *.pyc
 *.bak
 tmp
 .swp
+slc-conf.json
+docker-compose.override.yml

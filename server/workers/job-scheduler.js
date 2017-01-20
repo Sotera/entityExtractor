@@ -2,7 +2,8 @@
 
 // def: start and monitor job sets
 
-const debug = require('debug')('job-scheduler'),
+const app = require('../server'),
+  debug = require('debug')('job-scheduler'),
   _ = require('lodash');
 
 try {
@@ -20,19 +21,8 @@ if (!SYSTEM_START_TIME) {
   SYSTEM_START_TIME = Date.now();
 }
 
-let app,
-  SocialMediaPost,
+let SocialMediaPost,
   JobSet;
-
-const worker = module.exports = {
-  start(appObject) {
-    app = appObject;
-    SocialMediaPost = app.models.SocialMediaPost;
-    JobSet = app.models.JobSet;
-
-    schedule(SYSTEM_START_TIME);
-  }
-};
 
 const JOBSET_QUERYSPAN_MIN = process.env.JOBSET_QUERYSPAN_MIN ?
   +process.env.JOBSET_QUERYSPAN_MIN :
@@ -43,8 +33,22 @@ const JOBSET_QUERYSPAN_MIN = process.env.JOBSET_QUERYSPAN_MIN ?
   LOOP_INTERVAL = 1000 * 60, // sec
   MAX_RETRIES = QUERY_SPAN * RETRY_MULTIPLIER / LOOP_INTERVAL;
 
+
+module.exports = { start };
+
+// start if run as a worker process
+if (require.main === module)
+  start();
+
+function start() {
+  SocialMediaPost = app.models.SocialMediaPost;
+  JobSet = app.models.JobSet;
+
+  schedule(SYSTEM_START_TIME)
+}
+
 function schedule(startTime) {
-  let endTime = startTime + QUERY_SPAN;
+  let endTime = startTime + QUERY_SPAN - 1;
 
   if (endTime > Date.now()) {
     debug('endtime > now. waiting...');

@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -x
 
 docker stop redis
 docker rm redis

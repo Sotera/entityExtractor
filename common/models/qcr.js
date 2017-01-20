@@ -204,7 +204,7 @@ module.exports = function(Qcr) {
       // QCR re-sends tweets on 5xx (server error) http response codes.
       // b/c they send lots of dupe tweets, we get mongo uniq idx failures.
       // ignore them.
-      // console.error('QCR err:', err);
+      debug(err);
       failures++;
       cb(null, {ok: 1}); // send bogus 200 response
     });
