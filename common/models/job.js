@@ -1,6 +1,7 @@
 'use strict';
 
-const redis = require('../../lib/redis');
+const redis = require('../../lib/redis'),
+  _ = require('lodash');
 
 module.exports = function(Job) {
 
