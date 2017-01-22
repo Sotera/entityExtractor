@@ -27,15 +27,10 @@ function eventGraphController($scope, Event) {
     $scope.showSpinner = true;
     return Event.find()
       .$promise
-      .then(setEvents)
+      .then(events => $scope.events = events)
       .then(aggregateEvents)
       .then(() => $scope.showSpinner = false)
       .catch(console.error);
-  }
-
-  function setEvents(events) {
-    $scope.events = events;
-    return events;
   }
 
   function aggregateEvents(events){

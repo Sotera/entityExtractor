@@ -6,7 +6,7 @@ h5 drag mouse over an area to select
     .nav-chart-container(style='width:95%; height:160px')
       event-graph
 .row
-  .col-md-3(style='height:550px; overflow-y:auto')
+  .col-md-3(style='height:550px; overflow-y:auto' ng-show='selectedEvents')
     | Filter
     form(ng-submit='filterChanged()')
       .form-group
