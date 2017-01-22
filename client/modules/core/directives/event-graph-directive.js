@@ -19,16 +19,17 @@ function eventGraphController($scope, Event) {
   this.create = create;
 
   function create(event, callback) {
-    createGraph(0,0)
-
+    createGraph(0,0);
   }
 
   //we probably want to bound this in some way
   function createGraph(start, end) {
+    $scope.showSpinner = true;
     return Event.find()
       .$promise
       .then(setEvents)
       .then(aggregateEvents)
+      .then(() => $scope.showSpinner = false)
       .catch(console.error);
   }
 

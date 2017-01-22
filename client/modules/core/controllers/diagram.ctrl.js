@@ -1,5 +1,7 @@
+'use strict';
+
 angular.module('com.module.core')
-  .controller('DiagramCtrl', DiagramCtrl);
+.controller('DiagramCtrl', DiagramCtrl);
 
 function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
   $scope.clusterText = '';
@@ -13,19 +15,20 @@ function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
           id: obj.id
         }
       }
-    }).$promise
-      .then(function(cluster) {
-        let viz = visualize(cluster);
+    })
+    .$promise
+    .then(function(cluster) {
+      let viz = visualize(cluster);
 
-        if (cluster.data_type === 'text'){
-          viz.forText();
-        } else if (cluster.data_type === 'hashtag'){
-          viz.forHashtags();
-        } else if (cluster.data_type === 'image'){
-          viz.forImages();
-        }
-      })
-      .catch(console.error);
+      if (cluster.data_type === 'text'){
+        viz.forText();
+      } else if (cluster.data_type === 'hashtag'){
+        viz.forHashtags();
+      } else if (cluster.data_type === 'image'){
+        viz.forImages();
+      }
+    })
+    .catch(console.error);
   };
 
   $scope.dateRangeSelected = function(start, end) {

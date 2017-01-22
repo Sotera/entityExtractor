@@ -1,30 +1,29 @@
-angular.module('com.module.core')
-  .controller('EventsCtrl', EventsCtrl);
+'use strict';
 
-function EventsCtrl($scope, PostsCluster, Extract, Geocoder, SocialMediaPost, $q) {
-  $scope.eventPoints = {};
+angular.module('com.module.core')
+.controller('EventsCtrl', EventsCtrl);
+
+function EventsCtrl($scope, PostsCluster, SocialMediaPost) {
+  $scope.eventPoints = null;
   $scope.clusterText = '';
   $scope.clusterTerm = '';
   $scope.events = null;
   $scope.selectedEvents = null;
-  $scope.selectedEvent= null;
+  $scope.selectedEvent = null;
   $scope.filterText = null;
-  // obj: represents a cluster but not a loopback model
 
-  $scope.eventSelected = function(evnt){
+  $scope.eventSelected = function(evnt) {
     visualizeEvent(evnt);
   };
 
-  $scope.eventChanged= function(evnt){
+  $scope.eventChanged = function(evnt) {
     evnt.$save();
   };
 
-  $scope.filterChanged = function(){
-    var tempEvents = $scope.selectedEvents;
+  $scope.filterChanged = function() {
+    let tempEvents = $scope.selectedEvents;
     $scope.selectedEvents = [];
-    tempEvents.forEach(function(aggEvent){
-      filterEvent(aggEvent);
-    });
+    tempEvents.forEach(filterEvent);
   };
 
   function filterEvent(evnt){
@@ -34,13 +33,10 @@ function EventsCtrl($scope, PostsCluster, Extract, Geocoder, SocialMediaPost, $q
           id: { inq: evnt.cluster_ids }
         }
       }
-    }).$promise
-      .then(clusters => {
-        $scope.communityClusters = clusters;
-        return clusters;
-      })
-      .then(clusters => $scope.filter(clusters,evnt))
-      .catch(console.error);
+    })
+    .$promise
+    .then(clusters => $scope.filter(clusters, evnt))
+    .catch(console.error);
   }
 
   function visualizeEvent(evnt) {
@@ -51,125 +47,108 @@ function EventsCtrl($scope, PostsCluster, Extract, Geocoder, SocialMediaPost, $q
           id: { inq: evnt.cluster_ids }
         }
       }
-    }).$promise
-      .then(clusters => {
-        $scope.communityClusters = clusters;
-        return clusters;
-      })
-      .then($scope.visualize)
-      .then(visual => visual.forAll())
-      .catch(console.error);
+    })
+    .$promise
+    .then($scope.visualize)
+    .then(visual => visual.forAll())
+    .catch(console.error);
   }
 
   $scope.dateRangeSelected = function(start, end) {
-    $scope.showSpinner = true;
-    $q.all([
-      getEvents(start,end)
-    ])
-    .then(function() {
-      $scope.showSpinner = false;
-    })
-    .catch(console.error);
+    $scope.$apply(() => getEvents(start, end));
   };
 
-  function getEvents(start, end){
-    var events = [];
-    $scope.events.forEach(function(aggEvent){
-      if(aggEvent.end_time_ms >= start && aggEvent.end_time_ms<=end){
-        events.push(aggEvent);
-      }
-      else if(aggEvent.start_time_ms >= start && aggEvent.start_time_ms<=end){
-        events.push(aggEvent);
-      }
-      else if(aggEvent.start_time_ms <= start && aggEvent.end_time_ms >= end){
-        events.push(aggEvent);
+  function getEvents(start, end) {
+    let events = [];
+    $scope.events.forEach(function(evnt) {
+      if(evnt.end_time_ms >= start && evnt.end_time_ms <= end) {
+        events.push(evnt);
+      } else if(evnt.start_time_ms >= start && evnt.start_time_ms <= end) {
+        events.push(evnt);
+      } else if(evnt.start_time_ms <= start && evnt.end_time_ms >= end) {
+        events.push(evnt);
       }
     });
     $scope.selectedEvents = events;
   }
 
   $scope.filter = filter;
-  function filter(clusters, evnt){
-    function sampleSocialMediaPosts(dataType, sampleSize=100) {
-      let similarPostIds = _(clusters).map('similar_post_ids')
-        .flatten().compact().uniq().value();
 
-      let ids = _.sampleSize(similarPostIds, sampleSize);
+  function filter(clusters, evnt) {
+    let terms = evnt.hashtags.join(', ');
 
-      return SocialMediaPost.find({
-        filter: {
-          where: {
-            post_id: { inq: ids },
-            featurizer: dataType
-          }
-        }
-      }).$promise;
-    }
-
-    var terms = evnt.hashtags.join(', ');
-    if(terms.includes($scope.filterText)){
+    if (terms.includes($scope.filterText)) {
       $scope.selectedEvents.push(evnt);
       return;
     }
 
-    sampleSocialMediaPosts('text')
-      .then(posts => {
-        let allText = posts.map(p => p.text).join(' ');
-        if(allText.includes($scope.filterText)){
-          $scope.selectedEvents.push(evnt);
-        }
-      })
-      .catch(console.error);
+    let similarPostIds = _(clusters).map('similar_post_ids')
+      .flatten().compact().uniq().value();
+
+    sampleSocialMediaPosts('text', similarPostIds)
+    .then(posts => {
+      let allText = posts.map(p => p.text).join(' ');
+      if (allText.includes($scope.filterText)) {
+        $scope.selectedEvents.push(evnt);
+      }
+    })
+    .catch(console.error);
   }
 
+  function sampleSocialMediaPosts(dataType, postIds, sampleSize=100) {
+    $scope.showSpinner = true;
 
-   // 'visualize': show me the details
+    postIds = _.sampleSize(postIds, sampleSize);
+
+    return SocialMediaPost.find({
+      filter: {
+        where: {
+          post_id: { inq: postIds },
+          featurizer: dataType
+        },
+        fields: ['text', 'image_urls', 'hashtags']
+      }
+    }).$promise
+    .then(posts => {
+      $scope.showSpinner = false;
+      return posts;
+    });
+  }
+
+  // 'visualize': show me the details
   $scope.visualize = visualize;
 
   function visualize(clusters) {
-    if (!_.isArray(clusters)) clusters = [clusters];
-
-    function sampleSocialMediaPosts(dataType, sampleSize=100) {
-      let similarPostIds = _(clusters).map('similar_post_ids')
-        .flatten().compact().uniq().value();
-
-      let ids = _.sampleSize(similarPostIds, sampleSize);
-
-      return SocialMediaPost.find({
-        filter: {
-          where: {
-            post_id: { inq: ids },
-            featurizer: dataType
-          }
-        }
-      }).$promise;
-    }
-
     let functions = {
       forText() {
-        $scope.showSpinner = true;
-
         $scope.clusterText = '';
 
-        sampleSocialMediaPosts('text')
-          .then(posts => {
-            let allText = posts.map(p => p.text).join(' ');
-            $scope.clusterText = allText;
-            $scope.showSpinner = false;
-          })
-          .catch(console.error);
+        let similarPostIds = _(clusters).map('similar_post_ids')
+          .flatten().compact().uniq().value();
+
+        sampleSocialMediaPosts('text', similarPostIds)
+        .then(posts => {
+          let allText = posts.map(p => p.text).join(' ');
+          $scope.clusterText = allText;
+        })
+        .catch(console.error);
       },
 
-      forMap(){
+      forMap() {
         let features = {};
-        $scope.selectedEvent.location.forEach(function(location){
-          if(location.geo_type !== "point"){
+        $scope.selectedEvent.location.forEach(location => {
+          if (location.geo_type !== 'point')
             return;
-          }
 
-          features[location.label] = { lat: location.coords[0].lat, lng: location.coords[0].lng, message: location.label, focus: true, draggable: false };
+          features[location.label] = {
+            lat: location.coords[0].lat,
+            lng: location.coords[0].lng,
+            message: location.label,
+            focus: true,
+            draggable: false
+          };
         });
-        $scope.eventPoints = features;
+        $scope.eventPoints = _.isEmpty(features) ? null : features;
       },
 
       forHashtags() {
@@ -177,7 +156,6 @@ function EventsCtrl($scope, PostsCluster, Extract, Geocoder, SocialMediaPost, $q
       },
 
       forImages() {
-        $scope.showSpinner = true;
         $scope.imageUrls = $scope.selectedEvent.image_urls;
       },
 
