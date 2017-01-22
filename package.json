@@ -5,7 +5,6 @@
   "main": "server/server.js",
   "scripts": {
     "pretest": "jshint .",
-    "predev": "npm install && bower install",
     "dev": "nodemon . -w server -w common -w lib --ext js,json",
     "build": "bower install"
   },
