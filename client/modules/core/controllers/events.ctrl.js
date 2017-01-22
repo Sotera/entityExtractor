@@ -106,7 +106,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost) {
           post_id: { inq: postIds },
           featurizer: dataType
         },
-        fields: ['text', 'image_urls', 'hashtags']
+        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url']
       }
     }).$promise
     .then(posts => {

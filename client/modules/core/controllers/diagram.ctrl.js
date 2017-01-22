@@ -53,14 +53,15 @@ function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
       let similarPostIds = _(clusters).map('similar_post_ids')
         .flatten().compact().uniq().value();
 
-      let ids = _.sampleSize(similarPostIds, sampleSize);
+      similarPostIds = _.sampleSize(similarPostIds, sampleSize);
 
       return SocialMediaPost.find({
         filter: {
           where: {
-            post_id: { inq: ids },
+            post_id: { inq: similarPostIds },
             featurizer: dataType
-          }
+          },
+          fields: ['text', 'image_urls', 'hashtags', 'primary_image_url']
         }
       }).$promise;
     }
