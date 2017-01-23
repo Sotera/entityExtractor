@@ -10,9 +10,12 @@ h5 drag mouse over an area to select
     | Filter
     form(ng-submit='filterChanged()')
       .form-group
-        input.form-control(ng-model='filterText')
-      button.btn.btn-info(type='submit')
-        span.glyphicon.glyphicon-search
+        .row
+          .col-md-10
+            input.form-control(ng-model='filterText')
+          .col-md-2
+            button.btn.btn-info(type='submit', style='float:right')
+              span.glyphicon.glyphicon-search
 
     table.table.table-striped
       caption(style='font-weight:bold;font-size:1.2em') Events
