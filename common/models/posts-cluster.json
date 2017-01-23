@@ -42,6 +42,9 @@
       "required": true,
       "description": "equal to jobMonitor.featurizer. added for convenience."
     },
+    "lang": {
+      "type": "string"
+    },
     "term": {
       "type": "string"
     },

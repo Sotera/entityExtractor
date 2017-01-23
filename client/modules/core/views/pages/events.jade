@@ -6,19 +6,27 @@ h5 drag mouse over an area to select
     .nav-chart-container(style='width:95%; height:160px')
       event-graph
 .row
-  .col-md-3(style='height:550px; overflow-y:auto')
+  .col-md-3(style='height:550px; overflow-y:auto' ng-show='selectedEvents')
+    | Filter
+    form(ng-submit='filterChanged()')
+      .form-group
+        .row
+          .col-md-10
+            input.form-control(ng-model='filterText')
+          .col-md-2
+            button.btn.btn-info(type='submit', style='float:right')
+              span.glyphicon.glyphicon-search
+
     table.table.table-striped
-      thead
-        tr
-          th Events
-      tbody(ng-repeat="selectedEvent in selectedEvents")
-        tr
-          td
-            p(style="display:inline",ng-click="eventSelected(selectedEvent)") {{selectedEvent.start_time_ms | date:'M/d/yy HH:MM'  }} - {{selectedEvent.end_time_ms | date:'M/d/yy HH:MM'  }}
-            input(style="display:inline;width:100px;margin-left:16px",ng-model='selectedEvent.name', ng-blur="eventChanged(selectedEvent)").form-control
+      caption(style='font-weight:bold;font-size:1.2em') Events
+      tbody
+        tr(ng-repeat='selectedEvent in selectedEvents')
+          td(ng-click='eventSelected(selectedEvent)')
+            p(style='display:inline') {{selectedEvent.start_time_ms | date:'short'}} - {{selectedEvent.end_time_ms | date:'short'}}
+            input.form-control(style='display:inline;width:100px;margin-left:16px' ng-model='selectedEvent.name' ng-blur='eventChanged(selectedEvent)')
   .col-md-4(style='height:550px; overflow-y:hidden')
-    event-map(ng-model='eventPoints')
-      iframe(src="http://54.86.248.86:3005/index.html", style="width:100%; height:600px;", scrolling="no", frameborder="1", id="map-frame")
+    event-map(ng-show='eventPoints' ng-model='eventPoints')
+      iframe(src='http://54.86.248.86:3005/index.html' style='width:100%; height:600px' scrolling='no' frameborder='0' id='map-frame')
   .col-md-5
     .row(ng-show='imageUrls' style='width:100%; height:100px; overflow-y:auto')
       image-grid(hover-dir='left')

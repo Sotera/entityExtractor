@@ -1,24 +1,18 @@
-// def: trigger job monitors on a schedule
-
 'use strict';
+
+// def: handle job requests to start job monitors
 
 require('dotenv').config({silent: true});
 
 const app = require('../server'),
-  _ = require('lodash'),
+  { JobMonitor } = app.models,
   jobs = require('../../lib/jobs'),
-  JobMonitor = app.models.JobMonitor,
+  _ = require('lodash'),
   PreprocessMonitor = require('../../lib/job-monitors/preprocess-monitor'),
   FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
   ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
-  AggregateMonitor = require('../../lib/job-monitors/aggregate-monitor'),
   LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
-  createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor'),
-  jobScheduler = require('./job-scheduler'),
-  workerConcurrency = process.env.WORKER_CONCURRENCY || 4
-;
-
-console.log('Worker concurrency: %s', workerConcurrency);
+  createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor');
 
 module.exports = { start };
 
@@ -27,35 +21,16 @@ if (require.main === module)
   start();
 
 function start() {
-  const queue = jobs.queue;
+  // boot job processor with job handlers
+  jobs.boot(new Map([
+    ['job monitor', startMonitor]
+  ]));
+
+  // mount kue UI
+  jobs.mountUI();
+
   // let's run linkermonitor creation in this worker too
   createLinkerMonitor.start(app);
-  // for now, also job-scheduler
-  jobScheduler.start(app);
-
-  queue
-  .on('job complete', id => {
-    console.log('Job complete:', id);
-  })
-  .on('job failed attempt', (err, count) => {
-    console.error('Job attempt (failed):', err, count);
-  })
-  .on('job failed', err => {
-    console.error('Job failed:', err);
-  });
-
-  // Graceful shutdown
-  process.once('SIGTERM', sig => {
-    queue.shutdown(3000, err => {
-      console.log('Kue shutdown: ', err || 'no error');
-      process.exit(0);
-    });
-  });
-
-  // process jobs
-  queue.process('job monitor', workerConcurrency, (job, done) => {
-    startMonitor(job.data.options, done);
-  });
 }
 
 // options: jobMonitorId
@@ -85,7 +60,11 @@ function linkerize(jobMonitor, done) {
       error_msg: lMonitor.errors.join(',')
     })
     .then(updateJobSet)
-    .then(() => done())
+    .then(() => {
+      //TODO: Remove this when we turn event finding into a job monitor
+      findEvents(jobMonitor);
+      done();
+    })
     .catch(done);
   }
 
@@ -100,7 +79,7 @@ function linkerize(jobMonitor, done) {
 }
 
 function featurize(jobMonitor, done) {
-  let pMonitor, fMonitor, cMonitor, agMonitor;
+  let pMonitor, fMonitor, cMonitor;
 
   pMonitor = new PreprocessMonitor(jobMonitor, app);
   pMonitor.start();
@@ -121,18 +100,8 @@ function featurize(jobMonitor, done) {
     jobMonitor.updateAttributes({state: 'featurized'})
     .then(jobMonitor => {
       cMonitor = new ClusterizeMonitor(jobMonitor, app);
-      cMonitor.on('clustered', onClustered);
+      cMonitor.on('done', onDone);
       cMonitor.start();
-    })
-    .catch(done);
-  }
-
-  function onClustered() {
-    jobMonitor.updateAttributes({state: 'clustered'})
-    .then(jobMonitor => {
-      agMonitor = new AggregateMonitor(jobMonitor, app);
-      agMonitor.on('done', onDone);
-      agMonitor.start();
     })
     .catch(done);
   }
@@ -141,8 +110,7 @@ function featurize(jobMonitor, done) {
     // TODO: 'done' when there were errors or warnings?
     let errors = pMonitor.errors
       .concat(fMonitor.errors)
-      .concat(cMonitor.errors)
-      .concat(agMonitor.errors);
+      .concat(cMonitor.errors);
     jobMonitor.updateAttributes({
       state: 'done',
       done_at: new Date(),
@@ -151,4 +119,42 @@ function featurize(jobMonitor, done) {
     .then(() => done())
     .catch(done);
   }
+}
+
+
+//// TODO: Remove these when event finding is turned into a job monitor.
+const redis = require('../../lib/redis'),
+  idGen = require('../util/id-generator'),
+  { API_ROOT, KAFKA_URL, KAFKA_TOPIC } = process.env;
+////
+
+//TODO: Remove this when we turn event finding into a job monitor
+function generateJobKey(keyPrefix) {
+  // N.B. not universally unique if queue is in-memory.
+  // assumes rare mishaps are ok.
+  return keyPrefix + idGen.randomish(0, 9999999999);
+}
+
+//TODO: Remove this when we turn event finding into a job monitor
+function findEvents(jobMonitor) {
+  const queueName = 'genie:eventfinder',
+    key = generateJobKey(queueName),
+    jobAttrs = {
+      host: API_ROOT,
+      start_time: jobMonitor['start_time'].toString(),
+      end_time: jobMonitor['end_time'].toString(),
+      state: 'new'
+    };
+
+  if (KAFKA_URL) {
+    jobAttrs.kafka_url = KAFKA_URL;
+  }
+  if (KAFKA_TOPIC) {
+    jobAttrs.kafka_topic = KAFKA_TOPIC;
+  }
+
+  return redis
+    .hmset(key, jobAttrs)
+    .then(() => redis.lpush(queueName, key))
+    .catch(err => console.error(key, err.stack));
 }

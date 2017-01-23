@@ -1,7 +1,6 @@
 'use strict';
 
-const jobs = require('../../lib/jobs')
-;
+const jobs = require('../../lib/jobs');
 
 module.exports = function(JobMonitor) {
 

@@ -11,7 +11,7 @@ query_params = [{
         "query_value": [1477580423000, 1477780423000]
     }]
 
-lp_n = Loopy('http://localhost:3003/api/aggregateClusters', query_params)
+lp_n = Loopy('http://localhost:3003/api/postsClusters', query_params)
 com = Louvaine('http://localhost:3003/api/',
                'http://54.89.54.199:3003/api/extract/entities',
                'http://54.89.54.199:3003/api/geocoder/forward-geo')

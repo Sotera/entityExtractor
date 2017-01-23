@@ -1,0 +1,49 @@
+[
+  {
+    "name": "web",
+    "slc_host": "http://localhost:8701",
+    "env": [
+      "NODE_ENV=production",
+      "API_ROOT=http://172.17.0.1:3003/api",
+      "IGNORE_QCR=0",
+      "DB_HOST=mongo"
+    ],
+    "cluster_size": 1
+  },
+  {
+    "name": "feed",
+    "slc_host": "http://localhost:8702",
+    "env": [
+      "NODE_ENV=production",
+      "API_ROOT=http://172.17.0.1:3003/api",
+      "WORKER_SCRIPT=./workers/start-extractor",
+      "DB_HOST=mongo"
+    ],
+    "cluster_size": 1
+  },
+  {
+    "name": "queue",
+    "slc_host": "http://localhost:8703",
+    "env": [
+      "NODE_ENV=production",
+      "API_ROOT=http://172.17.0.1:3003/api",
+      "WORKER_SCRIPT=./workers/job-queue",
+      "DEBUG=*job-monitor*",
+      "DB_HOST=mongo"
+    ],
+    "cluster_size": 1
+  },
+  {
+    "name": "job-scheduler",
+    "slc_host": "http://localhost:8705",
+    "env": [
+      "NODE_ENV=production",
+      "API_ROOT=http://172.17.0.1:3003/api",
+      "WORKER_SCRIPT=./workers/job-scheduler",
+      "DEBUG=*job-scheduler*",
+      "DB_HOST=mongo",
+      "JOBSET_QUERYSPAN_MIN=5"
+    ],
+    "cluster_size": 1
+  }
+]

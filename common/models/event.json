@@ -29,7 +29,7 @@
       "type": "number",
       "required": true
     },
-    "aggregate_cluster_ids": {
+    "cluster_ids": {
       "type": [
         "string"
       ],

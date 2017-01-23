@@ -1,0 +1,13 @@
+version: '2.1'
+services:
+  loopback:
+    image: lukewendling/strong-pm:3
+    expose:
+      - "8701"
+      - "3001"
+    environment:
+      - NODE_ENV=production
+
+  analytic:
+    environment:
+      - ANALYTIC=1

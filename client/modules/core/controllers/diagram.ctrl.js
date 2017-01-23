@@ -1,33 +1,36 @@
-angular.module('com.module.core')
-  .controller('DiagramCtrl', DiagramCtrl);
+'use strict';
 
-function DiagramCtrl($scope, AggregateCluster, SocialMediaPost, $q) {
+angular.module('com.module.core')
+.controller('DiagramCtrl', DiagramCtrl);
+
+function DiagramCtrl($scope, PostsCluster, SocialMediaPost, $q) {
   $scope.clusterText = '';
   $scope.clusterTerm = '';
 
   // obj: represents a cluster but not a loopback model
   $scope.visualizeCluster = function(obj) {
-    AggregateCluster.findOne({
+    PostsCluster.findOne({
       filter: {
         where: {
           id: obj.id
         }
       }
-    }).$promise
-      .then(function(cluster) {
-        let viz = visualize(cluster);
+    })
+    .$promise
+    .then(function(cluster) {
+      let viz = visualize(cluster);
 
-        if (cluster.data_type === 'text'){
-          viz.forText();
-        } else if (cluster.data_type === 'domain'){
-          viz.forDomains();
-        } else if (cluster.data_type === 'hashtag'){
-          viz.forHashtags();
-        } else if (cluster.data_type === 'image'){
-          viz.forImages();
-        }
-      })
-      .catch(console.error);
+      if (cluster.data_type === 'text'){
+        viz.forText();
+      } else if (cluster.data_type === 'domain'){
+        viz.forDomains();
+      else if (cluster.data_type === 'hashtag'){
+        viz.forHashtags();
+      } else if (cluster.data_type === 'image'){
+        viz.forImages();
+      }
+    })
+    .catch(console.error);
   };
 
   $scope.dateRangeSelected = function(start, end) {
@@ -52,14 +55,15 @@ function DiagramCtrl($scope, AggregateCluster, SocialMediaPost, $q) {
       let similarPostIds = _(clusters).map('similar_post_ids')
         .flatten().compact().uniq().value();
 
-      let ids = _.sampleSize(similarPostIds, sampleSize);
+      similarPostIds = _.sampleSize(similarPostIds, sampleSize);
 
       return SocialMediaPost.find({
         filter: {
           where: {
-            post_id: { inq: ids },
+            post_id: { inq: similarPostIds },
             featurizer: dataType
-          }
+          },
+          fields: ['text', 'image_urls', 'hashtags', 'primary_image_url']
         }
       }).$promise;
     }

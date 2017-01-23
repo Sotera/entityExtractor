@@ -5,13 +5,13 @@
   "main": "server/server.js",
   "scripts": {
     "pretest": "jshint .",
-    "predev": "npm install && bower install",
-    "dev": "nodemon . -w server -w common -w lib --ext js,json"
+    "dev": "nodemon . -w server -w common -w lib --ext js,json",
+    "build": "bower install"
   },
   "private": true,
   "engines": {
-    "node": "4.5.x",
-    "npm": "2.15.x"
+    "node": "6.9.x",
+    "npm": "3.10.x"
   },
   "dependencies": {
     "bluebird": "^3.4.1",
@@ -46,7 +46,6 @@
     "textract": "^1.2.1"
   },
   "devDependencies": {
-    "jshint": "^2.5.6",
     "nodemon": "^1.9.2"
   },
   "repository": {

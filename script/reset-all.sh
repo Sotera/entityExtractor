@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
-set -x
 
-# Reset collections, clear redis keys, rm downloaded image files
-mongo --host mongo rancor script/remove-collections.js
+if [ -z "$1" ]; then
+  echo "missing arg: path/to/db/dump/file"
+  exit 1
+fi
+
+set -x
+# Reset collections, load posts from db dump, clear redis keys, rm downloaded image files
+mongo --host mongo rancor --eval "db.dropDatabase()"
+mongorestore -d rancor --gzip --numInsertionWorkersPerCollection=8 --drop --archive=$1
 redis-cli -h redis flushall
 sudo rm -rf /downloads/image-fetcher

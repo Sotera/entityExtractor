@@ -1,6 +1,7 @@
 'use strict';
 
-const jobs = require('../../lib/jobs');
+const redis = require('../../lib/redis'),
+  _ = require('lodash');
 
 module.exports = function(Job) {
 
@@ -20,11 +21,11 @@ module.exports = function(Job) {
     }
   );
 
+  // get state, data of a redis job, by user-defined id.
   Job.status = function(args, cb) {
-    var jobId = args.job_id;
-
-    jobs.status(jobId)
-    .then(data => cb(null, data))
-    .catch(err => cb(err));
+    redis.hgetall(args.job_id)
+      .then(data => _.pick(data, ['state', 'data', 'error']))
+      .then(data => cb(null, data))
+      .catch(err => cb(err));
   };
 };

@@ -18,7 +18,7 @@
     "angular-leaflet-directive": "0.10.0",
     "spin.js": "2.3.2",
     "moment": "2.15.1",
-    "moment-range": "2.1.0",
+    "moment-range": "2.2.0",
     "d3-tip": "0.7.1"
   },
   "resolutions": {

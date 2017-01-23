@@ -23,34 +23,28 @@ def process_message(key,job):
     if job['state'] == 'error':
         return
 
-    host = job['host']
-    ts_start = job['start_time']
+    host = os.environ['HOST'] if 'HOST' in os.environ else job['host']
+
     ts_end = job['end_time']
     debug = False
 
     if host[-1] != '/': host += '/'
     api_path = host
     query_params = [{
-        "query_type": "between",
+        "query_type": "where",
         "property_name": "end_time_ms",
-        "query_value": [ts_start, ts_end]
+        "query_value": ts_end
     }]
     com = Louvaine(api_path,
        '{}extract/entities'.format(api_path),
        '{}geocoder/forward-geo'.format(api_path))
 
-    # this one line was being run..not sure why..as it was unused???
-    # lp_n = Loopy('{}aggregateClusters'.format(api_path), query_params, page_size=500)
+    nodes_to_lookup = set()
+    nodes_to_add = list()
+    edges_to_add = list()
+    invalid_nodes = set()
+    edges_to_remove = list()
 
-    #print "getting aggregate clusters"
-    #while True:
-    #    page = lp_n.get_next_page()
-    #    if page is None:
-    #        break
-    #    for doc in page:
-    #        com.add_node(doc)
-
-    nodes_to_add = set()
     lp_e = Loopy('{}clusterLinks'.format(api_path), query_params, page_size=500)
 
     if lp_e.result_count == 0:
@@ -60,23 +54,48 @@ def process_message(key,job):
         job['state'] = 'error'
         return
 
-    print "getting aggregate cluster links"
+    print "getting cluster links"
     while True:
         page = lp_e.get_next_page()
         if page is None:
             break
         for doc in page:
-            if doc["target"] not in com.nodes_detailed:
-                nodes_to_add.add(doc["target"])
-            if doc["source"] not in com.nodes_detailed:
-                nodes_to_add.add(doc["source"])
-            com.add_edge(doc)
+            nodes_to_lookup.add(doc["target"])
+            nodes_to_lookup.add(doc["source"])
+            edges_to_add.append(doc)
 
-    print "filling in missing nodes"
-    for node_id in nodes_to_add:
-        agg_url = "{}{}{}".format(api_path, "aggregateClusters/", node_id)
-        node = requests.get(agg_url).json()
+    print "getting node data"
+    for node_id in nodes_to_lookup:
+        clust_url = "{}{}{}".format(api_path, "postsClusters/", node_id)
+        node = requests.get(clust_url).json()
+        if 'stats' in node:
+            if node['stats']['is_unlikely'] == 0:
+                invalid_nodes.add(node_id)
+                continue
+        nodes_to_add.append(node)
+
+    print "pruning invalid node edges"
+    for node_id in invalid_nodes:
+        for edge in edges_to_add:
+            if edge['target'] == node_id or edge['source'] == node_id:
+                edges_to_remove.append(edge)
+    for invalid_edge in edges_to_remove:
+        if invalid_edge in edges_to_add:
+            edges_to_add.remove(invalid_edge)
+
+    print "adding edges to louvaine"
+    for edge in edges_to_add:
+        com.add_edge(edge)
+
+    print "adding nodes to louvaine"
+    for node in nodes_to_add:
         com.add_node(node)
+
+    invalid_nodes.clear()
+    nodes_to_lookup.clear()
+    del nodes_to_add
+    del edges_to_add
+    del edges_to_remove
 
     print "Finding communities from {} nodes and {} edges.".format(len(com.graph.nodes()), len(com.graph.edges()))
     l_com = com.save_communities()

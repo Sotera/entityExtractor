@@ -31,7 +31,7 @@ function eventMapDirective() {
   }
 }
 
-function eventMapController($scope, ClusterLink, AggregateCluster) {
+function eventMapController($scope, ClusterLink, PostsCluster) {
   this.create = create;
   function create(event, callback) {
 

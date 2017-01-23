@@ -6,15 +6,13 @@ A core set of utilities frequently used in large data processing / ML projects, 
 
 ## Dependencies
 
-1. Node 4
+1. Node 6
 1. Strongloop 2
 1. Bower
-1. Docker 1.9+ / Firmament2
-1. Mongo 2.6
-1. Redis 3
-1. Python 2.7 / Conda
+1. Docker 1.12
+1. Python 2.7 + 3.5
 
-## Install
+## Dev boostrap
 
 ```
 # get working copy of .env file from a friend
@@ -24,15 +22,18 @@ npm i
 lb-ng server/server.js client/js/lb-services.js
 ```
 
-## Dev boostrap
+## Install with Docker Compose
 
 ```
-# get working copy of .env
-./script/setup.js
-npm run dev # open localhost:3000
+docker rm $(docker ps -a -q) # optional, remove all un'composed' containers
+sudo service docker restart # optional, but should speed things up
+git clone https://github.com/Sotera/watchman.git app; cd app # optional if in dev env
+cp slc-conf.template.json slc-conf.json
+sudo script/docker/install-compose.sh
+script/deploy/compose up deploy [branch] # branch optional, default: master
+script/deploy/compose scale image-fetcher=3
 
-# to process job monitors, in another terminal:
-WORKER_SCRIPT=./workers/job-queue npm run dev
+# hint: add /docker-compose.override.yml to override services.
 ```
 
 ## Misc
@@ -44,6 +45,11 @@ docker build --no-cache --force-rm -t lukewendling/mitie-server .
 
 docker run -d -p 8888:8888 --name mitie lukewendling/mitie-server
 ./server/workers/start-extractor.js # start workers
+```
+
+```
+# run a worker standalone
+WORKER_SCRIPT=./workers/job-queue npm run dev
 ```
 
 ## Tests

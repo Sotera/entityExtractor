@@ -1,6 +1,13 @@
+'use strict';
+
 angular.module('com.module.core')
-  .controller('NavigationCtrl', function($scope) {
+.controller('NavigationCtrl', NavigationCtrl);
 
-    // $scope.description ='Parsing events from text since 2016';
+function NavigationCtrl($scope, $window) {
 
-  });
+  $scope.openKue = function() {
+    let kueUrl = `//${window.location.hostname}:3002`;
+    $window.open(kueUrl);
+  };
+
+}

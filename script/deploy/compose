@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# exit immediately on error
+abort() {
+  exit 1
+}
+trap abort ERR
+
+display_usage() {
+  echo -e $"\n\tUsage: $0 {up|tail|(Compose COMMAND)} [Compose options]
+    \n\tDeploy: $0 up deploy [branch]"
+  abort
+}
+
+compose_files="-f deploy/compose/services.yml"
+
+# append overrides.yml file if present, for prod or dev conf.
+if [ -f docker-compose.override.yml ]; then
+  compose_files=$compose_files" -f docker-compose.override.yml"
+fi
+echo "⇨ Using conf flags: $compose_files"
+
+case "$1" in
+  -h|--help)
+    docker-compose $1
+    display_usage
+    ;;
+
+  up)
+    docker-compose $compose_files up -d
+
+    if [ "$2" == "deploy" ]; then
+      old_branch=`git rev-parse --abbrev-ref HEAD`
+      new_branch=${3:-master}
+      echo $"⇨ Current branch is $old_branch. Switching to $new_branch ..."
+      git checkout $new_branch
+      git pull
+      script/deploy/slc-deploy.js
+      git checkout $old_branch
+    fi
+    ;;
+
+  tail)
+    docker-compose $compose_files logs --tail 100 -f $2
+    ;;
+
+  log*)
+    docker-compose $compose_files logs $2
+    ;;
+
+  ps|down|start|stop|restart|exec|scale|rm|config|version)
+    docker-compose $compose_files "$@"
+    ;;
+
+  *)
+    display_usage
+
+esac

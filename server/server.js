@@ -13,8 +13,6 @@ var path = require('path');
 require('./basic-auth').auth(app, ['qcr/insert']);
 
 app.start = function() {
-  // mount kue jobs UI
-  app.use('/kue', kue.app);
   // start the web server
   return app.listen(function() {
     app.emit('started');
