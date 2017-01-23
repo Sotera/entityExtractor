@@ -80,7 +80,7 @@
   },
   {
     "name": "hashtag-clusterer",
-    "Image": "sotera/comedian:b96",
+    "Image": "sotera/comedian:19",
     "DockerFilePath": "",
     "Hostname": "hashtag-clusterer",
     "Env": [
@@ -133,7 +133,7 @@
   },
   {
     "name": "dr-manhattan",
-    "Image": "sotera/dr-manhattan:b96",
+    "Image": "sotera/dr-manhattan:20",
     "DockerFilePath": "",
     "Hostname": "dr-manhattan",
     "HostConfig": {
