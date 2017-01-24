@@ -80,7 +80,7 @@
   },
   {
     "name": "hashtag-clusterer",
-    "Image": "sotera/comedian:19",
+    "Image": "sotera/comedian:20",
     "DockerFilePath": "",
     "Hostname": "hashtag-clusterer",
     "Env": [
@@ -94,7 +94,7 @@
   },
   {
     "name": "domain-clusterer",
-    "Image": "sotera/absentfriends:6",
+    "Image": "sotera/absentfriends:7",
     "DockerFilePath": "",
     "Hostname": "domain-clusterer",
     "Env": [
@@ -108,7 +108,7 @@
   },
   {
     "name": "cluster-linker",
-    "Image": "sotera/ozymandias:b96",
+    "Image": "sotera/ozymandias:6",
     "DockerFilePath": "",
     "Hostname": "cluster-linker",
     "HostConfig": {
@@ -133,7 +133,7 @@
   },
   {
     "name": "dr-manhattan",
-    "Image": "sotera/dr-manhattan:20",
+    "Image": "sotera/dr-manhattan:21",
     "DockerFilePath": "",
     "Hostname": "dr-manhattan",
     "HostConfig": {
