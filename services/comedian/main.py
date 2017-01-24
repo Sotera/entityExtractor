@@ -37,8 +37,8 @@ def process_message(key, job):
     if job['state'] == 'error':
         return
 
-    query_url = os.environ['QUERY_URL'] if 'QUERY_URL' in os.environ else job['query_url']
-    result_url = os.environ['RESULT_URL'] if 'RESULT_URL' in os.environ else job['result_url']
+    query_url = os.getenv('QUERY_URL', job['query_url'])
+    result_url = os.getenv('RESULT_URL', job['result_url'])
 
     print 'FINDING SIMILARITY'
     print 'min_post set to %s' % job['min_post']
@@ -90,16 +90,17 @@ def process_message(key, job):
 
     print 'FINISHED SIMILARITY PROCESSING'
     for k, v in hash_clust.get_clusters().iteritems():
-        cluster = {}
-        cluster['id'] = str(uuid.uuid4())
-        cluster['term'] = k
-        cluster['similar_ids'] = v['similar_ids']
-        cluster['similar_post_ids'] = v['similar_post_ids']
-        cluster['job_monitor_id'] = job['job_id']
-        cluster['start_time_ms'] = job['start_time_ms']
-        cluster['end_time_ms'] = job['end_time_ms']
-        cluster['stats'] = v['stats']
-        cluster['data_type'] = 'hashtag'
+        cluster = {
+            'id': str(uuid.uuid4()),
+            'term': k,
+            'similar_ids': v['similar_ids'],
+            'similar_post_ids': v['similar_post_ids'],
+            'job_monitor_id': job['job_id'],
+            'start_time_ms': job['start_time_ms'],
+            'end_time_ms': job['end_time_ms'],
+            'stats': v['stats'],
+            'data_type': 'hashtag'
+        }
 
         try:
             loopy.post_result(result_url, cluster)

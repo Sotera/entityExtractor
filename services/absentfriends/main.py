@@ -66,8 +66,8 @@ def process_message(key, job):
     if job['state'] == 'error':
         return
 
-    query_url = os.environ['QUERY_URL'] if 'QUERY_URL' in os.environ else job['query_url']
-    result_url = os.environ['RESULT_URL'] if 'RESULT_URL' in os.environ else job['result_url']
+    query_url = os.getenv('QUERY_URL', job['query_url'])
+    result_url = os.getenv('RESULT_URL', job['result_url'])
 
     print 'FINDING SIMILARITY'
     print 'min_post set to %s' % job['min_post']

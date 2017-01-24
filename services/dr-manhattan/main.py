@@ -23,7 +23,7 @@ def process_message(key,job):
     if job['state'] == 'error':
         return
 
-    host = os.environ['HOST'] if 'HOST' in os.environ else job['host']
+    host = os.getenv('HOST', job['host'])
 
     ts_end = job['end_time']
     debug = False
