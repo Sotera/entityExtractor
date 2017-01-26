@@ -28,7 +28,6 @@ class Louvaine:
         self.graph.add_node(n_id)
         self.nodes_detailed[n_id] = cluster
 
-
     def add_edge(self, c_link):
         self.graph.add_edge(c_link['source'], c_link['target'], {'weight':c_link['weight']})
 
@@ -259,9 +258,8 @@ class Louvaine:
         d1 = self.get_communities()
         for com in d1.values():
             if len(com['cluster_ids']) < 3:
-                print 'skipping'
-                # print com
                 continue
+
             print 'Posting communities to {}'.format(self.url)
             Loopy.post(self.url + 'events/', json=com)
             print 'Communities Saved!'
