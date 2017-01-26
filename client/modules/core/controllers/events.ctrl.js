@@ -4,7 +4,7 @@ angular.module('com.module.core')
 .controller('EventsCtrl', EventsCtrl);
 
 function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
-  $scope.mapFeatures = null;
+  $scope.mapPoints = null;
   $scope.clusterText = '';
   $scope.events = null;
   $scope.selectedEvents = null;
@@ -131,12 +131,12 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
   function visualize(clusters) {
     let functions = {
       forMap() {
-        let features = {};
+        let points = {};
         $scope.selectedEvent.location.forEach(location => {
           if (location.geo_type !== 'point')
             return;
 
-          features[location.label] = {
+          points[location.label] = {
             lat: location.coords[0].lat,
             lng: location.coords[0].lng,
             message: location.label,
@@ -144,7 +144,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
             draggable: false
           };
         });
-        $scope.mapFeatures = _.isEmpty(features) ? null : features;
+        $scope.mapPoints = _.isEmpty(points) ? null : points;
       },
 
       forHashtags() {

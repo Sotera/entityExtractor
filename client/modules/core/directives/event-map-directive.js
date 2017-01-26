@@ -9,14 +9,14 @@ function eventMapDirective() {
   };
 
   function link(scope, elem, attrs) {
-    scope.$watch(attrs['features'], function(features) {
-      if (!features) return;
+    scope.$watch(attrs['points'], function(points) {
+      if (!points) return;
 
       let options = {
         tiles: {
           url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
         },
-        markers: features,
+        markers: points,
         geojson: {}
       };
       loadMap(options);

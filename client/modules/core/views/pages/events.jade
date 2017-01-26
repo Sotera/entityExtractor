@@ -25,7 +25,7 @@ h5 drag mouse over an area to select
             p(style='display:inline') {{evt.start_time_ms | date:'short'}} - {{evt.end_time_ms | date:'short'}}
             input.form-control(style='display:inline;width:100px;margin-left:16px' ng-model='evt.name' ng-model-options='{ debounce: 1000 }' ng-change='eventNamed(evt)')
   .col-md-4(style='height:550px; overflow-y:hidden')
-    event-map(ng-show='mapFeatures' features='mapFeatures')
+    event-map(ng-show='mapPoints' points='mapPoints')
       iframe(src='http://54.86.248.86:3005/index.html' style='width:100%; height:600px' scrolling='no' frameborder='0' id='map-frame')
   .col-md-5(ng-show='selectedEvent')
     .row(ng-show='imageUrls' style='width:100%; height:100px; overflow-y:auto')
