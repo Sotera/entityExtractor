@@ -110,12 +110,12 @@ def process_message(key,job):
 
 
 if __name__ == '__main__':
-    # dispatcher = Dispatcher(redis_host='redis',
-    #                         process_func=process_message,
-    #                         queues=['genie:eventfinder'])
-    # dispatcher.start()
+    dispatcher = Dispatcher(redis_host='redis',
+                            process_func=process_message,
+                            queues=['genie:eventfinder'])
+    dispatcher.start()
 
     # job = {u'api_root': u'http://172.17.0.1:3000/api', u'state': u'new', u'start_time': u'1481125254000', u'end_time': u'1481125373999'}
-    job = {u'start_time': u'1481124894000', u'state': u'new', u'end_time': u'1481125013999', u'api_root': u'http://172.17.0.1:3000/api',
-        'kafka_url': 'kafka', 'kafka_topic': 'test:1:1'}
-    process_message(1, job)
+    # job = {u'start_time': u'1481124894000', u'state': u'new', u'end_time': u'1481125013999', u'api_root': u'http://172.17.0.1:3000/api',
+    #     'kafka_url': 'kafka', 'kafka_topic': 'test:1:1'}
+    # process_message(1, job)
