@@ -4,9 +4,8 @@ angular.module('com.module.core')
 .controller('EventsCtrl', EventsCtrl);
 
 function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
-  $scope.eventPoints = null;
+  $scope.mapFeatures = null;
   $scope.clusterText = '';
-  $scope.clusterTerm = '';
   $scope.events = null;
   $scope.selectedEvents = null;
   $scope.selectedEvent = null;
@@ -131,20 +130,6 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
 
   function visualize(clusters) {
     let functions = {
-      forText() {
-        $scope.clusterText = '';
-
-        let similarPostIds = _(clusters).map('similar_post_ids')
-          .flatten().compact().uniq().value();
-
-        sampleSocialMediaPosts('text', similarPostIds)
-        .then(posts => {
-          let allText = posts.map(p => p.text).join(' ');
-          $scope.clusterText = allText;
-        })
-        .catch(console.error);
-      },
-
       forMap() {
         let features = {};
         $scope.selectedEvent.location.forEach(location => {
@@ -159,22 +144,26 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
             draggable: false
           };
         });
-        $scope.eventPoints = _.isEmpty(features) ? null : features;
+        $scope.mapFeatures = _.isEmpty(features) ? null : features;
       },
 
       forHashtags() {
-        $scope.clusterTerm = $scope.selectedEvent.hashtags.join(', ');
+        $scope.hashtags = $scope.selectedEvent.hashtags.join(', ');
       },
 
       forImages() {
         $scope.imageUrls = $scope.selectedEvent.image_urls;
       },
 
+      forKeywords() {
+        $scope.keywords = $scope.selectedEvent.keywords;
+      },
+
       forAll() {
-        this.forText();
         this.forMap();
         this.forHashtags();
         this.forImages();
+        this.forKeywords();
       }
     };
 
