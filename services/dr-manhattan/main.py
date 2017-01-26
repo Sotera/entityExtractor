@@ -1,8 +1,7 @@
-import sys, os, requests, json
+import sys, os, json
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
 from loopy import Loopy
-sys.path.append(os.path.join(os.path.dirname(__file__), "./"))
 from louvaine import Louvaine
 
 
@@ -11,33 +10,29 @@ def set_err(job, msg):
     job['data'] = []
     job['error'] = msg
 
-
 def err_check(job):
-    required = {'host', 'start_time', 'end_time'}
+    required = {'api_root', 'start_time', 'end_time'}
     if not required.issubset(job):
         set_err(job, 'Missing some required fields {}'.format(required))
-
 
 def process_message(key,job):
     err_check(job)
     if job['state'] == 'error':
         return
 
-    host = os.getenv('HOST', job['host'])
-
+    api_root = job['api_root']
     ts_end = job['end_time']
-    debug = False
 
-    if host[-1] != '/': host += '/'
-    api_path = host
+    if api_root[-1] != '/': api_root += '/'
+
     query_params = [{
         "query_type": "where",
         "property_name": "end_time_ms",
         "query_value": ts_end
     }]
-    com = Louvaine(api_path,
-       '{}extract/entities'.format(api_path),
-       '{}geocoder/forward-geo'.format(api_path))
+    com = Louvaine(api_root,
+       '{}extract/entities'.format(api_root),
+       '{}geocoder/forward-geo'.format(api_root))
 
     nodes_to_lookup = set()
     nodes_to_add = list()
@@ -45,7 +40,7 @@ def process_message(key,job):
     invalid_nodes = set()
     edges_to_remove = list()
 
-    lp_e = Loopy('{}clusterLinks'.format(api_path), query_params, page_size=500)
+    lp_e = Loopy('{}clusterLinks'.format(api_root), query_params, page_size=500)
 
     if lp_e.result_count == 0:
         print 'No data to process'
@@ -66,8 +61,8 @@ def process_message(key,job):
 
     print "getting node data"
     for node_id in nodes_to_lookup:
-        clust_url = "{}{}{}".format(api_path, "postsClusters/", node_id)
-        node = requests.get(clust_url).json()
+        clust_url = "{}{}{}".format(api_root, "postsClusters/", node_id)
+        node = Loopy.get(clust_url)
         if 'stats' in node:
             if node['stats']['is_unlikely'] == 0:
                 invalid_nodes.add(node_id)
@@ -99,8 +94,7 @@ def process_message(key,job):
 
     print "Finding communities from {} nodes and {} edges.".format(len(com.graph.nodes()), len(com.graph.edges()))
     l_com = com.save_communities()
-    print "Communities Saved!"
-    if 'kafka_url' in job.keys() and 'kafka_topic' in job.keys():
+    if 'kafka_url' in job and 'kafka_topic' in job:
         kafka_url = job['kafka_url']
         kafka_topic = job['kafka_topic']
         print "Sending events to kafka"
@@ -109,14 +103,19 @@ def process_message(key,job):
         print "kafka_topic"
         print kafka_topic
         from event_to_kafka import stream_events
-        stream_events(l_com.values(), kafka_url, kafka_topic, debug=debug)
+        stream_events(l_com.values(), kafka_url, kafka_topic)
 
     job['data'] = json.dumps({})  # no need to save anything to job
     job['state'] = 'processed'
 
 
 if __name__ == '__main__':
-    dispatcher = Dispatcher(redis_host='redis',
-                            process_func=process_message,
-                            queues=['genie:eventfinder'])
-    dispatcher.start()
+    # dispatcher = Dispatcher(redis_host='redis',
+    #                         process_func=process_message,
+    #                         queues=['genie:eventfinder'])
+    # dispatcher.start()
+
+    # job = {u'api_root': u'http://172.17.0.1:3000/api', u'state': u'new', u'start_time': u'1481125254000', u'end_time': u'1481125373999'}
+    job = {u'start_time': u'1481124894000', u'state': u'new', u'end_time': u'1481125013999', u'api_root': u'http://172.17.0.1:3000/api',
+        'kafka_url': 'kafka', 'kafka_topic': 'test:1:1'}
+    process_message(1, job)

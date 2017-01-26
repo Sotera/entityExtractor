@@ -5,8 +5,6 @@ angular.module('com.module.core')
 
 function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
   $scope.eventPoints = null;
-  $scope.clusterText = '';
-  $scope.clusterTerm = '';
   $scope.events = null;
   $scope.selectedEvents = null;
   $scope.selectedEvent = null;
@@ -16,6 +14,8 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
     // already selected
     if ($scope.selectedEvent && $scope.selectedEvent.id === evnt.id)
       return;
+
+    $scope.selectedEvent = evnt;
 
     visualizeEvent(evnt);
   };
@@ -36,21 +36,20 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
     tempEvents.forEach(filterEvent);
   };
 
-  function filterEvent(evnt){
-    PostsCluster.find({
-      filter: {
-        where: {
-          id: { inq: evnt.cluster_ids }
-        }
-      }
-    })
-    .$promise
-    .then(clusters => $scope.filter(clusters, evnt))
-    .catch(console.error);
+  function filterEvent(evnt) {
+    let hashtags = evnt.hashtags.join(', ');
+    let keywords = evnt.keywords.map(k => k[0]);
+
+    if (hashtags.includes($scope.filterText)) {
+      return $scope.selectedEvents.push(evnt);
+    }
+
+    if (keywords.includes($scope.filterText)) {
+      return $scope.selectedEvents.push(evnt);
+    }
   }
 
   function visualizeEvent(evnt) {
-    $scope.selectedEvent = evnt;
     PostsCluster.find({
       filter: {
         where: {
@@ -82,68 +81,11 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
     $scope.selectedEvents = events;
   }
 
-  $scope.filter = filter;
-
-  function filter(clusters, evnt) {
-    let terms = evnt.hashtags.join(', ');
-
-    if (terms.includes($scope.filterText)) {
-      $scope.selectedEvents.push(evnt);
-      return;
-    }
-
-    let similarPostIds = _(clusters).map('similar_post_ids')
-      .flatten().compact().uniq().value();
-
-    sampleSocialMediaPosts('text', similarPostIds)
-    .then(posts => {
-      let allText = posts.map(p => p.text).join(' ');
-      if (allText.includes($scope.filterText)) {
-        $scope.selectedEvents.push(evnt);
-      }
-    })
-    .catch(console.error);
-  }
-
-  function sampleSocialMediaPosts(dataType, postIds, sampleSize=100) {
-    $scope.showSpinner = true;
-
-    postIds = _.sampleSize(postIds, sampleSize);
-
-    return SocialMediaPost.find({
-      filter: {
-        where: {
-          post_id: { inq: postIds },
-          featurizer: dataType
-        },
-        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url']
-      }
-    }).$promise
-    .then(posts => {
-      $scope.showSpinner = false;
-      return posts;
-    });
-  }
-
   // 'visualize': show me the details
   $scope.visualize = visualize;
 
   function visualize(clusters) {
     let functions = {
-      forText() {
-        $scope.clusterText = '';
-
-        let similarPostIds = _(clusters).map('similar_post_ids')
-          .flatten().compact().uniq().value();
-
-        sampleSocialMediaPosts('text', similarPostIds)
-        .then(posts => {
-          let allText = posts.map(p => p.text).join(' ');
-          $scope.clusterText = allText;
-        })
-        .catch(console.error);
-      },
-
       forMap() {
         let features = {};
         $scope.selectedEvent.location.forEach(location => {
@@ -161,29 +103,26 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
         $scope.eventPoints = _.isEmpty(features) ? null : features;
       },
 
-      forDomains() {
-        $scope.clusterTerm = $scope.selectedEvent.domains.join(', ');
-      },
-
       forHashtags() {
-        $scope.clusterTerm = $scope.selectedEvent.hashtags.join(', ');
+        $scope.eventHashtags = $scope.selectedEvent.hashtags.join(', ');
       },
 
       forImages() {
-        $scope.imageUrls = $scope.selectedEvent.image_urls;
+        $scope.eventImageUrls = $scope.selectedEvent.image_urls;
+      },
+
+      forKeywords() {
+        $scope.eventKeywords = $scope.selectedEvent.keywords;
       },
 
       forAll() {
-        this.forText();
         this.forMap();
         this.forHashtags();
         this.forImages();
+        this.forKeywords();
       }
     };
 
     return functions;
   }
 }
-
-
-

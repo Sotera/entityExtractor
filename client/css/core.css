@@ -18,6 +18,11 @@ td.highlight {
   border: 3px solid #07582B !important;
 }
 
+table caption {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
 .navigator .circle {
   fill: white;
   stroke: cornflowerblue;

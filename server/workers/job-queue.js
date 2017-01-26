@@ -140,7 +140,7 @@ function findEvents(jobMonitor) {
   const queueName = 'genie:eventfinder',
     key = generateJobKey(queueName),
     jobAttrs = {
-      host: API_ROOT,
+      api_root: API_ROOT,
       start_time: jobMonitor['start_time'].toString(),
       end_time: jobMonitor['end_time'].toString(),
       state: 'new'

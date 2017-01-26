@@ -3,11 +3,11 @@ import requests
 import math
 from switch import switch
 
-'''
-pronounced 'Loo Py', not loopy:
-A Python module that makes REST API calls to Loopback apps.
-'''
 class Loopy:
+    '''
+    pronounced 'Loo Py', not loopy:
+    A Python module that makes REST API calls to Loopback apps.
+    '''
     def __init__(self, query_url, params, page_size=100, order_by='_id ASC'):
         # normalize url
         self.query_url = query_url.strip().rstrip('/') + '/'
@@ -105,22 +105,41 @@ class Loopy:
         self.total_returned += len(result)
         return result
 
-    '''
-    Send JSON data using specified http method (not just a POST).
-    If url starts with '/', append to query_url.
-    '''
     def post_result(self, url, json, method='POST'):
+        '''
+        Send JSON data using specified http method (not just a POST).
+        If query_url starts with '/', append to query_url.
+        '''
         if url.startswith('/'):
             url = self.query_url + url[1:]
 
+        return Loopy._send_request(url, json, method)
+
+    @staticmethod
+    def post(url, json, method='POST'):
+        '''
+        (static) Send JSON data using specified http method (not just a POST).
+        '''
+        return Loopy._send_request(url, json, method)
+
+    @staticmethod
+    def get(url):
+        '''
+        (static) GET json data.
+        '''
+        return Loopy._send_request(url, json=None, method='GET')
+
+    @staticmethod
+    def _send_request(url, json, method='POST'):
         result = requests.request(method, url, json=json)
-        if result.status_code != 200:
+        if result.status_code == 200:
+            return result.json()
+        else:
             print(result.content)
-            raise Exception('POST to {} failed: {}'.format(
+            raise Exception('{} to {} failed: {}'.format(
+                method.upper(),
                 url,
                 result.content))
-        else:
-            return result.content
 
 if __name__ == '__main__':
     query_params = [{
