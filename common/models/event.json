@@ -35,6 +35,10 @@
       ],
       "required": true
     },
+    "of_interest": {
+      "type": "Boolean",
+      "default":true
+    },
     "name": {
       "type": "string"
     },
