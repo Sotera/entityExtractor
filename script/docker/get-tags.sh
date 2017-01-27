@@ -7,7 +7,7 @@ if ! [ -e "$jq" ]; then
   exit $?
 fi
 
-for name in 'aggregate-clustering' 'caffe_redis_client' 'comedian' 'dr-manhattan' \
+for name in 'absentfriends' 'caffe_redis_client' 'comedian' 'dr-manhattan' \
 'feature-sim' 'image-fetcher' 'ozymandias' 'rorschach'
 do
   curl -s https://registry.hub.docker.com/v2/repositories/sotera/$name/tags/ |

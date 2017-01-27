@@ -126,7 +126,7 @@ services:
       extends:
         file: common.yml
         service: analytic
-      image: sotera/absentfriends:7
+      image: sotera/absentfriends:8
       hostname: domain-clusterer
       environment:
         - TRUNCATE_POSTS=1
