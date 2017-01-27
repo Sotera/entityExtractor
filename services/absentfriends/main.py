@@ -1,4 +1,4 @@
-import sys, os, codecs
+import sys, os, codecs, uuid
 from urlparse import urlparse
 from domain_similarity import DomainClusters
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
@@ -48,12 +48,10 @@ def get_domains(urlList):
                 A = A[1:]
             dn = UNICODE_PERIOD.join(A)
             result.add(dn)
-    
+
     return list(result)
-        
+
 def process_message(key, job):
-
-
     print "absentfriends/main.py:process_message" + repr((key, job))
     # if type == 'featurizer', immediately process and return b/c domains
     # are not featurized. allows system to continue with clustering process.
@@ -103,15 +101,16 @@ def process_message(key, job):
             if len(domains) > 0:
                 domain_clust.process_vector(doc['id'], doc['post_id'], domains)
 
-    if 'TRUNCATE_POSTS' in os.environ and os.environ['TRUNCATE_POSTS'] == '1':
+    if int(os.getenv('TRUNCATE_POSTS') or 0):
         print 'Truncating posts...'
-        print delete_noise(domain_clust.get_deletable_ids(), loopy)
+        print truncate_posts(feature_similarity.get_clusters_to_delete(), loopy)
     else:
         print 'Skipping truncate posts because TRUNCATE_POSTS env var is not set...'
 
     print 'FINISHED SIMILARITY PROCESSING'
     for k, v in domain_clust.get_clusters().iteritems():
         cluster = {}
+        cluster['id'] = str(uuid.uuid4())
         cluster['term'] = k
         cluster['similar_ids'] = v['similar_ids']
         cluster['similar_post_ids'] = v['similar_post_ids']
@@ -134,12 +133,11 @@ def process_message(key, job):
         job['state'] = 'processed'
 
 
-def delete_noise(noise_clusters, loopy):
-    return loopy.post_result('/destroy', {'ids': noise_clusters})
+def truncate_posts(deletable_ids, loopy):
+    return loopy.post_result('/destroy', {'ids': deletable_ids})
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
                             process_func=process_message,
                             queues=['genie:feature_domain', 'genie:clust_domain'])
     dispatcher.start()
-
