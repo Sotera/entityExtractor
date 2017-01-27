@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
   less \
   nano
 
+RUN apt-get autoremove -y
+
 COPY $SERVICE/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
@@ -24,4 +26,4 @@ COPY $SERVICE/$MAIN docker_main.py
 # match project dir structure to satisfy imports
 COPY util /usr/src/util
 
-CMD ["python", "-u", "docker_main.py"]
+ENTRYPOINT ["python", "-u", "docker_main.py"]

@@ -1,5 +1,7 @@
 FROM python:2.7
 
+ENV TERM=xterm
+
 # docker build-time args
 ARG SERVICE
 ARG MAIN=main.py
@@ -13,6 +15,8 @@ RUN apt-get update && apt-get install -y \
   nano \
   libicu-dev
 
+RUN apt-get autoremove -y
+
 COPY $SERVICE/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
@@ -22,7 +26,5 @@ COPY $SERVICE .
 COPY $SERVICE/$MAIN docker_main.py
 # match project dir structure to satisfy imports
 COPY util /usr/src/util
-
-ENV TERM=xterm
 
 ENTRYPOINT ["python", "-u", "docker_main.py"]

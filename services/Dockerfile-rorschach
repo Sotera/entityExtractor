@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     nano \
     libicu-dev
 
+RUN apt-get autoremove -y
+
 COPY $SERVICE/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -U git+https://github.com/aboSamoor/polyglot.git@master
@@ -28,4 +30,4 @@ COPY $SERVICE/$MAIN docker_main.py
 # match project dir structure to satisfy imports
 COPY util /usr/src/util
 
-CMD ["python", "-u", "docker_main.py", "-englishModel", "Aug09_en", "-arabicModel", "Aug09_ar", "-modelPath", "./models/"]
+ENTRYPOINT ["python", "-u", "docker_main.py", "-englishModel", "Aug09_en", "-arabicModel", "Aug09_ar", "-modelPath", "./models/"]
