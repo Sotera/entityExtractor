@@ -1,5 +1,6 @@
 node_modules
 client/bower_components
+client/build
 temp
 .idea
 *.log

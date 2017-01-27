@@ -27,6 +27,7 @@ lb-ng server/server.js client/js/lb-services.js
 ```
 docker rm $(docker ps -a -q) # optional, remove all un'composed' containers
 sudo service docker restart # optional, but should speed things up
+cp .env.template .env # add browser API keys, etc.
 git clone https://github.com/Sotera/watchman.git app; cd app # optional if in dev env
 cp slc-conf.template.json slc-conf.json
 sudo script/docker/install-compose.sh

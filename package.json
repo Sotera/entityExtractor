@@ -4,9 +4,11 @@
   "version": "1.0.0",
   "main": "server/server.js",
   "scripts": {
+    "postinstall": "npm run build",
     "pretest": "jshint .",
     "dev": "nodemon . -w server -w common -w lib --ext js,json",
-    "build": "bower install"
+    "build": "bower install && npm run build:env",
+    "build:env": "mkdir -p client/build && ./script/deploy/env.js > client/build/env.js"
   },
   "private": true,
   "engines": {
