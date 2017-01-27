@@ -22,8 +22,18 @@ h5 drag mouse over an area to select
       tbody
         tr(ng-repeat='evt in selectedEvents')
           td(ng-click='eventSelected(evt)' ng-class='{highlight: (selectedEvent && selectedEvent.id === evt.id)}')
-            p(style='display:inline') {{evt.start_time_ms | date:'short'}} - {{evt.end_time_ms | date:'short'}}
-            input.form-control(style='display:inline;width:100px;margin-left:16px' ng-model='evt.name' ng-model-options='{ debounce: 1000 }' ng-change='eventNamed(evt)')
+            .row
+              .cell
+                p(style='display:inline') {{evt.start_time_ms | date:'short'}} - {{evt.end_time_ms | date:'short'}}
+                input.form-control(style='display:inline;width:100px;margin-left:16px' ng-model='evt.name' ng-model-options='{ debounce: 1000 }' ng-change='eventNamed(evt)')
+            .row
+              .cell
+                label Interesting:
+              .cell
+                label.switch
+                  input(type='checkbox' ng-model='evt.of_interest' ng-change='ofInterestChanged(evt)')
+                  .slider.round
+
   .col-md-4(style='height:550px; overflow-y:hidden')
     event-map(ng-show='eventPoints' ng-model='eventPoints')
       iframe(src='http://54.86.248.86:3005/index.html' style='width:100%; height:600px' scrolling='no' frameborder='0' id='map-frame')

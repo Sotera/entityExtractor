@@ -30,6 +30,16 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
     .catch(console.error);
   };
 
+  $scope.ofInterestChanged = function(evnt) {
+    Event.prototype$updateAttributes({
+      id: evnt.id,
+      of_interest: evnt.of_interest
+    })
+      .$promise
+      .then(console.info)
+      .catch(console.error);
+  };
+
   $scope.filterChanged = function() {
     let tempEvents = $scope.selectedEvents;
     $scope.selectedEvents = [];
