@@ -36,9 +36,9 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
       id: evnt.id,
       of_interest: evnt.of_interest
     })
-      .$promise
-      .then(console.info)
-      .catch(console.error);
+    .$promise
+    .then(console.info)
+    .catch(console.error);
   };
 
   $scope.filterChanged = function() {
@@ -75,21 +75,19 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
   }
 
   $scope.dateRangeSelected = function(start, end) {
-    $scope.$apply(() => getEvents(start, end));
+    $scope.$apply(() => getEventsInRange(start, end));
   };
 
-  function getEvents(start, end) {
-    let events = [];
-    $scope.events.forEach(function(evnt) {
-      if(evnt.end_time_ms >= start && evnt.end_time_ms <= end) {
-        events.push(evnt);
-      } else if(evnt.start_time_ms >= start && evnt.start_time_ms <= end) {
-        events.push(evnt);
-      } else if(evnt.start_time_ms <= start && evnt.end_time_ms >= end) {
-        events.push(evnt);
+  function getEventsInRange(start, end) {
+    $scope.selectedEvents = $scope.events.filter(evnt => {
+      if (evnt.end_time_ms >= start && evnt.end_time_ms <= end) {
+        return true;
+      } else if (evnt.start_time_ms >= start && evnt.start_time_ms <= end) {
+        return true;
+      } else if (evnt.start_time_ms <= start && evnt.end_time_ms >= end) {
+        return true;
       }
     });
-    $scope.selectedEvents = events;
   }
 
   $scope.filter = filter;

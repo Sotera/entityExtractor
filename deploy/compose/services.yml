@@ -123,15 +123,15 @@ services:
       - redis
 
   domain-clusterer:
-      extends:
-        file: common.yml
-        service: analytic
-      image: sotera/absentfriends:8
-      hostname: domain-clusterer
-      environment:
-        - TRUNCATE_POSTS=1
-      depends_on:
-        - redis
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/absentfriends:8
+    hostname: domain-clusterer
+    environment:
+      - TRUNCATE_POSTS=1
+    depends_on:
+      - redis
 
   cluster-linker:
     extends:
