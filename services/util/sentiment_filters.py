@@ -1,4 +1,5 @@
 import re
+import traceback
 from polyglot.text import Text
 
 class SentimentFilter:
@@ -32,7 +33,7 @@ class SentimentFilter:
             try:
                 return filter(lambda x: len(x)>1, Text(caption).words)
             except:
-                print 'error in tokenize returning empty array'
+                traceback.print_exc()
                 return []
         else:
             return []
@@ -48,7 +49,7 @@ class SentimentFilter:
                 caption = re.sub('[#]', ' #',caption,flags=re.UNICODE)
                 return filter(lambda x: len(x)>1, Text(caption).words)
             except:
-                print 'error in pres_tokenize returning empty array'
+                traceback.print_exc()
                 return []
         else:
             return []

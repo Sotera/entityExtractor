@@ -265,4 +265,3 @@ class Louvaine:
             print 'Communities Saved!'
 
         return d1
-
