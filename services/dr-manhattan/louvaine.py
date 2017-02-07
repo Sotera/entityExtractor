@@ -43,7 +43,6 @@ class Louvaine:
         websites = set([])
         r_o["campaigns"]["total"] += n_posts
 
-        #TODO: fix query type once S.L. is fixed
         query_params = [{
             "query_type":"inq",
             "property_name":"post_id",
@@ -58,12 +57,6 @@ class Louvaine:
             if doc['featurizer'] != cluster['data_type']:
                 continue
 
-            entities = None
-            try:
-                entities = Loopy.post(self.ent_url, json={'text': doc['text']})
-            except:
-                print 'error getting entities, ignoring'
-
             if 'campaigns' in doc:
                 for cam in doc['campaigns']:
                     if cam in r_o["campaigns"]["ids"]:
@@ -71,14 +64,12 @@ class Louvaine:
                     else:
                         r_o["campaigns"]["ids"][cam] = 1
 
-            if entities:
-                for res in entities:
-                    if res['tag'] != 'LOCATION':
-                        continue
-                    geos = Loopy.post(self.geo_url, json={'address': res['label']})
-                    for place in geos:
-                        places.append(place)
-                        break
+            locs = self.sf.extract_loc(doc['text'])
+            for loc in locs:
+                geos = Loopy.post(self.geo_url, json={'address': loc})
+                for place in geos:
+                    places.append(place)
+                    break
 
             for word in [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]:
                 if word[0] == '#':
