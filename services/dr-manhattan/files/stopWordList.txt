@@ -1054,7 +1054,7 @@ or
 other
 ought
 our
-ours 
+ours
 ourselves
 out
 over
@@ -1734,7 +1734,6 @@ who
 will
 with
 the
-www
 ﻿a
 about
 above
@@ -3050,3 +3049,5 @@ yüz
 þunda
 þundan
 þunu
+-
+&amp;
