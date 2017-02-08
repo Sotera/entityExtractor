@@ -24,6 +24,7 @@ def process_message(key,job):
     ts_end = job['end_time']
 
     if api_root[-1] != '/': api_root += '/'
+    job['api_root'] = api_root
 
     query_params = [{
         "query_type": "where",
@@ -93,7 +94,7 @@ def process_message(key,job):
     del edges_to_remove
 
     print "Finding communities from {} nodes and {} edges.".format(len(com.graph.nodes()), len(com.graph.edges()))
-    l_com = com.save_communities()
+    l_com = save_communities(com, job)
     if 'kafka_url' in job and 'kafka_topic' in job:
         kafka_url = job['kafka_url']
         kafka_topic = job['kafka_topic']
@@ -108,6 +109,63 @@ def process_message(key,job):
     job['data'] = json.dumps({})  # no need to save anything to job
     job['state'] = 'processed'
 
+
+def save_communities(com, job):
+    d1 = com.get_communities()
+    for com in d1.values():
+        if len(com['cluster_ids']) < 3:
+            continue
+
+        match_and_create_event(com, job)
+
+    return d1
+
+def match_and_create_event(com, job):
+    print 'Saving event'
+
+    events_url = '{}events'.format(job['api_root'])
+
+    # get prior events -> end_time == job.start_time - 1ms
+    query_params = [{
+        'query_type': 'where',
+        'property_name': 'end_time_ms',
+        'query_value': int(job['start_time']) - 1
+    }]
+
+    loopy = Loopy(events_url, query_params)
+
+    # if no events in prior window, create new event
+    if loopy.result_count == 0:
+        create_event(loopy, com)
+        return
+
+    while True:
+        match = None
+        page = loopy.get_next_page()
+
+        if page is None:
+            break
+
+        for event in page:
+            match = match_event(com, event)
+
+    if match:
+        update_event(com, event)
+        return
+    else:
+        create_event(loopy, com)
+        return
+
+def match_event(com, event):
+    # TODO
+    return
+
+def create_event(loopy, com):
+    return loopy.post_result('/', json=com)
+
+def update_event(com, event):
+    # TODO
+    return
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',

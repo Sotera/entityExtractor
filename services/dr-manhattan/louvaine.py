@@ -253,15 +253,3 @@ class Louvaine:
             d1[com]['location'] = temp
 
         return d1
-
-    def save_communities(self):
-        d1 = self.get_communities()
-        for com in d1.values():
-            if len(com['cluster_ids']) < 3:
-                continue
-
-            print 'Posting communities to {}'.format(self.url)
-            Loopy.post(self.url + 'events/', json=com)
-            print 'Communities Saved!'
-
-        return d1
