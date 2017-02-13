@@ -167,7 +167,7 @@ class Louvaine:
 
         print "Communities found, getting event summary information"
         n_nodes = len(self.graph.nodes())
-        checkpoints = [.1, .25, .5, .75, .9, .95, .99999, 1.1]
+        checkpoints = [.1, .25, .5, .75, .9, .95, .99, 1.1]
         ind_checked = 0
         n_checked = 0
         for n in self.graph.nodes():

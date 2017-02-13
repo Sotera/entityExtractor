@@ -1,9 +1,9 @@
 import sys, os, json
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
+import event_matcher as matcher
 from loopy import Loopy
 from louvaine import Louvaine
-
 
 def set_err(job, msg):
     job['state'] = 'error'
@@ -116,56 +116,9 @@ def save_communities(com, job):
         if len(com['cluster_ids']) < 3:
             continue
 
-        match_and_create_event(com, job)
+        matcher.match_and_create_event(com, job)
 
     return d1
-
-def match_and_create_event(com, job):
-    print 'Saving event'
-
-    events_url = '{}events'.format(job['api_root'])
-
-    # get prior events -> end_time == job.start_time - 1ms
-    query_params = [{
-        'query_type': 'where',
-        'property_name': 'end_time_ms',
-        'query_value': int(job['start_time']) - 1
-    }]
-
-    loopy = Loopy(events_url, query_params)
-
-    # if no events in prior window, create new event
-    if loopy.result_count == 0:
-        create_event(loopy, com)
-        return
-
-    while True:
-        match = None
-        page = loopy.get_next_page()
-
-        if page is None:
-            break
-
-        for event in page:
-            match = match_event(com, event)
-
-    if match:
-        update_event(com, event)
-        return
-    else:
-        create_event(loopy, com)
-        return
-
-def match_event(com, event):
-    # TODO
-    return
-
-def create_event(loopy, com):
-    return loopy.post_result('/', json=com)
-
-def update_event(com, event):
-    # TODO
-    return
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
@@ -173,7 +126,8 @@ if __name__ == '__main__':
                             queues=['genie:eventfinder'])
     dispatcher.start()
 
-    # job = {u'api_root': u'http://172.17.0.1:3000/api', u'state': u'new', u'start_time': u'1481125254000', u'end_time': u'1481125373999'}
-    # job = {u'start_time': u'1481124894000', u'state': u'new', u'end_time': u'1481125013999', u'api_root': u'http://172.17.0.1:3000/api',
+    job = {u'start_time': u'1486579143000', u'state': u'new', u'end_time': u'1486579262999', u'api_root': u'http://172.17.0.1:3000/api'}
+    # job = {'start_time': '1481124894000', 'state': 'new', 'end_time': '1481125013999', 'api_root': 'http://172.17.0.1:3000/api',
     #     'kafka_url': 'kafka', 'kafka_topic': 'test:1:1'}
+    #process_message(1, job)
     # process_message(1, job)
