@@ -6,18 +6,19 @@ from loopy import Loopy
 from sentiment_filters import SentimentFilter
 from operator import itemgetter as iget
 
+# big list: load it once
+stop_path = os.path.join(os.path.dirname(__file__), 'files', 'stopWordList.txt')
+stop_file = open(stop_path, 'r')
+stop_list = {w.strip('\n').strip('\r') for w in stop_file}
+
 class Louvaine:
     def __init__(self, base_url, ent_url, geo_url):
         self.graph = nx.Graph()
         self.nodes_detailed = {}
-        stop_file = open(os.path.dirname(__file__) + '/files/' + 'stopWordList.txt', 'r')
-        self.stop = set([])
         self.ent_url = ent_url
         self.geo_url = geo_url
-        for line in stop_file:
-            self.stop.add(line.strip('\n').strip('\r'))
-
         self.sf = SentimentFilter()
+
         if base_url[-1] == '/':
             self.url = base_url
         else:
@@ -49,7 +50,7 @@ class Louvaine:
             "property_name":"post_id",
             "query_value":l_sample
         }]
-        lp = Loopy(self.url + 'socialMediaPosts', query_params, page_size=500)
+        lp = Loopy(self.url + 'socialMediaPosts', query_params)
         page = lp.get_next_page()
         if page is None:
             return
@@ -80,7 +81,10 @@ class Louvaine:
                         places.append(place)
                         break
 
-            for word in [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]:
+            for word in [w for w in
+                self.sf.pres_tokenize(doc['text'], doc['lang'])
+                if w not in stop_list]:
+
                 if word[0] == '#':
                     continue
                 if word[:4]=='http':
@@ -201,19 +205,18 @@ class Louvaine:
             #Expand Summary data (hashtags, keywords, images, urls, geo, domains)
             if clust['data_type'] == 'hashtag':
                 d1[com]['hashtags'][clust['term']] = len(clust['similar_post_ids'])
-                images |= self.get_img_sum(clust)
                 #Add full text analysis, many communities have no image/text nodes
                 self.get_text_sum(clust, d1[com])
             elif clust['data_type'] == 'domain':
                 # TODO: Verify we don't need hashtag or a get_domain_sum function
                 d1[com]['domains'][clust['term']] = len(clust['similar_post_ids'])
-                images |= self.get_img_sum(clust)
                 self.get_text_sum(clust, d1[com])
             elif clust['data_type'] == 'image':
-                images |= self.get_img_sum(clust)
+                pass
             elif clust['data_type'] == 'text':
-                images |= self.get_img_sum(clust)
                 self.get_text_sum(clust, d1[com])
+
+            images |= self.get_img_sum(clust)
 
             d1[com]['image_urls'] = list(set(d1[com]['image_urls']) |images)
 
