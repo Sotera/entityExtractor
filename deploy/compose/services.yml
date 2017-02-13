@@ -59,7 +59,7 @@ services:
       - data-container
     ports:
       - "8703:8701"
-      - "3002:3001"
+      - "3002:3002"
 
   scheduler:
     extends:
