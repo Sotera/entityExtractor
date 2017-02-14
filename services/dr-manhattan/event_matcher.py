@@ -91,4 +91,4 @@ def update_event(loopy, event, job):
     print 'keywords: {}\nhashtags: {}'.format(event['keywords'], event['hashtags'])
     return loopy.post_result('/{}'.format(event['id']),
         method='PUT',
-        json={'end_time_ms': job['end_time']})
+        json={'end_time_ms': job['end_time'], 'extended': True})
