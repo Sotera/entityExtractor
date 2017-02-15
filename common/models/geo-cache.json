@@ -1,0 +1,46 @@
+{
+  "name": "geoCache",
+  "description": "Cache of geocoded results",
+  "plural": "geoCache",
+  "base": "PersistedModel",
+  "indexes": {
+    "idx_uniq": {
+      "keys": {
+        "place": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  },
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "Timestamp": {},
+    "DestroyAll": {}
+  },
+  "properties": {
+    "place": {
+      "type": "string",
+      "required": true
+    },
+    "res": {
+      "description": "geocoded result",
+      "type": [
+        "object"
+      ],
+      "required": true,
+      "default": []
+    },
+    "updated": {
+      "type": "date",
+      "default": "$now"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
