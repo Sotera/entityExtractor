@@ -1,5 +1,7 @@
+'use strict';
+
 angular.module('com.module.core')
-  .controller('JobMonitorsCtrl', JobMonitorsCtrl);
+.controller('JobMonitorsCtrl', JobMonitorsCtrl);
 
 function JobMonitorsCtrl($scope, $window, JobMonitor, PostsCluster,
   $routeParams, $location) {
@@ -12,7 +14,7 @@ function JobMonitorsCtrl($scope, $window, JobMonitor, PostsCluster,
     if (_limit) {
       limit = _limit;
       $location.search('limit', limit);
-      getJobMonitors({limit: limit, type: type});
+      slowlyGetJobMonitors({limit: limit, type: type});
     }
   });
 
@@ -20,7 +22,7 @@ function JobMonitorsCtrl($scope, $window, JobMonitor, PostsCluster,
     if (_type) {
       type = _type;
       $location.search('type', type);
-      getJobMonitors({limit: limit, type: type});
+      slowlyGetJobMonitors({limit: limit, type: type});
     }
   });
 
@@ -31,10 +33,16 @@ function JobMonitorsCtrl($scope, $window, JobMonitor, PostsCluster,
     type: type,
     totalClustersCount: PostsCluster.count()
   });
-  getJobMonitors({limit: limit, type: type});
 
-  // params: type, limit
-  function getJobMonitors(params) {
+  // prevent watchers from duplicating expensive db call.
+  // delay time isn't especially important in this case.
+  const slowlyGetJobMonitors = _.throttle(
+    getJobMonitors,
+    1000,
+    { leading: true, trailing: false }
+  );
+
+  function getJobMonitors(params={limit: 10, type: null}) {
     var filter = {
       limit: params.limit,
       order: 'start_time desc',
