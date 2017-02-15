@@ -237,16 +237,16 @@ class Louvaine:
             d1[com]['campaigns'] = l_camps
 
             l_tags = map(lambda x: x[0], sorted([(k, v) for k, v in d1[com]['hashtags'].iteritems()], key=iget(1)))
-            d1[com]['hashtags'] = l_tags[:10] # slice
+            d1[com]['hashtags'] = l_tags[:20] # slice
 
             # l_terms = map(lambda x: x[0], sorted([(k, v) for k, v in d1[com]['keywords'].iteritems()], key=lambda x: x[1]))
             l_terms = sorted(list(d1[com]['keywords'].iteritems()), key=iget(1), reverse=1)
-            d1[com]['keywords'] = l_terms[:10] # slice
+            d1[com]['keywords'] = l_terms[:20] # slice
 
             d1[com]['urls'] = list(d1[com]['urls'])
 
             l_domains = map(lambda x: x[0], sorted([(k, v) for k, v in d1[com]['domains'].iteritems()], key=iget(1)))
-            d1[com]['domains'] = l_domains[:10] # slice
+            d1[com]['domains'] = l_domains[:20] # slice
 
             temp = []
             for k, v in d1[com]['location'].iteritems():
