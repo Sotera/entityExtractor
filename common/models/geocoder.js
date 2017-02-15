@@ -1,16 +1,6 @@
 'use strict';
 
-var geocoderProvider = 'openstreetmap',
-  app = require('../../server/server'),
-  protocol = 'https';
-
-// optional
-var extra = {
-  apiKey: 'YOUR_API_KEY', // for Mapquest, OpenCage, Google Premier
-  formatter: null     // 'gpx', 'string', ...
-};
-
-var geocoder = require('node-geocoder')(geocoderProvider, protocol, extra);
+const geocoder = require('../../lib/geocoder');
 
 module.exports = function(Geocoder) {
 
@@ -37,14 +27,12 @@ module.exports = function(Geocoder) {
   };
 
   Geocoder.geocodeEvent = function(parsedEventId) {
-
-    var ParsedEvent = Geocoder.app.models.ParsedEvent;
-
-    var filter = {
-      where: {
-        id: parsedEventId
-      }
-    };
+    const ParsedEvent = Geocoder.app.models.ParsedEvent,
+      filter = {
+        where: {
+          id: parsedEventId
+        }
+      };
 
     return ParsedEvent.findOne(filter)
     .then(function(item){

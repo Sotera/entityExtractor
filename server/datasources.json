@@ -6,5 +6,13 @@
     "name": "db",
     "connectionTimeout": 10000,
     "connector": "mongodb"
+  },
+  "cache": {
+    "host": "localhost",
+    "port": 27017,
+    "database": "watchman-cache",
+    "name": "cache",
+    "connectionTimeout": 10000,
+    "connector": "mongodb"
   }
 }
