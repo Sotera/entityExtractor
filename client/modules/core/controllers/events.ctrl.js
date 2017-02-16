@@ -167,11 +167,16 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
         $scope.keywords = $scope.selectedEvent.keywords;
       },
 
+      forLocations() {
+        $scope.locations = $scope.selectedEvent.location.map(loc => loc.label);
+      },
+
       forAll() {
         this.forMap();
         this.forHashtags();
         this.forImages();
         this.forKeywords();
+        this.forLocations();
       }
     };
 
