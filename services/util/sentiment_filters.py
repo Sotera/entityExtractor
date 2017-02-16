@@ -58,6 +58,7 @@ class SentimentFilter:
         try:
             text = Text(caption)
             ll = [u' '.join(list(x)) for x in filter(lambda x: x.tag=='I-LOC', text.entities)]
-            return ll
+            return set(ll)
         except:
-            return []
+            traceback.print_exc()
+            return set([])
