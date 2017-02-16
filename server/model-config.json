@@ -91,5 +91,9 @@
   "setting": {
     "dataSource": "db",
     "public": true
+  },
+  "geoCache": {
+    "dataSource": "cache",
+    "public": true
   }
 }
