@@ -66,17 +66,20 @@ class Louvaine:
 
             locs = self.sf.extract_loc(doc['text'])
             for loc in locs:
-                geos = Loopy.post(self.geo_url, json={'address': loc})
-                for place in geos:
-                    places.append(place)
-                    break
+                try:
+                    geos = Loopy.post(self.geo_url, json={'address': loc})
+                    for place in geos:
+                        places.append(place)
+                        break
+                except Exception as e:
+                    print "error getting locations from geocoder...continuing."
 
             for word in [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]:
                 if word[0] == '#':
                     continue
-                if word[:4]=='http':
+                if word[:4] == 'http':
                     websites.add(word)
-                if word[:3]=='www':
+                if word[:3] == 'www':
                     websites.add('http://' + word)
                 if word in words:
                     words[word] += 1
