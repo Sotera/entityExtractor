@@ -1,4 +1,4 @@
-﻿فى
+فى
 في
 كل
 لم
@@ -1054,7 +1054,7 @@ or
 other
 ought
 our
-ours 
+ours
 ourselves
 out
 over
@@ -3050,3 +3050,4 @@ yüz
 þunda
 þundan
 þunu
+&amp;

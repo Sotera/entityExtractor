@@ -3,6 +3,7 @@ import networkx as nx
 from random import sample
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from loopy import Loopy
+from text_utils import remove_punctuation
 from sentiment_filters import SentimentFilter
 from operator import itemgetter as iget
 
@@ -90,6 +91,8 @@ class Louvaine:
                     words[word] = 1
 
         for k, v in words.iteritems():
+            print k, v
+            k = remove_punctuation(k)
             if v < 5:
                 continue
             if v in r_o['keywords']:
