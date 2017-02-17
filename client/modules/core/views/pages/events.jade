@@ -63,4 +63,4 @@ h5 drag mouse over an area to select
           th loc
       tbody
         tr(ng-repeat='loc in locations')
-          td {{loc}}
+          td(ng-click='translate(loc)') {{loc}}
