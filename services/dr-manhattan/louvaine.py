@@ -67,7 +67,7 @@ class Louvaine:
 
             locs = self.sf.extract_loc(doc['text'])
             for loc in locs:
-                print 'Location:', loc
+                print 'Location:', loc.encode('utf-8')
                 try:
                     geos = Loopy.post(self.geo_url, json={'address': loc})
                     for place in geos:
