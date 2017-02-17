@@ -70,7 +70,6 @@ class Louvaine:
                 print 'Location:', loc
                 try:
                     geos = Loopy.post(self.geo_url, json={'address': loc})
-                    print 'Geos:', geos
                     for place in geos:
                         places.append(place)
                         break
@@ -78,20 +77,24 @@ class Louvaine:
                     print "error getting locations from geocoder...continuing.", e
                     traceback.print_exc()
 
-            for word in [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]:
+            tokens = [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]
+            for word in tokens:
                 if word[0] == '#':
+                    continue
+                if word[0] == '@':
                     continue
                 if word[:4] == 'http':
                     websites.add(word)
+                    continue
                 if word[:3] == 'www':
                     websites.add('http://' + word)
+                    continue
                 if word in words:
                     words[word] += 1
                 else:
                     words[word] = 1
 
         for k, v in words.iteritems():
-            print k, v
             k = remove_punctuation(k)
             if v < 5:
                 continue
