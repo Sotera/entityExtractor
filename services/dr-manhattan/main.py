@@ -125,7 +125,7 @@ if __name__ == '__main__':
                             queues=['genie:eventfinder'])
     dispatcher.start()
 
-    job = {u'start_time': u'1486579143000', u'state': u'new', u'end_time': u'1486579262999', u'api_root': u'http://172.17.0.1:3000/api'}
+    job = {u'start_time': u'1481124894000', u'state': u'new', u'end_time': u'1481125073999', u'api_root': u'http://172.17.0.1:3000/api'}
     # job = {'start_time': '1481124894000', 'state': 'new', 'end_time': '1481125013999', 'api_root': 'http://172.17.0.1:3000/api',
     #     'kafka_url': 'kafka', 'kafka_topic': 'test:1:1'}
     #process_message(1, job)
