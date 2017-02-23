@@ -13,10 +13,9 @@ stop_file = open(stop_path, 'r')
 stop_list = {w.strip('\n').strip('\r') for w in stop_file}
 
 class Louvaine:
-    def __init__(self, base_url, ent_url, geo_url):
+    def __init__(self, base_url, geo_url):
         self.graph = nx.Graph()
         self.nodes_detailed = {}
-        self.ent_url = ent_url
         self.geo_url = geo_url
         self.sf = SentimentFilter()
 
@@ -79,7 +78,7 @@ class Louvaine:
                     print "error getting locations from geocoder...continuing.", e
                     traceback.print_exc()
 
-            tokens = [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]
+            tokens = [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in stop_list]
             for word in tokens:
                 if word[0] == '#':
                     continue

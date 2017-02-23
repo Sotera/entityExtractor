@@ -32,7 +32,6 @@ def process_message(key,job):
         "query_value": ts_end
     }]
     com = Louvaine(api_root,
-       '{}extract/entities'.format(api_root),
        '{}geocoder/forward-geo'.format(api_root))
 
     nodes_to_lookup = set()
