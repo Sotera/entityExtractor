@@ -3417,7 +3417,7 @@ module.factory(
          * @param {function(Object)=} errorCb Error callback with one argument:
          *   `httpResponse`.
          *
-         * @returns {Object} An empty reference that will be
+         * @returns {Array.<Object>} An empty reference that will be
          *   populated with the actual data once the response is returned
          *   from the server.
          *
@@ -3427,6 +3427,7 @@ module.factory(
          * </em>
          */
         "toEnglish": {
+          isArray: true,
           url: urlBase + "/translate/en",
           method: "POST"
         },
@@ -3455,7 +3456,7 @@ module.factory(
          * @param {function(Object)=} errorCb Error callback with one argument:
          *   `httpResponse`.
          *
-         * @returns {Object} An empty reference that will be
+         * @returns {Array.<Object>} An empty reference that will be
          *   populated with the actual data once the response is returned
          *   from the server.
          *
@@ -3465,6 +3466,7 @@ module.factory(
          * </em>
          */
         "detect": {
+          isArray: true,
           url: urlBase + "/translate/detect",
           method: "POST"
         },

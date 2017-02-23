@@ -15,7 +15,7 @@ module.exports = function(Translate) {
         required: true,
         http: { source: 'body' }
       },
-      returns: {type: 'string', root: true},
+      returns: {type: 'array', root: true},
       http: {path: '/en', verb: 'post'}
     }
   );
@@ -31,7 +31,7 @@ module.exports = function(Translate) {
         required: true,
         http: { source: 'body' }
       },
-      returns: {type: 'string', root: true},
+      returns: {type: 'array', root: true},
       http: {path: '/detect', verb: 'post'}
     }
   );
@@ -39,14 +39,14 @@ module.exports = function(Translate) {
   Translate.detect = (args, cb) => {
     translator.detect(args, (err, res) => {
       if (err) return cb(err);
-      cb(null, res);
+      cb(null, [args.text, res]);
     });
   };
 
   Translate.toEnglish = (args, cb) => {
     translator.translateToEnglish(args.text, (err, res) => {
       if (err) return cb(err);
-      cb(null, res);
+      cb(null, [args.text, res]);
     });
   };
 };

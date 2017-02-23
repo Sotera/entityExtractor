@@ -1,5 +1,4 @@
-from kafka import KafkaProducer
-from kafka.errors import KafkaError
+
 from datetime import datetime
 import json
 import traceback
@@ -57,6 +56,16 @@ def stream_events(l_clusts, kafka_url, kafka_topic, debug=False):
     except Exception as exc:
         traceback.print_exc()
 
+    if kafka_url == 'print':
+        print "Printing events to console instead of sending them to kafka."
+        for doc in kds:
+            for k, v in doc.iteritems():
+                print k, v
+        return
+
+    #wait until the very last second to import these kafka packages
+    from kafka import KafkaProducer
+    from kafka.errors import KafkaError
     producer = KafkaProducer(bootstrap_servers=kafka_url, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
     print "Streaming Events"
     for doc in kds:

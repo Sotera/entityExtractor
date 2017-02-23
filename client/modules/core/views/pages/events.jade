@@ -42,14 +42,25 @@ h5 drag mouse over an area to select
       image-grid(hover-dir='left')
     .row(style='width:100%; height:60px; overflow-y:auto')
       p(ng-show='hashtags' style='font-size:1.5em') # {{hashtags}}
-    .row(style='width:100%; height:400px')
-      table.table.table-striped
-        caption Keywords
-        thead
-          tr
-            th word
-            th count
-        tbody
-          tr(ng-repeat='keyword in keywords')
-            td {{keyword[0]}}
-            td {{keyword[1]}}
+
+.row(ng-show='selectedEvent')
+  .col-md-6(style='height:400px; overflow-y:auto')
+    table.table.table-striped
+      caption Keywords
+      thead
+        tr
+          th word
+          th count
+      tbody
+        tr(ng-repeat='keyword in keywords')
+          td {{keyword[0]}}
+          td {{keyword[1]}}
+  .col-md-6(style='height:400px; overflow-y:auto')
+    table.table.table-striped
+      caption Locations
+      thead
+        tr
+          th loc
+      tbody
+        tr(ng-repeat='loc in locations')
+          td(ng-click='translate(loc)') {{loc}}

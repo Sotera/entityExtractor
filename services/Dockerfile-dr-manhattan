@@ -20,6 +20,8 @@ RUN apt-get autoremove -y
 COPY $SERVICE/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+RUN polyglot download embeddings2.en embeddings2.tr embeddings2.ja embeddings2.hi
+RUN polyglot download embeddings2.bn ner2.en embeddings2.ar ner2.ar embeddings2.ru ner2.ru embeddings2.ms ner2.ms
 
 COPY $SERVICE .
 # create consistent top-level filename

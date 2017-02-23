@@ -4,7 +4,7 @@ from polyglot.text import Text
 
 class SentimentFilter:
     def __init__(self):
-        self.good_langs = ['en']
+        self.good_langs = ['en', 'ar']
 
     def which_languages(self):
         return self.good_langs
@@ -54,3 +54,11 @@ class SentimentFilter:
         else:
             return []
 
+    def extract_loc(self, caption):
+        try:
+            text = Text(caption)
+            ll = [u' '.join(list(x)) for x in filter(lambda x: x.tag=='I-LOC', text.entities)]
+            return set(ll)
+        except:
+            traceback.print_exc()
+            return set([])

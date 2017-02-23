@@ -14,7 +14,7 @@ module.exports = function(app, cb) {
         [
           { lang: 'en', featurizer: 'text', service_args: { similarity_threshold: 0.65 }  },
           { lang: 'ar', featurizer: 'text', service_args: { similarity_threshold: 0.65 }  },
-          { featurizer: 'domain' },
+          //{ featurizer: 'domain' },
           { featurizer: 'hashtag' },
           { featurizer: 'image', service_args: { similarity_threshold: 0.39 } }
         ]

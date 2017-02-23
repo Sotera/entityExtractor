@@ -1,4 +1,4 @@
-﻿فى
+فى
 في
 كل
 لم
@@ -1734,6 +1734,7 @@ who
 will
 with
 the
+www
 ﻿a
 about
 above
@@ -3049,5 +3050,4 @@ yüz
 þunda
 þundan
 þunu
--
 &amp;

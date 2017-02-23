@@ -97,7 +97,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/dr-manhattan:22
+    image: sotera/dr-manhattan:24
     hostname: dr-manhattan
     depends_on:
       - redis
@@ -117,17 +117,6 @@ services:
       service: analytic
     image: sotera/comedian:20
     hostname: hashtag-clusterer
-    environment:
-      - TRUNCATE_POSTS=1
-    depends_on:
-      - redis
-
-  domain-clusterer:
-    extends:
-      file: common.yml
-      service: analytic
-    image: sotera/absentfriends:8
-    hostname: domain-clusterer
     environment:
       - TRUNCATE_POSTS=1
     depends_on:
