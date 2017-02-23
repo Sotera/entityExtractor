@@ -163,7 +163,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, Translate) {
       },
 
       forHashtags() {
-        $scope.hashtags = $scope.selectedEvent.hashtags.join(', ');
+        $scope.hashtags = $scope.selectedEvent.hashtags;
       },
 
       forImages() {

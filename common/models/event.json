@@ -45,7 +45,7 @@
     },
     "hashtags": {
       "type": [
-        "string"
+        "object"
       ]
     },
     "domains": {
