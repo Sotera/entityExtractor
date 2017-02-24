@@ -56,7 +56,8 @@ h5 drag mouse over an area to select
           th count
       tbody
         tr(ng-repeat='keyword in keywords')
-          td {{keyword[0]}}
+          td
+            translate(phrase='{{keyword[0]}}')
           td {{keyword[1]}}
   .col-md-6(style='height:400px; overflow-y:auto')
     table.table.table-striped
@@ -66,4 +67,5 @@ h5 drag mouse over an area to select
           th loc
       tbody
         tr(ng-repeat='loc in locations')
-          td(ng-click='translate(loc)') {{loc}}
+          td
+            translate(phrase='{{loc}}')

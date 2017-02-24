@@ -3,20 +3,13 @@
 angular.module('com.module.core')
 .controller('EventsCtrl', EventsCtrl);
 
-function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, Translate) {
+function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
   $scope.mapPoints = null;
   $scope.clusterText = '';
   $scope.events = null;
   $scope.selectedEvents = null;
   $scope.selectedEvent = null;
   $scope.filterText = null;
-
-  $scope.translate = function(loc) {
-    Translate.toEnglish({text: loc})
-    .$promise
-    .then(text => alert(text[1]))
-    .catch(err => alert(JSON.stringify(err)));
-  };
 
   $scope.eventSelected = function(evnt) {
     // already selected

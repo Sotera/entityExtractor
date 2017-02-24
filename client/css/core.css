@@ -23,6 +23,11 @@ table caption {
   font-size: 1.2em;
 }
 
+span.underline {
+  border-bottom: 1px dotted #ccc;
+  text-decoration: none;
+}
+
 .navigator .circle {
   fill: white;
   stroke: cornflowerblue;
