@@ -44,7 +44,8 @@ h5 drag mouse over an area to select
       p(ng-show='hashtags' style='font-size:1.5em')
         |#
         span(ng-repeat='ht in hashtags')
-          {{ht[0]}} ({{ht[1]}}){{$last ? '' : ','}}&nbsp;
+          translate(phrase='{{ht[0]}}')
+          | ({{ht[1]}}){{$last ? '' : ','}}&nbsp;
 
 .row(ng-show='selectedEvent')
   .col-md-6(style='height:400px; overflow-y:auto')
