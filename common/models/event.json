@@ -79,9 +79,9 @@
         "object"
       ]
     },
-    "extended": {
-      "type": "boolean",
-      "description": "linked with adjacent events to extend end time"
+    "sibling_id": {
+      "type": "string",
+      "description": "id of adjacent, similar event"
     }
   },
   "validations": [],

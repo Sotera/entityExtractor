@@ -46,12 +46,11 @@ def match_and_create_event(com, job):
                 matched_event = event
 
     # is score above threshold?
-    # then extend existing event end time
-    # else, create new event
+    # then add link to new event
     if match_score >= MIN_MATCH_SCORE:
-        update_event(loopy, matched_event, job)
-    else:
-        create_event(loopy, com)
+        com['sibling_id'] = matched_event.id
+
+    create_event(loopy, com)
 
 def match_event(com, event, match_score):
     return max([
@@ -77,18 +76,12 @@ def match_event_with(com, event, match_score, key):
 
     # rm dupes and get common items
     intersection = set(com_values) & set(event_values)
-    # calc ratio of common items to total keywords
-    score = len(intersection) / len(com_values)
+    # calc ratio of common items to total keywords.
+    # use avg of new + existing to reduce large num of keywords in either.
+    score = len(intersection) / ((len(event_values)+len(com_values)) / 2)
     return score
 
 def create_event(loopy, com):
     print 'creating event'
     print 'keywords: {}\nhashtags: {}'.format(com['keywords'], com['hashtags'])
     return loopy.post_result('/', json=com)
-
-def update_event(loopy, event, job):
-    print 'extending event'
-    print 'keywords: {}\nhashtags: {}'.format(event['keywords'], event['hashtags'])
-    return loopy.post_result('/{}'.format(event['id']),
-        method='PUT',
-        json={'end_time_ms': job['end_time'], 'extended': True})
