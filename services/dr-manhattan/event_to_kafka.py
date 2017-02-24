@@ -28,6 +28,7 @@ def to_qcr_format(rec, campaign_thresh = 0.7, debug=False):
         print "n recs to transform: ", len(camps)
     for camp in camps:
         keywords = map(iget(0), sorted(rec['keywords'], key=iget(1), reverse=True))
+        hashtags = map(iget(0), sorted(rec['hashtags'], key=iget(1), reverse=True))
 
         l_rec.append({
             'uid': rec['id'],
@@ -35,7 +36,7 @@ def to_qcr_format(rec, campaign_thresh = 0.7, debug=False):
             'startDate': datetime.fromtimestamp(rec['start_time_ms']/1000.0).isoformat(),
             'endDate': datetime.fromtimestamp(rec['end_time_ms']/1000.0).isoformat(),
             'domains': rec['domains'],
-            'hashtags': rec['hashtags'],
+            'hashtags': hashtags,
             'keywords': keywords,
             'urls': rec['urls'],
             'photos': rec['image_urls'],
