@@ -55,8 +55,8 @@ def match_and_create_event(com, job):
 
 def match_event(com, event, match_score):
     return max([
-        match_event_with(com, event, match_score, key='keywords'),
-        match_event_with(com, event, match_score, key='hashtags')
+        match_event_with(com, event, match_score, key='keywords')
+        # match_event_with(com, event, match_score, key='hashtags')
     ])
 
 # compare com to event and return score.
