@@ -2,6 +2,8 @@ from __future__ import division
 from loopy import Loopy
 from os import getenv
 from operator import itemgetter as iget
+import numpy as np
+import copy
 
 MIN_MATCH_SCORE = float(getenv('MIN_MATCH_SCORE', 0.6))
 MIN_MATCH_COUNT = int(getenv('MIN_MATCH_COUNT', 10))
@@ -39,7 +41,7 @@ def match_and_create_event(com, job):
 
         for event in page:
             # score this com against each event, eventually take highest
-            score = match_event(com, event, match_score)
+            score = dot_comparison(com, event)
             print 'score: {}'.format(score)
             if score > match_score:
                 match_score = score
@@ -80,6 +82,22 @@ def match_event_with(com, event, match_score, key):
     # use avg of new + existing to reduce large num of keywords in either.
     score = len(intersection) / ((len(event_values)+len(com_values)) / 2)
     return score
+
+def dot_comparison(e1, e2, normed=True, key='hashtags'):
+    lt1, lt2 = e1[key], e2[key]
+    w1 = dict(lt1)
+    w2 = dict(lt2)
+    words = copy.copy(w1.keys())
+    words.extend(w2.keys())
+    words = list(set(words))
+    v1, v2 = [], []
+    for w in words:
+        v1.append(float(w1[w])) if w in w1 else v1.append(0.)
+        v2.append(float(w2[w])) if w in w2 else v2.append(0.)
+    v1, v2 = np.array(v1), np.array(v2)
+    if normed is True:
+        v1, v2 = v1/sum(v1), v2/sum(v2)
+    return np.dot(v1, v2)
 
 def create_event(loopy, com):
     print 'creating event'
