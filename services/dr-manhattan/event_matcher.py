@@ -6,9 +6,8 @@ import numpy as np
 import copy
 
 MIN_MATCH_SCORE = float(getenv('MIN_MATCH_SCORE', 0.6))
-MIN_MATCH_COUNT = int(getenv('MIN_MATCH_COUNT', 10))
 
-print 'settings:', MIN_MATCH_COUNT, MIN_MATCH_SCORE
+print 'min match score:', MIN_MATCH_SCORE
 
 # com == community, a potential event
 def match_and_create_event(com, job):
@@ -53,35 +52,6 @@ def match_and_create_event(com, job):
         com['sibling_id'] = matched_event.id
 
     create_event(loopy, com)
-
-def match_event(com, event, match_score):
-    return max([
-        match_event_with(com, event, match_score, key='keywords')
-        # match_event_with(com, event, match_score, key='hashtags')
-    ])
-
-# compare com to event and return score.
-# key is a document field, like 'hashtags'.
-def match_event_with(com, event, match_score, key):
-    com_values = com.get(key, [])
-    event_values = event.get(key, [])
-
-    print 'len({}): '.format(key), len(com_values), len(event_values)
-    # return 0 if not enough data for comparison
-    if len(com_values) < MIN_MATCH_COUNT or len(event_values) < MIN_MATCH_COUNT:
-        return 0
-
-    # keywords are tuples (keyword, count) so check for that structure
-    if len(com_values) and type(com_values[0]) == tuple:
-        com_values = map(iget(0), com_values)
-        event_values = map(iget(0), event_values)
-
-    # rm dupes and get common items
-    intersection = set(com_values) & set(event_values)
-    # calc ratio of common items to total keywords.
-    # use avg of new + existing to reduce large num of keywords in either.
-    score = len(intersection) / ((len(event_values)+len(com_values)) / 2)
-    return score
 
 def dot_comparison(e1, e2, normed=True, key='hashtags'):
     lt1, lt2 = e1[key], e2[key]
