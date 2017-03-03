@@ -12,7 +12,7 @@ module.exports = function(Qcr) {
   let postWindowStart = bootTime;
   let postWindowPostCount = 0;
   let postWindowInterval = 1000;
-  let postPerSecondTarget = -1;
+  let postPerSecondTarget = +process.env.PPS_TARGET || -1;
   let postPerSecondDelta = 0;
   let postPerSecondCount = 0;
   let filteredPostCount = 0;
@@ -20,56 +20,23 @@ module.exports = function(Qcr) {
   let pps = 0;
   let failures = 0;
   let postsIgnored = 0;
-  let stupidDupeSet = new Set();
+  let dupeSet = new Set();
   let postAge = 0;
+  let dupeInterval = +process.env.DUPE_INTERVAL_MS || 10000;
 
-  Qcr.setFilter = function(args, cb) {
-    //should we have to parse this?
-    let f = JSON.parse(args);
-    postPerSecondTarget = +f.target;
-    //reset counters and start time for pps calculation
-    filteredPostCount = 0;
-    postPerSecondCount = 0;
-    bootTime = Date.now();
-    if(f.target <0)
-      debug('Filter off!');
-    else
-      debug('Setting target post per second count to ' + f.target + ' posts');
-    cb(null, 'Posts Per Second count set to: ' + f.target);
-  };
+  // ignore posts before this
+  let daysBack = +process.env.IGNORE_DAYS_BACK || 3;
+  let secondsBack = daysBack * 24 * 60 * 60;
 
-  Qcr.remoteMethod('setFilter', {
-    accepts: {arg: 'filter', type: 'string'},
-    returns: {arg: 'result', type: 'string'}
-  });
+  if(postPerSecondTarget < 0)
+    debug('Filter off!');
+  else
+    debug('post per second target:', postPerSecondTarget);
 
-
-  let stupidDupeInterval = 10000;
-  let interval = setInterval(function(){
+  let interval = setInterval(() => {
     debug("clearing dupe set...");
-    stupidDupeSet.clear();
-  },stupidDupeInterval);
-
-
-  Qcr.setDupeInterval = function(args, cb) {
-    //should we have to parse this?
-    let f = JSON.parse(args);
-    stupidDupeInterval = +f.target;
-    clearInterval(interval);
-
-    interval = setInterval(function(){
-      debug("clearing dupe set...");
-      stupidDupeSet.clear();
-    },stupidDupeInterval);
-
-    debug('Set dupe clear interval to: ' + f.target);
-    cb(null, 'Set dupe clear interval to: ' + f.target);
-  };
-
-  Qcr.remoteMethod('setDupeInterval', {
-    accepts: {arg: 'interval', type: 'string'},
-    returns: {arg: 'result', type: 'string'}
-  });
+    dupeSet.clear();
+  }, dupeInterval);
 
   Qcr.remoteMethod(
     'insert',
@@ -87,8 +54,8 @@ module.exports = function(Qcr) {
   );
 
   setInterval(function(){
-      pps = postPerSecondCount / ((Date.now() - bootTime)/1000);
-      debug('--==PPS==--:' + pps);
+    pps = postPerSecondCount / ((Date.now() - bootTime) / 1000);
+    debug('--==PPS==--:' + pps);
     if(postPerSecondTarget>=0) {
       fpps = filteredPostCount / ((Date.now() - bootTime) / 1000);
       debug("--==FPPS==--:" + fpps + " Delta:" + postPerSecondDelta);
@@ -99,18 +66,17 @@ module.exports = function(Qcr) {
     bootTime = Date.now();
     postAge = 0;
 
-    debug("qcr dupes over the last 5 seconds: " + failures );
+    debug("qcr dupes over the last 5 seconds: " + failures);
     debug("dupes ignored over the last 5 seconds: " + postsIgnored);
-    debug("dupe list size:" + stupidDupeSet.size);
+    debug("dupe list size:" + dupeSet.size);
     debug("Average Post Age: " + avgAge);
 
     postsIgnored = 0;
     failures = 0;
-  },5000);
+  }, 5000);
 
   Qcr.insert = function(req, cb) {
     const attrs = req.body;
-
 
     // stop the deluge
     if (+process.env.IGNORE_QCR) {
@@ -118,21 +84,18 @@ module.exports = function(Qcr) {
     }
 
     //--------------------------------------------------------------------------
-    //TODO:get rid of this silly crap when we aren't being sent a load of dupes
     let postId = attrs['post_id'];
-    if(stupidDupeSet.has(postId)){
+    if(dupeSet.has(postId)){
       postsIgnored++;
       return cb(null, attrs); // send 200 code and stop
     }
-    stupidDupeSet.add(postId);
-    //BLAH!!!
+    dupeSet.add(postId);
     //--------------------------------------------------------------------------
 
-
-    if((Date.now() - new Date(attrs['timestamp_ms']).getTime())/1000 > 259200)
+    if((Date.now() - new Date(attrs['timestamp_ms']).getTime())/1000 > secondsBack)
       return cb(null, attrs);
 
-    //TODO: either make our system scale correctly or fix this to be less hacky!
+    //TODO: less hacky!
     //Calculating our posts per second so we get a real amount to deal with
     postPerSecondCount ++;
     postAge += (Date.now() - new Date(attrs['timestamp_ms']).getTime())/1000;
@@ -153,9 +116,8 @@ module.exports = function(Qcr) {
       }
 
       filteredPostCount++;
-
     }
-    //TODO: END either make our system scale correctly or fix this to be less hacky!
+    //TODO: less hacky!
 
     let qcrData = new Qcr(attrs);
 
@@ -196,10 +158,11 @@ module.exports = function(Qcr) {
       processedAttrs.featurizer = 'hashtag';
       createActions.push(SocialMediaPost.create(processedAttrs));
     }
-    if (processedAttrs.image_urls.length > 0) {
-      processedAttrs.featurizer = 'domain';
-      createActions.push(SocialMediaPost.create(processedAttrs));
-    }
+    // No domain posts until absentfriends is fixed
+    // if (processedAttrs.image_urls.length > 0) {
+    //   processedAttrs.featurizer = 'domain';
+    //   createActions.push(SocialMediaPost.create(processedAttrs));
+    // }
 
     // returns default 200 for everything.
     // if nil text, hashtags, and images just forget about it.
@@ -214,5 +177,4 @@ module.exports = function(Qcr) {
       cb(null, {ok: 1}); // send bogus 200 response
     });
   }
-
 };
