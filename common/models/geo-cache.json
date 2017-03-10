@@ -3,6 +3,7 @@
   "description": "Cache of geocoded results",
   "plural": "geoCache",
   "base": "PersistedModel",
+  "idInjection": true,
   "indexes": {
     "idx_uniq": {
       "keys": {
@@ -13,7 +14,6 @@
       }
     }
   },
-  "idInjection": true,
   "options": {
     "validateUpsert": true
   },
@@ -27,11 +27,11 @@
       "required": true
     },
     "res": {
-      "description": "geocoded result",
       "type": [
         "object"
       ],
       "required": true,
+      "description": "geocoded result",
       "default": []
     },
     "updated": {

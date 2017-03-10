@@ -1,0 +1,33 @@
+{
+  "name": "annotation",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "campaign": {
+      "type": "string",
+      "required": true
+    },
+    "event": {
+      "type": "string",
+      "required": true
+    },
+    "features": {
+      "type": [
+        "string"
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "relevant": {
+      "type": "boolean"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

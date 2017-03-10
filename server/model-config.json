@@ -95,5 +95,9 @@
   "geoCache": {
     "dataSource": "cache",
     "public": true
+  },
+  "annotation": {
+    "dataSource": "db",
+    "public": true
   }
 }

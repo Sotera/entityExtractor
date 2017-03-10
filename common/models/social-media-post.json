@@ -42,8 +42,8 @@
   "properties": {
     "system_created": {
       "type": "date",
-      "default": "$now",
-      "description": "internal system timestamp. not using Timestamp mixin, to clearly differentiate from original post time."
+      "description": "internal system timestamp. not using Timestamp mixin, to clearly differentiate from original post time.",
+      "default": "$now"
     },
     "post_id": {
       "type": "string",
