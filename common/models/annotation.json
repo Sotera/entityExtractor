@@ -1,7 +1,19 @@
 {
   "name": "annotation",
+  "description": "Name + other attrs given to event-campaign relation",
   "base": "PersistedModel",
   "idInjection": true,
+  "indexes": {
+    "idx_uniq": {
+      "keys": {
+        "campaign": 1,
+        "event": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  },
   "options": {
     "validateUpsert": true
   },
