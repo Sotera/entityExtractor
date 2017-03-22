@@ -5,6 +5,10 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "Timestamp": {},
+    "DestroyAll": {}
+  },
   "properties": {
     "campaign": {
       "type": "string",

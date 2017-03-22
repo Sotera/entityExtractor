@@ -2,9 +2,12 @@
 from datetime import datetime
 import json
 import traceback
+import math_utils
+from loopy import Loopy
+from switch import switch
 from operator import itemgetter as iget
 
-def to_qcr_format(rec, campaign_thresh = 0.7, debug=False):
+def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
     if debug:
         print "Start conv, doing location"
         print "rec['location'] = ", rec['location']
@@ -22,7 +25,7 @@ def to_qcr_format(rec, campaign_thresh = 0.7, debug=False):
     if debug:
         print "Splitting campaigns"
     l_rec = []
-    camps = filter(lambda x: x is not None, map(lambda x: [y for y in x.iteritems()][0] if x.values()[0]>campaign_thresh else None, rec['campaigns']))
+    camps = filter(lambda x: x is not None, map(lambda x: [y for y in x.iteritems()][0] if x.values()[0] > campaign_thresh else None, rec['campaigns']))
     if debug:
         print "Max campaign association:", max([x.values()[0] for x in rec['campaigns']])
         print "n recs to transform: ", len(camps)
@@ -30,9 +33,10 @@ def to_qcr_format(rec, campaign_thresh = 0.7, debug=False):
         keywords = map(iget(0), sorted(rec['keywords'], key=iget(1), reverse=True))
         hashtags = map(iget(0), sorted(rec['hashtags'], key=iget(1), reverse=True))
 
-        l_rec.append({
+        event = {
             'uid': rec['id'],
-            'label': rec['hashtags'][0] if len(rec['hashtags']) > 0 else 'None',
+            'label': rec['hashtags'][0] if len(rec['hashtags']) > 0 else
+                        rec['keywords'][0] if len(rec['keywords']) > 0 else 'None',
             'startDate': datetime.fromtimestamp(rec['start_time_ms']/1000.0).isoformat(),
             'endDate': datetime.fromtimestamp(rec['end_time_ms']/1000.0).isoformat(),
             'domains': rec['domains'],
@@ -45,15 +49,70 @@ def to_qcr_format(rec, campaign_thresh = 0.7, debug=False):
             'campaignId': camp[0],
             'newsEventIds': [],
             'location': o_loc
-        })
+        }
+        annotate_event(event, job)
+        l_rec.append(event)
+
+
     return l_rec
 
-def stream_events(l_clusts, kafka_url, kafka_topic, debug=False):
+
+def annotate_event(event, job):
+    print 'annotating community: '
+
+    annotations_url = '{}annotations'.format(job['api_root'])
+
+    query_params = [{
+        'query_type': 'where',
+        'property_name': 'campaign',
+        'query_value': 'j5fj6' #event['campaignId']
+    }]
+
+    loopy = Loopy(annotations_url, query_params)
+
+    # if no events in prior window, create new event
+    if loopy.result_count == 0:
+        print 'no annotations found'
+        return
+
+    matched_relevant_annotation, match_relevant_score = None, 0
+    matched_label_annotation, match_label_score = None, 0
+
+    while True:
+        page = loopy.get_next_page()
+        if page is None:
+            break
+        for annotation in page:
+            score = math_utils.dot_comparison(event, annotation, key='features')
+            print 'score: {}'.format(score)
+            for case in switch(annotation['type'].lower()):
+                if case('label'):
+                    if score > match_label_score:
+                        match_label_score = score
+                        matched_label_annotation = annotation
+                    break
+                if case('relevant'):
+                    if score > match_relevant_score:
+                        match_relevant_score = score
+                        matched_relevant_annotation = annotation
+                    break
+                if case():
+                    print('huh?')
+
+    if matched_label_annotation is not None:
+        event['label'] = matched_label_annotation['name']
+    if matched_relevant_annotation is not None:
+        event['relevant'] = matched_relevant_annotation['relevant']
+
+
+def stream_events(l_clusts, job, debug=False):
     print "Converting to QCR format"
+    kafka_url = job['kafka_url']
+    kafka_topic = job['kafka_topic']
     try:
         kds = []
         for clust in l_clusts:
-            kds.extend(to_qcr_format(clust, debug=debug))
+            kds.extend(to_qcr_format(clust, job, debug=debug))
     except Exception as exc:
         traceback.print_exc()
 
