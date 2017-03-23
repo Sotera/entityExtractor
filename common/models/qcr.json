@@ -1,5 +1,6 @@
 {
   "name": "qcr",
+  "description": "Validate input from QCR: required?, data type",
   "plural": "qcr",
   "base": "Model",
   "idInjection": true,
@@ -10,10 +11,6 @@
     "post_id": {
       "type": "string",
       "required": true
-    },
-    "author_id":{
-      "type": "string",
-      "required": false
     },
     "post_type": {
       "type": "string",
@@ -52,6 +49,10 @@
         "object"
       ],
       "default": []
+    },
+    "author_id":{
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],

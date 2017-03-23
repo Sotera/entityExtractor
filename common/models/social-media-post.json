@@ -31,6 +31,11 @@
       "keys": {
         "primary_image_url": 1
       }
+    },
+    "idx_author_id": {
+      "keys": {
+        "author_id": 1
+      }
     }
   },
   "options": {
@@ -44,10 +49,6 @@
       "type": "date",
       "description": "internal system timestamp. not using Timestamp mixin, to clearly differentiate from original post time.",
       "default": "$now"
-    },
-    "author_id":{
-      "type": "string",
-      "required": false
     },
     "post_id": {
       "type": "string",
@@ -118,6 +119,9 @@
         "string"
       ],
       "default": []
+    },
+    "author_id": {
+      "type": "string"
     }
   },
   "validations": [],
