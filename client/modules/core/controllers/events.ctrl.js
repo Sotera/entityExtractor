@@ -191,7 +191,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window) {
       forPosts() {
         getPosts(clusters)
         .then(posts => {
-          $scope.posts = _(posts).orderBy(['author_id']).value();
+          $scope.posts = _(posts).orderBy(p => p.author_id.toLowerCase()).value();
         });
       },
 
