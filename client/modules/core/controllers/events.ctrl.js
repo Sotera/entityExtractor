@@ -3,10 +3,14 @@
 angular.module('com.module.core')
 .controller('EventsCtrl', EventsCtrl);
 
-function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
+function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window) {
+  // TODO: what about recurring errors from embed map?
+  // window.onerror = function() {};
+
   $scope.mapPoints = null;
   $scope.selectedEvent = null;
   $scope.filterText = null;
+  $scope.authorPosts = null;
 
   $scope.eventSelected = function(evnt) {
     // already selected
@@ -49,6 +53,28 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
     let tmpEvents = $scope.selectedEvents;
     $scope.selectedEvents = [];
     tmpEvents.forEach(filterEvent);
+  };
+
+  $scope.loadAuthorPosts = function(post) {
+    $scope.showSpinner = true;
+
+    $window.open(post.post_url);
+
+    return SocialMediaPost.find({
+      filter: {
+        where: {
+          author_id: post.author_id,
+          featurizer: 'text'
+        },
+        fields: ['text', 'author_id', 'post_url']
+      }
+    })
+    .$promise
+    .then(posts => {
+      $scope.authorPosts = posts;
+      $scope.showSpinner = false;
+    })
+    .catch(console.error);
   };
 
   function filterEvent(evnt) {

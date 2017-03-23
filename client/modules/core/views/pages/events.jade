@@ -53,10 +53,10 @@ h5 drag mouse over an area to select
         tbody
           tr(ng-repeat='post in posts')
             td
-              a(href='{{post.post_url}}' target='_blank') {{post.author_id}}
+              a(ng-click='loadAuthorPosts(post)') {{post.author_id}}
             td {{post.text}}
 .row(ng-show='selectedEvent')
-  .col-md-6(style='height:400px; overflow-y:auto')
+  .col-md-4(style='height:400px; overflow-y:auto')
     table.table.table-striped
       caption Keywords
       thead
@@ -68,7 +68,7 @@ h5 drag mouse over an area to select
           td
             translate(phrase='{{keyword[0]}}')
           td {{keyword[1]}}
-  .col-md-6(style='height:400px; overflow-y:auto')
+  .col-md-4(style='height:400px; overflow-y:auto')
     table.table.table-striped
       caption Locations
       thead
@@ -78,3 +78,11 @@ h5 drag mouse over an area to select
         tr(ng-repeat='loc in locations')
           td
             translate(phrase='{{loc}}')
+  .col-md-4(ng-show='authorPosts' style='height:400px; overflow-y:auto')
+    table.table.table-striped
+      caption All {{authorPosts[0].author_id}} Posts ({{authorPosts.length}})
+      tbody
+        tr(ng-repeat='post in authorPosts')
+          td
+            a(href='{{post.post_url}}' target='_blank') visit
+          td {{post.text}}
