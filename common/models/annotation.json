@@ -32,8 +32,11 @@
     },
     "features": {
       "type": [
-        "string"
+        "object"
       ]
+    },
+    "type":{
+      "type":"string"
     },
     "name": {
       "type": "string"

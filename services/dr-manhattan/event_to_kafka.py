@@ -2,10 +2,13 @@
 from datetime import datetime
 import json
 import traceback
+from os import getenv
 import math_utils
 from loopy import Loopy
 from switch import switch
 from operator import itemgetter as iget
+
+MIN_ANNOTATION_MATCH_SCORE = float(getenv('MIN_ANNOTATION_MATCH_SCORE', 0.6))
 
 def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
     if debug:
@@ -35,8 +38,9 @@ def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
 
         event = {
             'uid': rec['id'],
-            'label': rec['hashtags'][0] if len(rec['hashtags']) > 0 else
-                        rec['keywords'][0] if len(rec['keywords']) > 0 else 'None',
+            'label': rec['hashtags'][0][0] if len(rec['hashtags']) > 0 else
+                        rec['keywords'][0][0] if len(rec['keywords']) > 0 else 'None',
+            'relevant': True,
             'startDate': datetime.fromtimestamp(rec['start_time_ms']/1000.0).isoformat(),
             'endDate': datetime.fromtimestamp(rec['end_time_ms']/1000.0).isoformat(),
             'domains': rec['domains'],
@@ -50,14 +54,14 @@ def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
             'newsEventIds': [],
             'location': o_loc
         }
-        annotate_event(event, job)
+        if len(rec["hashtags"])>0:
+            annotate_event(event, {"features":rec['hashtags']}, job)
         l_rec.append(event)
-
 
     return l_rec
 
 
-def annotate_event(event, job):
+def annotate_event(event, event_features, job):
     print 'annotating community: '
 
     annotations_url = '{}annotations'.format(job['api_root'])
@@ -65,7 +69,7 @@ def annotate_event(event, job):
     query_params = [{
         'query_type': 'where',
         'property_name': 'campaign',
-        'query_value': 'j5fj6' #event['campaignId']
+        'query_value': event['campaignId']
     }]
 
     loopy = Loopy(annotations_url, query_params)
@@ -83,7 +87,7 @@ def annotate_event(event, job):
         if page is None:
             break
         for annotation in page:
-            score = math_utils.dot_comparison(event, annotation, key='features')
+            score = math_utils.dot_comparison(event_features, annotation, key='features')
             print 'score: {}'.format(score)
             for case in switch(annotation['type'].lower()):
                 if case('label'):
@@ -99,9 +103,9 @@ def annotate_event(event, job):
                 if case():
                     print('huh?')
 
-    if matched_label_annotation is not None:
+    if matched_label_annotation is not None and match_label_score >= MIN_ANNOTATION_MATCH_SCORE:
         event['label'] = matched_label_annotation['name']
-    if matched_relevant_annotation is not None:
+    if matched_relevant_annotation is not None and match_relevant_score >= MIN_ANNOTATION_MATCH_SCORE:
         event['relevant'] = matched_relevant_annotation['relevant']
 
 
