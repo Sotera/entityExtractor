@@ -17,6 +17,10 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "Timestamp": {},
+    "DestroyAll": {}
+  },
   "properties": {
     "campaign": {
       "type": "string",
@@ -28,8 +32,11 @@
     },
     "features": {
       "type": [
-        "string"
+        "object"
       ]
+    },
+    "type":{
+      "type":"string"
     },
     "name": {
       "type": "string"
