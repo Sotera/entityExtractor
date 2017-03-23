@@ -11,6 +11,10 @@
       "type": "string",
       "required": true
     },
+    "author_id":{
+      "type": "string",
+      "required": false
+    },
     "post_type": {
       "type": "string",
       "required": true

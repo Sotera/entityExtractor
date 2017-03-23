@@ -45,6 +45,10 @@
       "description": "internal system timestamp. not using Timestamp mixin, to clearly differentiate from original post time.",
       "default": "$now"
     },
+    "author_id":{
+      "type": "string",
+      "required": false
+    },
     "post_id": {
       "type": "string",
       "required": true
