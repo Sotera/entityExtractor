@@ -122,13 +122,12 @@ def save_communities(com, job):
     return d1
 
 if __name__ == '__main__':
-    #dispatcher = Dispatcher(redis_host='redis',
-    #                        process_func=process_message,
-    #                        queues=['genie:eventfinder'])
-    #dispatcher.start()
+    dispatcher = Dispatcher(redis_host='redis',
+                            process_func=process_message,
+                            queues=['genie:eventfinder'])
+    dispatcher.start()
 
-    job = {'start_time': '1490209183577', 'state': 'new', 'end_time': '1490209483576', 'api_root': 'http://172.17.0.1:3003/api'}
+    #job = {'start_time': '1490209183577', 'state': 'new', 'end_time': '1490209483576', 'api_root': 'http://172.17.0.1:3003/api'}
     # job = {'start_time': '1481124894000', 'state': 'new', 'end_time': '1481125013999', 'api_root': 'http://172.17.0.1:3000/api',
     #     'kafka_url': 'kafka', 'kafka_topic': 'test:1:1'}
     #process_message(1, job)
-    process_message(1, job)
