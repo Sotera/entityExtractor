@@ -78,10 +78,14 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
     let similarPostIds = _(clusters).map('similar_post_ids')
       .flatten().compact().uniq().value();
 
-    sampleSocialMediaPosts('text', similarPostIds)
+    sampleSocialMediaPosts('text', similarPostIds, 250)
     .then(posts => {
       let allText = posts.map(p => p.text).join(' ');
       if (regex.test(allText)) {
+        $scope.selectedEvents.push(evnt);
+      }
+      let authors = posts.map(p => p.author_id).join(' ');
+      if (regex.test(authors)) {
         $scope.selectedEvents.push(evnt);
       }
     })
@@ -113,7 +117,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
           post_id: { inq: postIds },
           featurizer: dataType
         },
-        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url']
+        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url', 'author_id', 'post_url']
       }
     })
     .$promise
@@ -161,7 +165,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
       forPosts() {
         getPosts(clusters)
         .then(posts => {
-          $scope.posts = posts;
+          $scope.posts = _(posts).orderBy(['author_id']).value();
         });
       },
 
