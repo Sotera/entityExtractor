@@ -5,9 +5,6 @@ angular.module('com.module.core')
 
 function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
   $scope.mapPoints = null;
-  $scope.clusterText = '';
-  $scope.events = null;
-  $scope.selectedEvents = null;
   $scope.selectedEvent = null;
   $scope.filterText = null;
 
@@ -42,12 +39,19 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
   };
 
   $scope.filterChanged = function() {
-    let tempEvents = $scope.selectedEvents;
+    // rm previously selected event
+    $scope.selectedEvent = null;
+
+    // reset events
+    $scope.getEventsInRange();
+
+    // apply filter
+    let tmpEvents = $scope.selectedEvents;
     $scope.selectedEvents = [];
-    tempEvents.forEach(filterEvent);
+    tmpEvents.forEach(filterEvent);
   };
 
-  function filterEvent(evnt){
+  function filterEvent(evnt) {
     PostsCluster.find({
       filter: {
         where: {
@@ -60,42 +64,13 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
     .catch(console.error);
   }
 
-  function visualizeEvent(evnt) {
-    PostsCluster.find({
-      filter: {
-        where: {
-          id: { inq: evnt.cluster_ids }
-        }
-      }
-    })
-    .$promise
-    .then($scope.visualize)
-    .then(visual => visual.forAll())
-    .catch(console.error);
-  }
-
-  $scope.dateRangeSelected = function(start, end) {
-    $scope.$apply(() => getEventsInRange(start, end));
-  };
-
-  function getEventsInRange(start, end) {
-    $scope.selectedEvents = $scope.events.filter(evnt => {
-      if (evnt.end_time_ms >= start && evnt.end_time_ms <= end) {
-        return true;
-      } else if (evnt.start_time_ms >= start && evnt.start_time_ms <= end) {
-        return true;
-      } else if (evnt.start_time_ms <= start && evnt.end_time_ms >= end) {
-        return true;
-      }
-    });
-  }
-
   $scope.filter = filter;
 
   function filter(clusters, evnt) {
-    let terms = evnt.hashtags.join(', ');
+    let regex = new RegExp($scope.filterText, 'i'),
+      terms = evnt.hashtags.join(', ');
 
-    if (terms.includes($scope.filterText)) {
+    if (regex.test(terms)) {
       $scope.selectedEvents.push(evnt);
       return;
     }
@@ -106,10 +81,24 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
     sampleSocialMediaPosts('text', similarPostIds)
     .then(posts => {
       let allText = posts.map(p => p.text).join(' ');
-      if (allText.includes($scope.filterText)) {
+      if (regex.test(allText)) {
         $scope.selectedEvents.push(evnt);
       }
     })
+    .catch(console.error);
+  }
+
+  function visualizeEvent(evnt) {
+    PostsCluster.find({
+      filter: {
+        where: {
+          id: { inq: evnt.cluster_ids }
+        }
+      }
+    })
+    .$promise
+    .then(visualize)
+    .then(visuals => visuals.forAll())
     .catch(console.error);
   }
 
@@ -126,15 +115,13 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
         },
         fields: ['text', 'image_urls', 'hashtags', 'primary_image_url']
       }
-    }).$promise
+    })
+    .$promise
     .then(posts => {
       $scope.showSpinner = false;
       return posts;
     });
   }
-
-  // 'visualize': show me the details
-  $scope.visualize = visualize;
 
   function visualize(clusters) {
     let functions = {
@@ -171,15 +158,31 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event) {
         $scope.locations = $scope.selectedEvent.location.map(loc => loc.label);
       },
 
+      forPosts() {
+        getPosts(clusters)
+        .then(posts => {
+          $scope.posts = posts;
+        });
+      },
+
       forAll() {
         this.forMap();
         this.forHashtags();
         this.forImages();
         this.forKeywords();
         this.forLocations();
+        this.forPosts();
       }
     };
 
     return functions;
+  }
+
+  function getPosts(clusters) {
+    let similarPostIds = _(clusters).map('similar_post_ids')
+      .flatten().compact().uniq().value();
+
+    return sampleSocialMediaPosts('text', similarPostIds, 200)
+    .catch(console.error);
   }
 }

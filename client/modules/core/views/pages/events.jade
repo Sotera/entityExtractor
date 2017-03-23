@@ -7,7 +7,7 @@ h5 drag mouse over an area to select
       event-graph
 .row
   .col-md-3(style='height:550px; overflow-y:auto' ng-show='selectedEvents')
-    | Filter
+    | Filter (supports regex)
     form(ng-submit='filterChanged()')
       .form-group
         .row
@@ -33,19 +33,26 @@ h5 drag mouse over an area to select
                 label.switch
                   input(type='checkbox' ng-model='evt.of_interest' ng-change='ofInterestChanged(evt)')
                   .slider.round
-
+            .row
+              .cell
+                | {{evt.hashtags | sampleWeightedPairs}}
   .col-md-4(style='height:550px; overflow-y:hidden')
     event-map(ng-show='mapPoints' points='mapPoints')
       iframe(src='http://54.86.248.86:3005/index.html' style='width:100%; height:600px' scrolling='no' frameborder='0' id='map-frame')
   .col-md-5(ng-show='selectedEvent')
-    .row(ng-show='imageUrls' style='width:100%; height:160px; overflow-y:auto')
+    .row(ng-show='imageUrls' style='width:100%; height:120px; overflow-y:auto')
       image-grid(hover-dir='left')
-    .row(ng-show='hashtags' style='width:100%; height:160px; overflow-y:auto; font-size:1.5em')
+    .row(ng-show='hashtags' style='width:100%; height:120px; overflow-y:auto; font-size:1.5em')
       |#
       div(ng-repeat='ht in hashtags' style='display:inline-block')
         translate(phrase='{{ht[0]}}')
         | ({{ht[1]}}){{$last ? '' : ','}}&nbsp;
-
+    .row(ng-show='imageUrls' style='width:100%; height:220px; overflow-y:auto')
+      table.table.table-striped
+        caption Posts ({{posts.length}})
+        tbody
+          tr(ng-repeat='post in posts')
+            td {{post.text}}
 .row(ng-show='selectedEvent')
   .col-md-6(style='height:400px; overflow-y:auto')
     table.table.table-striped
