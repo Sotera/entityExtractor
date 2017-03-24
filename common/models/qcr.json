@@ -50,7 +50,7 @@
       ],
       "default": []
     },
-    "author_id":{
+    "author_id": {
       "type": "string",
       "required": false
     },

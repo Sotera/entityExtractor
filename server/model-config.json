@@ -100,7 +100,7 @@
     "dataSource": "db",
     "public": true
   },
-  "twitter": {
+  "chart": {
     "dataSource": null,
     "public": true
   }

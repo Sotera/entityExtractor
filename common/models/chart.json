@@ -1,13 +1,11 @@
 {
-  "name": "twitter",
-  "plural": "twitter",
+  "name": "chart",
   "base": "Model",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
-  "properties": {
-  },
+  "properties": {},
   "validations": [],
   "relations": {},
   "acls": [],
