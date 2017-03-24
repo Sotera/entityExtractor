@@ -54,6 +54,10 @@
       "type": "string",
       "required": false
     },
+    "screen_name": {
+      "type": "string",
+      "required": false
+    },
     "author_image_url": {
       "type": "string",
       "required": false

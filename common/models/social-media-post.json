@@ -36,6 +36,11 @@
       "keys": {
         "author_id": 1
       }
+    },
+    "idx_author_id": {
+      "keys": {
+        "screen_name": 1
+      }
     }
   },
   "options": {
@@ -121,6 +126,9 @@
       "default": []
     },
     "author_id": {
+      "type": "string"
+    },
+    "screen_name": {
       "type": "string"
     },
     "author_image_url": {
