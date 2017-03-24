@@ -99,5 +99,9 @@
   "annotation": {
     "dataSource": "db",
     "public": true
+  },
+  "twitter": {
+    "dataSource": null,
+    "public": true
   }
 }
