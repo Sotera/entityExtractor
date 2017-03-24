@@ -34,9 +34,12 @@ module.exports = function(Chart) {
         let routeKey = "../../server/chart/" + src + "/" + type;
         let route = routes[routeKey];
         if(!route){
-            route = require(routeKey);
-            if(!route){
-                cb({"message":"route does not exist"}, null)
+            try {
+                route = require(routeKey);
+            }
+            catch(err){
+                cb({"message": "route does not exist"}, null)
+                return;
             }
             routes[routeKey] = route;
         }
