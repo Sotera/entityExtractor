@@ -4,9 +4,6 @@ angular.module('com.module.core')
 .controller('EventsCtrl', EventsCtrl);
 
 function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window) {
-  // TODO: what about recurring errors from embed map?
-  // window.onerror = function() {};
-
   $scope.mapPoints = null;
   $scope.selectedEvent = null;
   $scope.filterText = null;
@@ -161,6 +158,13 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window) {
           if (location.geo_type !== 'point')
             return;
 
+          if (_.isEmpty(location.label))
+            return;
+
+          // country weight is .05
+          if (location.weight < 0.05)
+            return;
+
           points[location.label] = {
             lat: location.coords[0].lat,
             lng: location.coords[0].lng,
@@ -185,7 +189,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window) {
       },
 
       forLocations() {
-        $scope.locations = $scope.selectedEvent.location.map(loc => loc.label);
+        $scope.locations = _.orderBy($scope.selectedEvent.location, 'weight', 'desc');
       },
 
       forPosts() {
