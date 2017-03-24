@@ -53,6 +53,10 @@
     "author_id":{
       "type": "string",
       "required": false
+    },
+    "author_image_url": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],

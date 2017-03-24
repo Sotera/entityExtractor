@@ -63,7 +63,8 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window) {
           author_id: post.author_id,
           featurizer: 'text'
         },
-        fields: ['text', 'author_id', 'post_url']
+        order: 'timestamp_ms desc',
+        fields: ['text', 'author_id', 'post_url', 'author_image_url', 'timestamp_ms']
       }
     })
     .$promise
@@ -140,7 +141,8 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window) {
           post_id: { inq: postIds },
           featurizer: dataType
         },
-        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url', 'author_id', 'post_url']
+        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url', 'author_id',
+          'post_url', 'author_image_url']
       }
     })
     .$promise

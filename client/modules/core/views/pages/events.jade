@@ -86,3 +86,4 @@ h5 drag mouse over an area to select
         tr(ng-repeat='post in authorPosts')
           td: a(href='{{post.post_url}}' target='_blank') visit
           td {{post.text}}
+          td {{post.timestamp_ms | date:'short'}}

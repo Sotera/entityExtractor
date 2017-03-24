@@ -122,6 +122,9 @@
     },
     "author_id": {
       "type": "string"
+    },
+    "author_image_url": {
+      "type": "string"
     }
   },
   "validations": [],
