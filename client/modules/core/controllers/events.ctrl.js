@@ -3,7 +3,7 @@
 angular.module('com.module.core')
 .controller('EventsCtrl', EventsCtrl);
 
-function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window) {
+function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, authorProfileURLFilter) {
   $scope.mapPoints = null;
   $scope.selectedEvent = null;
   $scope.filterText = null;
@@ -55,7 +55,8 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window) {
   $scope.loadAuthorPosts = function(post) {
     $scope.showSpinner = true;
 
-    $window.open(post.post_url);
+    if (post.author_id)
+      $window.open(authorProfileURLFilter(post));
 
     return SocialMediaPost.find({
       filter: {
