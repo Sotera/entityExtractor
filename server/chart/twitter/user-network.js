@@ -22,24 +22,71 @@ if(twitterReady)
     });
 
 module.exports = {
+
+    getClusters: function(clusters){
+        const PostsCluster = app.models.PostsCluster;
+        return PostsCluster.find({
+            where: {
+                id: { inq: clusters }
+            },
+            fields: ['similar_post_ids']
+        });
+    },
+
+    getEvent: function(eventId) {
+        const Event = app.models.Event;
+        return Event.findById(eventId,{
+            fields: ['cluster_ids']
+        });
+    },
+
+    getPostIds: function(clusters) {
+        return _(clusters).map('similar_post_ids')
+            .flatten().compact().uniq().value();
+    },
+
+    getPosts: function(postIds) {
+        const SocialMediaPost = app.models.SocialMediaPost;
+
+        return SocialMediaPost.find({
+            where: {
+                post_id: { inq: postIds }
+            },
+            fields: ['author_id']
+        });
+    },
+
+    getAuthorIds: function(posts) {
+        let authorIds = _(posts).map('author_id')
+            .flatten().compact().uniq().value();
+        console.log(authorIds);
+    },
+
     execute: function(filter, cb){
         if(!twitterReady){
             cb(null,{message:"twitter client not ready"});
             return;
         }
-        var params = {screen_name: filter.userid};
-        twitterClient.get('followers/ids', params, function(error, cursor, response) {
-            if (error) {
-                cb(null, error);
-                return;
-            }
+        this.getEvent(filter.eventid)
+            .then(event=>this.getClusters(event.cluster_ids))
+            .then(clusters=>this.getPostIds(clusters))
+            .then(postIds=>this.getPosts(postIds))
+            .then(posts=>this.getAuthorIds(posts));
 
-            cb(null,cursor.ids);
 
-        });
     }
 };
 
+/*var params = {screen_name: filter.userid};
+ twitterClient.get('followers/ids', params, function(error, cursor, response) {
+ if (error) {
+ cb(null, error);
+ return;
+ }
+
+ cb(null,cursor.ids);
+
+ });*/
 /*
      function getEvent(eventId) {
  const Event = Twitter.app.models.Event;
