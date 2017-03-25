@@ -4,13 +4,8 @@ require('dotenv').config({silent: true});
 
 var loopback = require('loopback');
 var boot = require('loopback-boot');
-var bodyParser = require('body-parser');
 var app = module.exports = loopback();
-var kue = require('kue');
 var path = require('path');
-
-// protect qcr endpoint with basic auth
-require('./basic-auth').auth(app, ['qcr/insert']);
 
 app.start = function() {
   // start the web server
