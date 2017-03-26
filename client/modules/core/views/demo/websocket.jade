@@ -1,0 +1,40 @@
+extends /modules/core/views/layouts/layout
+block content
+  .row
+    .col-md-1
+    .col-md-10
+      .row
+        .col-md-12
+          h3 Threat Detection
+      .row
+        .col-md-12
+          form#archive-form
+            .form-group
+              label URL to zip file
+              input#archive-url.form-control(name='images_url' placeholder='https://s3.amazonaws.com/bucket/images.zip' value='https://s3.amazonaws.com/watchman/threats/day.zip')
+            .form-group
+              label.radio-inline
+                input(type='radio' value='day' name='tod' checked)
+                | Day
+              label.radio-inline
+                input(type='radio' value='night' name='tod')
+                | Night
+            .form-group
+              button.btn.btn-primary(type='submit') Run Detection
+      .row#images-container(style='margin-top:20px')
+
+    .col-md-1
+
+block scripts
+
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js')
+
+  script.
+    var socket = io('http://localhost:4000/threat');
+    socket.on('connect', console.log);
+    socket.on('chat', console.log);
+    socket.on('disconnect', function(){});
+
+    setInterval(() => {
+      socket.emit('chat', 'abc')
+    }, 2000)

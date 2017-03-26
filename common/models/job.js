@@ -21,11 +21,15 @@ module.exports = function(Job) {
     }
   );
 
-  // get state, data of a redis job, by user-defined id.
+  // get state + data of a redis job by id.
   Job.status = function(args, cb) {
-    redis.hgetall(args.job_id)
-      .then(data => _.pick(data, ['state', 'data', 'error']))
-      .then(data => cb(null, data))
+    Job.get(args.job_id)
+      .then(job => cb(null, job))
       .catch(err => cb(err));
+  };
+
+  Job.get = function(jobId) {
+    return redis.hgetall(jobId)
+      .then(job => _.pick(job, ['state', 'data', 'error']));
   };
 };
