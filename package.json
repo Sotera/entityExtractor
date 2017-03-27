@@ -44,6 +44,7 @@
     "request-json": "^0.6.1",
     "request-json-light": "^0.5.22",
     "serve-favicon": "^2.0.1",
+    "socket.io": "^1.7.3",
     "textract": "^1.2.1"
   },
   "devDependencies": {
