@@ -55,17 +55,17 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
   $scope.loadAuthorPosts = function(post) {
     $scope.showSpinner = true;
 
-    if (post.author_id)
+    if (post.screen_name)
       $window.open(authorProfileURLFilter(post));
 
     return SocialMediaPost.find({
       filter: {
         where: {
-          author_id: post.author_id,
+          screen_name: post.screen_name,
           featurizer: 'text'
         },
         order: 'timestamp_ms desc',
-        fields: ['text', 'author_id', 'post_url', 'author_image_url', 'timestamp_ms']
+        fields: ['text', 'screen_name', 'post_url', 'author_image_url', 'timestamp_ms']
       }
     })
     .$promise
@@ -109,7 +109,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
       if (regex.test(allText)) {
         $scope.selectedEvents.push(evnt);
       }
-      let authors = posts.map(p => p.author_id).join(' ');
+      let authors = posts.map(p => p.screen_name).join(' ');
       if (regex.test(authors)) {
         $scope.selectedEvents.push(evnt);
       }
@@ -142,7 +142,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
           post_id: { inq: postIds },
           featurizer: dataType
         },
-        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url', 'author_id',
+        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url', 'screen_name',
           'post_url', 'author_image_url']
       }
     })
@@ -198,7 +198,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
       forPosts() {
         getPosts(clusters)
         .then(posts => {
-          $scope.posts = _(posts).orderBy(p => p.author_id.toLowerCase()).value();
+          $scope.posts = _(posts).orderBy(p => p.screen_name.toLowerCase()).value();
         });
       },
 

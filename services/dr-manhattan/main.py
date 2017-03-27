@@ -94,6 +94,8 @@ def process_message(key,job):
 
     print "Finding communities from {} nodes and {} edges.".format(len(com.graph.nodes()), len(com.graph.edges()))
     l_com = save_communities(com, job)
+    job['kafka_url'] = "print"
+    job['kafka_topic'] = "bar"
     if 'kafka_url' in job and 'kafka_topic' in job:
         kafka_url = job['kafka_url']
         kafka_topic = job['kafka_topic']
@@ -103,7 +105,7 @@ def process_message(key,job):
         print "kafka_topic"
         print kafka_topic
         from event_to_kafka import stream_events
-        stream_events(l_com.values(), kafka_url, kafka_topic)
+        stream_events(l_com.values(), job)
 
     job['data'] = json.dumps({})  # no need to save anything to job
     job['state'] = 'processed'
@@ -125,8 +127,7 @@ if __name__ == '__main__':
                             queues=['genie:eventfinder'])
     dispatcher.start()
 
-    job = {u'start_time': u'1481124894000', u'state': u'new', u'end_time': u'1481125073999', u'api_root': u'http://172.17.0.1:3000/api'}
+    #job = {'start_time': '1490209183577', 'state': 'new', 'end_time': '1490209483576', 'api_root': 'http://172.17.0.1:3003/api'}
     # job = {'start_time': '1481124894000', 'state': 'new', 'end_time': '1481125013999', 'api_root': 'http://172.17.0.1:3000/api',
     #     'kafka_url': 'kafka', 'kafka_topic': 'test:1:1'}
     #process_message(1, job)
-    # process_message(1, job)

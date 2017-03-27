@@ -37,7 +37,7 @@
         "author_id": 1
       }
     },
-    "idx_author_id": {
+    "idx_screen_name_id": {
       "keys": {
         "screen_name": 1
       }
