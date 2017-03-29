@@ -103,5 +103,9 @@
   "chart": {
     "dataSource": null,
     "public": true
+  },
+  "eventNetwork": {
+    "dataSource": "db",
+    "public": true
   }
 }

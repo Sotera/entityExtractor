@@ -99,6 +99,17 @@ module.exports = {
     });
   },
 
+  getEventNetwork: function (eventId) {
+    const EventNetwork = app.models.EventNetwork;
+
+    return EventNetwork.findOne({
+      where: {
+        event_id: eventId
+      },
+      fields: ['data']
+    });
+  },
+
   getAuthorIds: function (posts, eventid) {
     let authorIds = _(posts).map('author_id')
       .flatten().compact().uniq().value();
@@ -111,11 +122,14 @@ module.exports = {
 
     authorRelations.authorIds.forEach(function(otherId){
       if(authorId == otherId){ return;}
-      if(_.includes(authorRelations['follows'][authorId],authorId)){relatedTo.push(otherId);}
-      if(_.includes(authorRelations['followers'][authorId],authorId)){relatedTo.push(otherId);}
+      if(_.includes(authorRelations['follows'][otherId],authorId)){relatedTo.push(otherId);}
+      if(_.includes(authorRelations['followers'][otherId],authorId)){relatedTo.push(otherId);}
       relatedTo = _(relatedTo).uniq();
     });
 
+    if(relatedTo.length == 0){
+      return;
+    }
     authorRelations.network.nodes.push({id:authorId});
     relatedTo.forEach(function(otherId){
       authorRelations.network.nodes.push({id:otherId});
@@ -123,9 +137,10 @@ module.exports = {
     });
   },
 
-  getRelationshipData: function (authorRelations) {
+  getRelationshipData: function (authorRelations, network) {
     let me = this;
     return new Promise((resolve)=> {
+      console.log("getting relationship data");
       authorRelations.network = {links:[], nodes:[]};
       authorRelations.authorIds.forEach(function(authorId){
         me.getRelationships(authorId, authorRelations);
@@ -137,34 +152,48 @@ module.exports = {
         if(a.source == b.target && a.target == b.source){return true;}
         return false;
       });
+
+      console.log("saving network");
+      network.save({event_id:authorRelations.eventId,status:1, data:authorRelations.network});
+      console.log("network saved");
       resolve(authorRelations);
     });
   },
   getDataForAuthorPromise: function (endpoint, user_id, key, authorRelations) {
     return new Promise((resolve, reject)=> {
-      let params = {'user_id': user_id, 'count': 500};
+      let params = {'user_id': user_id, 'count': 100};
       twitterClient.get(endpoint, params, function (error, cursor) {
         if (error) {
           reject(error.toString());
         }
         let val = {};
         val[user_id] = user_id;
+        if(!cursor){
+          resolve(authorRelations);
+          return;
+        }
         val[key] = cursor.ids;
         authorRelations[key].push(val);
         resolve(authorRelations);
       });
     });
   },
-  getDataForAuthors: function (endpoint, key, authorRelations) {
-    //authorRelations.authorIds = [authorRelations.authorIds[0], authorRelations.authorIds[1], authorRelations.authorIds[2]];
-    authorRelations[key] = [];
+  getDataForAuthors: function (endpoints, authorRelations) {
+    authorRelations.authorIds = [authorRelations.authorIds[0], authorRelations.authorIds[1], authorRelations.authorIds[2]];
+
+    for(let endpoint of endpoints){
+      authorRelations[endpoint.key] = [];
+    }
 
     return new Promise((resolve, reject)=> {
       let promiseChain = Promise.resolve();
       for (let user_id of authorRelations.authorIds) {
+        for(let endpoint of endpoints){
+          promiseChain = promiseChain
+            .then(() => this.getDataForAuthorPromise(endpoint.endpoint, user_id, endpoint.key, authorRelations))
+        }
         promiseChain = promiseChain
-          .then(() => this.getDataForAuthorPromise(endpoint, user_id, key, authorRelations))
-          .then(() => ptools.delay(60))
+          .then(() => ptools.delay(61))
       }
       promiseChain.then(()=> {
         resolve(authorRelations);
@@ -179,19 +208,32 @@ module.exports = {
       cb(null, {message: "twitter client not ready"});
       return;
     }
-    this.getEvent(filter.eventid)
-      .then(event=>this.getClusters(event.cluster_ids))
-      .then(clusters=>this.getPostIds(clusters))
-      .then(postIds=>this.getPosts(postIds))
-      .then(posts=>this.getAuthorIds(posts, filter.eventid))
-      .then(authorRelations=>this.getDataForAuthors('friends/ids', 'follows', authorRelations))
-      .then(authorRelations=>this.getDataForAuthors('followers/ids', 'followers', authorRelations))
-      .then(authorRelations=>this.getRelationshipData(authorRelations))
-      .then(authorRelations=>cb(null, authorRelations.network))
-      .catch(function (reason) {
-        console.log(reason);
-      });
 
+    //check to see if we have already built this network
+    this.getEventNetwork(filter.eventid)
+      .then(network=>{
+        if(!network || network.status <= 0){
+          cb(null, "working");
+          if(!network) {
+            const EventNetwork = app.models.EventNetwork;
+            EventNetwork.create({event_id: filter.eventid, status: 0, data: {}});
+          }
+          //we haven't, bummer, lets get to work :(
+          this.getEvent(filter.eventid)
+            .then(event=>this.getClusters(event.cluster_ids))
+            .then(clusters=>this.getPostIds(clusters))
+            .then(postIds=>this.getPosts(postIds))
+            .then(posts=>this.getAuthorIds(posts, filter.eventid))
+            .then(authorRelations=>this.getDataForAuthors([{endpoint:'friends/ids',key:'follows'},{endpoint:'followers/ids',key:'followers'}], authorRelations))
+            .then(authorRelations=>this.getRelationshipData(authorRelations, network))
+            .catch(function (reason) {
+              console.log(reason);
+            });
+          return;
+        }
+
+        cb(null,network);
+      });
   }
 };
 
