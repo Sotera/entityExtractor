@@ -40,29 +40,37 @@ h5 drag mouse over an area to select
     event-map(ng-show='mapPoints' points='mapPoints')
       iframe#map-frame(src='http://54.86.248.86:3005/index.html' style='width:100%; height:600px' scrolling='no' frameborder='0')
   .col-md-5(ng-show='selectedEvent')
-    .row(ng-show='imageUrls' style='width:100%; height:160px; overflow-y:auto')
+    .row(ng-show='imageUrls' style='width:100%; height:120px; overflow-y:auto')
       image-grid(hover-dir='left')
-    .row(ng-show='hashtags' style='width:100%; height:160px; overflow-y:auto; font-size:1.5em')
+    .row(ng-show='hashtags' style='width:100%; height:100px; overflow-y:auto; font-size:1.5em')
       |#
       div(ng-repeat='ht in hashtags' style='display:inline-block')
         translate(phrase='{{ht[0]}}')
         | ({{ht[1]}}){{$last ? '' : ','}}&nbsp;
+    .row(style='width:100%; height:280px; overflow-y:auto')
+      ul.nav.nav-tabs(role='tablist')
+        li.active(role='presentation'): a(data-target='#tc-post-types' role='tab' data-toggle='tab') Post types
+        li(role='presentation'): a(data-target='#tc-posts' role='tab' data-toggle='tab') Posts
+        li(role='presentation'): a(data-target='#tc-user-network' role='tab' data-toggle='tab') Uer network
 
-    .row(ng-show='imageUrls' style='width:100%; height:260px; overflow-y:auto')
-      table.table.table-striped
-        caption Posts ({{posts.length}})
-        tbody
-          tr(ng-repeat='post in posts')
-            td
-              a(ng-click='loadAuthorUrl(post)')
-                | {{post.screen_name}}
-                br
-                img(ng-src='{{post.author_image_url}}' style='border:0; width:48px; height:48px')
-            td {{post.text}}
-            td: a(ng-href='{{post.post_url}}' target='_blank') visit
-    .row(style='width:100%; height:260px; overflow-y:auto')
-      .chart-container(style='width:100%; height:600px')
-        user-network-graph
+      .tab-content
+        #tc-post-types.tab-pane.active(role='tabpanel')
+          pie-chart(content='{{postTypeCounts}}' conf='{{::postTypeConf}}')
+        #tc-posts.tab-pane(role='tabpanel')
+          table.table.table-striped
+            caption Posts ({{posts.length}})
+            tbody
+              tr(ng-repeat='post in posts')
+                td
+                  a(ng-click='loadAuthorUrl(post)')
+                    | {{post.screen_name}}
+                    br
+                    img(ng-src='{{post.author_image_url}}' style='border:0; width:48px; height:48px')
+                td {{post.text}}
+                td: a(ng-href='{{post.post_url}}' target='_blank') visit
+        #tc-user-network.tab-pane(role='tabpanel')
+          .chart-container(style='width:100%; height:600px')
+            user-network-graph
 .row(ng-show='selectedEvent')
   .col-md-4(style='height:400px; overflow-y:auto')
     table.table.table-striped

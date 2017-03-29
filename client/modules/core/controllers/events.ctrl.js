@@ -8,6 +8,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
   $scope.selectedEvent = null;
   $scope.filterText = null;
   $scope.authorPosts = null;
+  $scope.retweetCounts = [];
 
   $scope.eventSelected = function(evnt) {
     // already selected
@@ -52,7 +53,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
     tmpEvents.forEach(filterEvent);
   };
 
-  $scope.loadAuthorUrl = function(post){
+  $scope.loadAuthorUrl = function(post) {
     $scope.showSpinner = true;
 
     if (post.screen_name)
@@ -60,6 +61,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
 
     return $scope.loadAuthorPosts(post.screen_name);
   };
+
   $scope.loadAuthorPosts = function(screen_name) {
     return SocialMediaPost.find({
       filter: {
@@ -68,7 +70,8 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
           featurizer: 'text'
         },
         order: 'timestamp_ms desc',
-        fields: ['text', 'screen_name', 'post_url', 'author_image_url', 'timestamp_ms']
+        fields: ['text', 'screen_name', 'post_url', 'author_image_url',
+        'timestamp_ms']
       }
     })
     .$promise
@@ -145,8 +148,9 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
           post_id: { inq: postIds },
           featurizer: dataType
         },
-        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url', 'screen_name',
-          'post_url', 'author_image_url']
+        fields: ['text', 'image_urls', 'hashtags', 'primary_image_url',
+          'author_id', 'post_url', 'author_image_url', 'quote_post_id',
+          'broadcast_post_id', 'reply_to_post_id']
       }
     })
     .$promise
@@ -205,6 +209,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
         getPosts(clusters)
         .then(posts => {
           $scope.posts = _(posts).orderBy(p => p.screen_name.toLowerCase()).value();
+          createPostsCharts(posts);
         });
       },
 
@@ -228,5 +233,30 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
 
     return sampleSocialMediaPosts('text', similarPostIds, 200)
     .catch(console.error);
+  }
+
+  function createPostsCharts(posts) {
+    let counts = posts.reduce((acc, curr) => {
+      if (curr.quote_post_id)
+        acc['quote']++
+      else if (curr.broadcast_post_id)
+        acc['broadcast']++
+      else if (curr.reply_to_post_id)
+        acc['reply']++
+      else
+        acc['direct']++
+
+      return acc;
+    }, {quote: 0, broadcast: 0, reply: 0, direct: 0});
+
+    $scope.postTypeCounts = [
+      {label: 'quote', value: counts['quote']},
+      {label: 'retweet', value: counts['broadcast']},
+      {label: 'reply', value: counts['reply']},
+      {label: 'direct', value: counts['direct']}
+    ];
+    $scope.postTypeConf = [
+      {path: 'header.title.text', value: 'post types'}
+    ];
   }
 }
