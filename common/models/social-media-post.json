@@ -87,6 +87,12 @@
       ],
       "default": []
     },
+    "domains": {
+      "type": [
+        "string"
+      ],
+      "default": []
+    },
     "featurizer": {
       "type": "string",
       "required": true,
@@ -133,6 +139,18 @@
     },
     "author_image_url": {
       "type": "string"
+    },
+    "quote_post_id": {
+      "type": "string",
+      "description": "Similar to twitter quoted_status id."
+    },
+    "broadcast_post_id": {
+      "type": "string",
+      "description": "Similar to twitter retweeted_status id."
+    },
+    "reply_to_post_id": {
+      "type": "string",
+      "description": "Similar to twitter in_reply_to id."
     }
   },
   "validations": [],
