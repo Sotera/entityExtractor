@@ -99,44 +99,64 @@ module.exports = {
     });
   },
 
-
-  getAuthorIds: function (posts) {
+  getAuthorIds: function (posts, eventid) {
     let authorIds = _(posts).map('author_id')
       .flatten().compact().uniq().value();
     console.log(authorIds);
-    return {authorIds: authorIds};
+    return {authorIds: authorIds, eventId:eventid};
   },
 
-  getRelationshipData: function (endpoint, user_id) {
+  getRelationships: function(authorId, authorRelations){
+    let relatedTo = [];
+
+    authorRelations.authorIds.forEach(function(otherId){
+      if(authorId == otherId){ return;}
+      if(_.includes(authorRelations['follows'][authorId],authorId)){relatedTo.push(otherId);}
+      if(_.includes(authorRelations['followers'][authorId],authorId)){relatedTo.push(otherId);}
+      relatedTo = _(relatedTo).uniq();
+    });
+
+    authorRelations.network.nodes.push({id:authorId});
+    relatedTo.forEach(function(otherId){
+      authorRelations.network.nodes.push({id:otherId});
+      authorRelations.network.links.push({source:authorId, target:otherId});
+    });
+  },
+
+  getRelationshipData: function (authorRelations) {
+    let me = this;
     return new Promise((resolve)=> {
-      var params = {user_id: user_id};
-      twitterClient.get(endpoint, params, function (error, cursor, response) {
-        if (error) {
-          resolve([]);
-          return;
-        }
-
-        resolve(cursor.ids);
-
+      authorRelations.network = {links:[], nodes:[]};
+      authorRelations.authorIds.forEach(function(authorId){
+        me.getRelationships(authorId, authorRelations);
       });
+
+      authorRelations.network.nodes = _.uniqWith(authorRelations.network.nodes, _.isEqual);
+      authorRelations.network.links = _.uniqWith(authorRelations.network.links, function(a, b){
+        if(a.source == b.source && a.target == b.target){return true;}
+        if(a.source == b.target && a.target == b.source){return true;}
+        return false;
+      });
+      resolve(authorRelations);
     });
   },
   getDataForAuthorPromise: function (endpoint, user_id, key, authorRelations) {
     return new Promise((resolve, reject)=> {
-      let params = {'user_id': user_id, 'count': 100};
+      let params = {'user_id': user_id, 'count': 500};
       twitterClient.get(endpoint, params, function (error, cursor) {
         if (error) {
           reject(error.toString());
         }
         let val = {};
-        val[user_id] = cursor.ids;
+        val[user_id] = user_id;
+        val[key] = cursor.ids;
         authorRelations[key].push(val);
         resolve(authorRelations);
       });
     });
   },
   getDataForAuthors: function (endpoint, key, authorRelations) {
-    authorRelations.authorIds = [authorRelations.authorIds[0], authorRelations.authorIds[1], authorRelations.authorIds[2]];
+    //authorRelations.authorIds = [authorRelations.authorIds[0], authorRelations.authorIds[1], authorRelations.authorIds[2]];
     authorRelations[key] = [];
 
     return new Promise((resolve, reject)=> {
@@ -144,7 +164,7 @@ module.exports = {
       for (let user_id of authorRelations.authorIds) {
         promiseChain = promiseChain
           .then(() => this.getDataForAuthorPromise(endpoint, user_id, key, authorRelations))
-          .then(() => ptools.delay(1))
+          .then(() => ptools.delay(60))
       }
       promiseChain.then(()=> {
         resolve(authorRelations);
@@ -163,14 +183,15 @@ module.exports = {
       .then(event=>this.getClusters(event.cluster_ids))
       .then(clusters=>this.getPostIds(clusters))
       .then(postIds=>this.getPosts(postIds))
-      .then(posts=>this.getAuthorIds(posts))
+      .then(posts=>this.getAuthorIds(posts, filter.eventid))
       .then(authorRelations=>this.getDataForAuthors('friends/ids', 'follows', authorRelations))
       .then(authorRelations=>this.getDataForAuthors('followers/ids', 'followers', authorRelations))
-      .then(authorRelations=>cb(null, authorRelations))
+      .then(authorRelations=>this.getRelationshipData(authorRelations))
+      .then(authorRelations=>cb(null, authorRelations.network))
       .catch(function (reason) {
         console.log(reason);
       });
-    //.then(authorRelations=>this.getNetwork(authorRelations));
+
   }
 };
 
