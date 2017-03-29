@@ -124,14 +124,16 @@ module.exports = {
       if(authorId == otherId){ return;}
       if(_.includes(authorRelations['follows'][otherId],authorId)){relatedTo.push(otherId);}
       if(_.includes(authorRelations['followers'][otherId],authorId)){relatedTo.push(otherId);}
-      relatedTo = _(relatedTo).uniq();
+
     });
 
     if(relatedTo.length == 0){
       return;
     }
+
+    relatedTo = _(relatedTo).uniq();
     authorRelations.network.nodes.push({id:authorId});
-    relatedTo.forEach(function(otherId){
+    _.each(relatedTo,function(otherId){
       authorRelations.network.nodes.push({id:otherId});
       authorRelations.network.links.push({source:authorId, target:otherId});
     });
@@ -179,7 +181,7 @@ module.exports = {
     });
   },
   getDataForAuthors: function (endpoints, authorRelations) {
-    authorRelations.authorIds = [authorRelations.authorIds[0], authorRelations.authorIds[1], authorRelations.authorIds[2]];
+    authorRelations.authorIds = authorRelations.authorIds.slice(0,60);
 
     for(let endpoint of endpoints){
       authorRelations[endpoint.key] = [];
@@ -216,7 +218,9 @@ module.exports = {
           cb(null, "working");
           if(!network) {
             const EventNetwork = app.models.EventNetwork;
-            EventNetwork.create({event_id: filter.eventid, status: 0, data: {}});
+            EventNetwork.create({event_id: filter.eventid, status: 0, data: {}}, function (err,obj){
+              network = obj;
+            });
           }
           //we haven't, bummer, lets get to work :(
           this.getEvent(filter.eventid)
@@ -237,52 +241,6 @@ module.exports = {
   }
 };
 
-/*var params = {screen_name: filter.userid};
- twitterClient.get('followers/ids', params, function(error, cursor, response) {
- if (error) {
- cb(null, error);
- return;
- }
-
- cb(null,cursor.ids);
-
- });*/
-/*
- function getEvent(eventId) {
- const Event = Twitter.app.models.Event;
- return Event.findById(eventId,{
- fields: ['cluster_ids']
- });
- }
-
- function getClusters(event){
- const PostsCluster = Twitter.app.models.postsCluster;
- let similarPostIds = _(clusters).map('similar_post_ids')
- .flatten().compact().uniq().value();
-
- similarPostIds = _.sampleSize(similarPostIds, sampleSize);
-
- return PostsCluster.find({
- where: {
- post_id: { inq: event.cluster_ids }
- },
- fields: ['similarPostIds']
- }).$promise;
- }
-
- Twitter.followerNetwork = function(id,cb){
- if(!twitterReady){
- cb(null,{message:"twitter client not ready"});
- return;
- }
-
- getEvent(id)
- .then(event=>{
- cb(null,{message:event.name});
- return;
- })
- };
- * */
 
 
 
