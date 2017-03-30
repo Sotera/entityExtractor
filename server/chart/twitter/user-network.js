@@ -166,7 +166,7 @@ module.exports = {
       let params = {'user_id': user_id, 'count': 100};
       twitterClient.get(endpoint, params, function (error, cursor) {
         if (error) {
-          reject(error.toString());
+          resolve(authorRelations);
         }
         let val = {};
         val[user_id] = user_id;
@@ -181,7 +181,7 @@ module.exports = {
     });
   },
   getDataForAuthors: function (endpoints, authorRelations) {
-    authorRelations.authorIds = authorRelations.authorIds.slice(0,60);
+    //authorRelations.authorIds = authorRelations.authorIds.slice(0,60);
 
     for(let endpoint of endpoints){
       authorRelations[endpoint.key] = [];
@@ -201,7 +201,8 @@ module.exports = {
         resolve(authorRelations);
       })
         .catch(function (reason) {
-          reject(reason);
+          console.log(reason + " :continuing...");
+          resolve(authorRelations);
         });
     });
   },
