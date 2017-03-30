@@ -120,11 +120,13 @@ module.exports = {
   getRelationships: function(authorId, authorRelations){
     let relatedTo = [];
 
+    let follows = authorRelations['follows'][authorId];
+    let followers = authorRelations['followers'][authorId];
+
     authorRelations.authorIds.forEach(function(otherId){
       if(authorId == otherId){ return;}
-      if(_.includes(authorRelations['follows'][otherId],authorId)){relatedTo.push(otherId);}
-      if(_.includes(authorRelations['followers'][otherId],authorId)){relatedTo.push(otherId);}
-
+      if(_.includes(follows,otherId)){relatedTo.push(otherId);}
+      if(_.includes(followers,otherId)){relatedTo.push(otherId);}
     });
 
     if(relatedTo.length == 0){
@@ -163,28 +165,22 @@ module.exports = {
   },
   getDataForAuthorPromise: function (endpoint, user_id, key, authorRelations) {
     return new Promise((resolve, reject)=> {
-      let params = {'user_id': user_id, 'count': 100};
+      let params = {'user_id': user_id, 'count': 200};
       twitterClient.get(endpoint, params, function (error, cursor) {
-        if (error) {
-          resolve(authorRelations);
-        }
-        let val = {};
-        val[user_id] = user_id;
-        if(!cursor){
+        if (error || !cursor) {
           resolve(authorRelations);
           return;
         }
-        val[key] = cursor.ids;
-        authorRelations[key].push(val);
+        authorRelations[key][user_id] =cursor.ids;
         resolve(authorRelations);
       });
     });
   },
-  getDataForAuthors: function (endpoints, authorRelations) {
+  getDataForAuthors: function (endpoints, authorRelations, network) {
     //authorRelations.authorIds = authorRelations.authorIds.slice(0,60);
 
     for(let endpoint of endpoints){
-      authorRelations[endpoint.key] = [];
+      authorRelations[endpoint.key] = {};
     }
 
     return new Promise((resolve, reject)=> {
@@ -195,7 +191,9 @@ module.exports = {
             .then(() => this.getDataForAuthorPromise(endpoint.endpoint, user_id, endpoint.key, authorRelations))
         }
         promiseChain = promiseChain
-          .then(() => ptools.delay(61))
+        .then(authorRelations=>this.getRelationshipData(authorRelations, network));
+        promiseChain = promiseChain
+        .then(() => ptools.delay(61))
       }
       promiseChain.then(()=> {
         resolve(authorRelations);
@@ -229,8 +227,7 @@ module.exports = {
             .then(clusters=>this.getPostIds(clusters))
             .then(postIds=>this.getPosts(postIds))
             .then(posts=>this.getAuthorIds(posts, filter.eventid))
-            .then(authorRelations=>this.getDataForAuthors([{endpoint:'friends/ids',key:'follows'},{endpoint:'followers/ids',key:'followers'}], authorRelations))
-            .then(authorRelations=>this.getRelationshipData(authorRelations, network))
+            .then(authorRelations=>this.getDataForAuthors([{endpoint:'friends/ids',key:'follows'},{endpoint:'followers/ids',key:'followers'}], authorRelations, network))
             .catch(function (reason) {
               console.log(reason);
             });
