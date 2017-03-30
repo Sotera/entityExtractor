@@ -1,11 +1,11 @@
 require('dotenv').config({silent: true});
-
 'use strict';
 const _ = require('lodash'),
   ptools = require('../../../server/util/promise-tools'),
   TwitterApi = require('twitter'),
   app = require('../../../server/server'),
-  https = require('https');
+  https = require('https'),
+  redis = require('../../../lib/redis');
 
 let twitter_consumer_key = process.env.TWITTER_CONSUMER_KEY,
   twitter_consumer_secret = process.env.TWITTER_CONSUMER_SECRET,
@@ -174,6 +174,17 @@ module.exports = {
         authorRelations[key][user_id] =cursor.ids;
         resolve(authorRelations);
       });
+    });
+  },
+  getDataForAuthorRedisPromise: function (endpoint, user_id, key, authorRelations) {
+    return new Promise((resolve, reject)=> {
+      let params = {'user_id': user_id, 'count': 200};
+      return redis
+        .hmset(user_id, params)
+        .then(() => redis.lpush('genie:eventfinder', user_id))
+        .catch(err => console.error(key, err.stack));
+
+      resolve(authorRelations);
     });
   },
   getDataForAuthors: function (endpoints, authorRelations, network) {
