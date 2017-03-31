@@ -155,6 +155,9 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
 
   function visualize(clusters) {
     let functions = {
+      forUserNetwork(){
+        $scope.loadUserNetworkGraph($scope.selectedEvent.id);
+      },
       forMap() {
         let points = {};
         $scope.selectedEvent.location.forEach(location => {
@@ -203,6 +206,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
       },
 
       forAll() {
+        this.forUserNetwork();
         this.forMap();
         this.forHashtags();
         this.forImages();

@@ -9,7 +9,7 @@ function userNetworkGraphDirective() {
   };
 }
 
-function userNetworkGraphController($scope, ClusterLink) {
+function userNetworkGraphController($scope, EventNetwork) {
   var colors = {
     user: 'SteelBlue'
   };
@@ -22,7 +22,7 @@ function userNetworkGraphController($scope, ClusterLink) {
         event_id:eventId
       }
     };
-    return ClusterLink.findOne(query)
+    return EventNetwork.findOne(query)
       .$promise
       .then(getGraphData)
       .then(graphClusterLinks)
@@ -30,18 +30,18 @@ function userNetworkGraphController($scope, ClusterLink) {
       .catch(console.error);
   }
 
-  $scope.loadNetworkGraph = function(eventId, callback) {
+  $scope.loadUserNetworkGraph = function(eventId, callback) {
     if ($scope.networkGraphSvg)
       $scope.networkGraphSvg.remove();
 
     return createGraph(eventId, callback);
   };
 
-  function getGraphData(data){
-    if(!data){
+  function getGraphData(eventNetwork){
+    if(!eventNetwork.data){
       return null;
     }
-    var graph = data.network;
+    var graph = eventNetwork.data;
     graph.nodes.forEach(function(node){
       node.group = "user";
     });
@@ -55,7 +55,7 @@ function userNetworkGraphController($scope, ClusterLink) {
     if(!graphData){
       return;
     }
-    
+
     var $container = $('.chart-container'),
       width = $container.width(),
       height = $container.height(),
@@ -107,7 +107,7 @@ function userNetworkGraphController($scope, ClusterLink) {
       })
       .on('click', function(d) {
         simulation.stop();
-        $scope.visualizeCluster(d);
+        /*$scope.visualizeCluster(d); TODO: Figure something else out*/
       })
       .call(d3.drag()
         .on('start', dragstarted)

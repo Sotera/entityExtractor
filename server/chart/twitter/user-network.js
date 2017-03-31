@@ -133,7 +133,7 @@ module.exports = {
       return;
     }
 
-    relatedTo = _(relatedTo).uniq();
+    relatedTo = _(relatedTo).uniq().value();
     authorRelations.network.nodes.push({id:authorId});
     _.each(relatedTo,function(otherId){
       authorRelations.network.nodes.push({id:otherId});
@@ -158,7 +158,15 @@ module.exports = {
       });
 
       console.log("saving network");
-      network.save({event_id:authorRelations.eventId,status:1, data:authorRelations.network});
+      network.event_id = authorRelations.eventId;
+      network.status = 1;
+      network.data = authorRelations.network;
+      network.save(function(err,obj){
+        if(err){
+          console.log(err);
+          network = obj;
+        }
+      });
       console.log("network saved");
       resolve(authorRelations);
     });
@@ -171,7 +179,7 @@ module.exports = {
           resolve(authorRelations);
           return;
         }
-        authorRelations[key][user_id] =cursor.ids;
+        authorRelations[key][user_id] =cursor.ids.map(String);
         resolve(authorRelations);
       });
     });
