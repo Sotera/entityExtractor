@@ -12,8 +12,8 @@ const _ = require('lodash'),
 let twitter_consumer_key = process.env.TWITTER_CONSUMER_KEY,
   twitter_consumer_secret = process.env.TWITTER_CONSUMER_SECRET,
   twitter_bearer_token = process.env.TWITTER_BEARER_TOKEN,
-  twitter_scrape_method = process.env.TWITTER_SCRAPE_METHOD,
-  max_twitter_count = process.env.MAX_TWITTER_COUNT, //follow_along or twitter
+  twitter_scrape_method = process.env.TWITTER_SCRAPE_METHOD || "follow_along",//follow_along or twitter
+  max_twitter_count = +process.env.MAX_TWITTER_COUNT || 200,
   twitterClient = undefined;
 
 /*//code used to get bearer token...does not need to be called unless our bearer token is bad.
