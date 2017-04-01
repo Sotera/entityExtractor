@@ -12,10 +12,11 @@ const _ = require('lodash'),
 let twitter_consumer_key = process.env.TWITTER_CONSUMER_KEY,
   twitter_consumer_secret = process.env.TWITTER_CONSUMER_SECRET,
   twitter_bearer_token = process.env.TWITTER_BEARER_TOKEN,
-  twitter_scrape_method = process.env.TWITTER_SCRAPE_METHOD, //follow_along or twitter
+  twitter_scrape_method = process.env.TWITTER_SCRAPE_METHOD,
+  max_twitter_count = process.env.MAX_TWITTER_COUNT, //follow_along or twitter
   twitterClient = undefined;
 
-/*
+/*//code used to get bearer token...does not need to be called unless our bearer token is bad.
  if(twitter_consumer_key != undefined && twitter_consumer_secret != undefined){
  let url_tck = encodeURIComponent(twitter_consumer_key);
  let url_tcs = encodeURIComponent(twitter_consumer_secret);
@@ -194,7 +195,7 @@ module.exports = {
   },
   getDataForAuthorPromise: function (endpoint, user_id, key, authorRelations) {
     return new Promise((resolve)=> {
-      let params = {'user_id': user_id, 'count': 200};
+      let params = {'user_id': user_id, 'count': max_twitter_count};
       twitterClient.get(endpoint, params, function (error, cursor) {
         if (error || !cursor) {
           resolve(authorRelations);
@@ -207,7 +208,7 @@ module.exports = {
   },
   getDataForAuthorRedisPromise: function (endpoint, user_id, key, authorRelations) {
     return new Promise((resolve)=> {
-      let params = {'id': user_id, 'state':'new'};
+      let params = {'id': user_id, 'state':'new', 'max':max_twitter_count};
       redis.hmset(user_id, params)
       .then(() =>{
         redis.lpush('genie:followfinder', user_id)
