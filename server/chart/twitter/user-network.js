@@ -1,15 +1,18 @@
 require('dotenv').config({silent: true});
+
 'use strict';
 const _ = require('lodash'),
   ptools = require('../../../server/util/promise-tools'),
   TwitterApi = require('twitter'),
   app = require('../../../server/server'),
   https = require('https'),
-  redis = require('../../../lib/redis');
+  redis = require('../../../lib/redis'),
+  idGen = require('../../../server/util/id-generator');
 
 let twitter_consumer_key = process.env.TWITTER_CONSUMER_KEY,
   twitter_consumer_secret = process.env.TWITTER_CONSUMER_SECRET,
   twitter_bearer_token = process.env.TWITTER_BEARER_TOKEN,
+  twitter_scrape_method = process.env.TWITTER_SCRAPE_METHOD, //follow_along or twitter
   twitterClient = undefined;
 
 /*
@@ -95,7 +98,7 @@ module.exports = {
       where: {
         post_id: {inq: postIds}
       },
-      fields: ['author_id']
+      fields: ['author_id','screen_name']
     });
   },
 
@@ -111,13 +114,24 @@ module.exports = {
   },
 
   getAuthorIds: function (posts, eventid) {
-    let authorIds = _(posts).map('author_id')
+    let authorKey = twitter_scrape_method === 'twitter'?'author_id':'screen_name';
+    let authorIds = _(posts).map(authorKey)
       .flatten().compact().uniq().value();
     console.log(authorIds);
     return {authorIds: authorIds, eventId:eventid};
   },
-
+  getHash: function(str){
+    let hash = 0, i, chr;
+    if (str.length === 0) return hash;
+    for (i = 0; i < str.length; i++) {
+      chr   = str.charCodeAt(i);
+      hash  = ((hash << 5) - hash) + chr;
+      hash |= 0; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  },
   getRelationships: function(authorId, authorRelations){
+    let me = this;
     let relatedTo = [];
 
     let follows = authorRelations['follows'][authorId];
@@ -134,10 +148,17 @@ module.exports = {
     }
 
     relatedTo = _(relatedTo).uniq().value();
-    authorRelations.network.nodes.push({id:authorId});
+    let authorHash = me.getHash(authorId);
+    authorRelations.network.nodes.push({
+      id:authorHash,
+      name:authorId
+    });
     _.each(relatedTo,function(otherId){
-      authorRelations.network.nodes.push({id:otherId});
-      authorRelations.network.links.push({source:authorId, target:otherId});
+      authorRelations.network.nodes.push({
+        id:me.getHash(otherId),
+        name:otherId
+      });
+      authorRelations.network.links.push({source:authorHash, target:me.getHash(otherId)});
     });
   },
 
@@ -172,7 +193,7 @@ module.exports = {
     });
   },
   getDataForAuthorPromise: function (endpoint, user_id, key, authorRelations) {
-    return new Promise((resolve, reject)=> {
+    return new Promise((resolve)=> {
       let params = {'user_id': user_id, 'count': 200};
       twitterClient.get(endpoint, params, function (error, cursor) {
         if (error || !cursor) {
@@ -185,14 +206,30 @@ module.exports = {
     });
   },
   getDataForAuthorRedisPromise: function (endpoint, user_id, key, authorRelations) {
-    return new Promise((resolve, reject)=> {
-      let params = {'user_id': user_id, 'count': 200};
-      return redis
-        .hmset(user_id, params)
-        .then(() => redis.lpush('genie:eventfinder', user_id))
+    return new Promise((resolve)=> {
+      let params = {'id': user_id, 'state':'new'};
+      redis.hmset(user_id, params)
+      .then(() =>{
+        redis.lpush('genie:followfinder', user_id)
+        .then(()=>{
+          let interval = setInterval(function(){
+            redis.hgetall(user_id).then(data=>{
+              if(!data) return;
+              if(data.state === 'new') return;
+              clearInterval(interval);
+              if(data.state === 'error') return;
+              authorRelations[key][user_id] = data.data.split(',');
+              resolve(authorRelations);
+            }).catch(err => {
+              console.log(err);
+              resolve(authorRelations);
+            });
+          },100);
+        });
+      })
         .catch(err => console.error(key, err.stack));
 
-      resolve(authorRelations);
+
     });
   },
   getDataForAuthors: function (endpoints, authorRelations, network) {
@@ -206,13 +243,25 @@ module.exports = {
       let promiseChain = Promise.resolve();
       for (let user_id of authorRelations.authorIds) {
         for(let endpoint of endpoints){
-          promiseChain = promiseChain
-            .then(() => this.getDataForAuthorPromise(endpoint.endpoint, user_id, endpoint.key, authorRelations))
+          if(twitter_scrape_method === 'twitter') {
+            promiseChain = promiseChain
+              .then(() => this.getDataForAuthorPromise(endpoint.endpoint, user_id, endpoint.key, authorRelations))
+          }
+          else{
+            promiseChain = promiseChain
+              .then(() => this.getDataForAuthorRedisPromise(endpoint.endpoint, user_id, endpoint.key, authorRelations))
+          }
         }
         promiseChain = promiseChain
         .then(authorRelations=>this.getRelationshipData(authorRelations, network));
-        promiseChain = promiseChain
-        .then(() => ptools.delay(61))
+        if(twitter_scrape_method === 'twitter'){
+          promiseChain = promiseChain
+            .then(() => ptools.delay(61))
+        }
+        else{
+          promiseChain = promiseChain
+            .then(() => ptools.delay(0))
+        }
       }
       promiseChain.then(()=> {
         resolve(authorRelations);

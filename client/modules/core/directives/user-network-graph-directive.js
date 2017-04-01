@@ -18,8 +18,10 @@ function userNetworkGraphController($scope, EventNetwork) {
 
   function createGraph(eventId, callback) {
     var query = {
-      filter: {
-        event_id:eventId
+      "filter":{
+        "where": {
+          "event_id":eventId
+        }
       }
     };
     return EventNetwork.findOne(query)
@@ -43,7 +45,7 @@ function userNetworkGraphController($scope, EventNetwork) {
     }
     var graph = eventNetwork.data;
     graph.nodes.forEach(function(node){
-      node.group = "user";
+      node.group = 'user';
     });
     graph.links.forEach(function(link){
       link.value = 1;
@@ -116,7 +118,7 @@ function userNetworkGraphController($scope, EventNetwork) {
 
     node.append('title')
       .text(function (d) {
-        return d.group;
+        return d.name;
       });
 
     simulation
