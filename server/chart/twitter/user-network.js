@@ -129,7 +129,7 @@ module.exports = {
       hash  = ((hash << 5) - hash) + chr;
       hash |= 0; // Convert to 32bit integer
     }
-    return Math.abs(hash);
+    return hash;
   },
   getRelationships: function(authorId, authorRelations){
     let me = this;

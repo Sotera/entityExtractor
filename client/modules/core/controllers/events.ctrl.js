@@ -52,16 +52,19 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
     tmpEvents.forEach(filterEvent);
   };
 
-  $scope.loadAuthorPosts = function(post) {
+  $scope.loadAuthorUrl = function(post){
     $scope.showSpinner = true;
 
     if (post.screen_name)
       $window.open(authorProfileURLFilter(post));
 
+    return $scope.loadAuthorPosts(post.screen_name);
+  };
+  $scope.loadAuthorPosts = function(screen_name) {
     return SocialMediaPost.find({
       filter: {
         where: {
-          screen_name: post.screen_name,
+          screen_name: screen_name,
           featurizer: 'text'
         },
         order: 'timestamp_ms desc',

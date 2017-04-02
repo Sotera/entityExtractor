@@ -109,7 +109,7 @@ function userNetworkGraphController($scope, EventNetwork) {
       })
       .on('click', function(d) {
         simulation.stop();
-        /*$scope.visualizeCluster(d); TODO: Figure something else out*/
+        $scope.loadAuthorPosts(d.name);
       })
       .call(d3.drag()
         .on('start', dragstarted)

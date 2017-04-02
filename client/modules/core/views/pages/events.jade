@@ -54,7 +54,7 @@ h5 drag mouse over an area to select
         tbody
           tr(ng-repeat='post in posts')
             td
-              a(ng-click='loadAuthorPosts(post)')
+              a(ng-click='loadAuthorUrl(post)')
                 | {{post.screen_name}}
                 br
                 img(ng-src='{{post.author_image_url}}' style='border:0; width:48px; height:48px')
