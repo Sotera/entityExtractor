@@ -1,5 +1,6 @@
 {
   "name": "socialMediaPost",
+  "description": "User data that seeds event detection",
   "base": "PersistedModel",
   "idInjection": true,
   "indexes": {

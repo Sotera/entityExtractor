@@ -1,5 +1,6 @@
 {
   "name": "event",
+  "description": "A detected event: The primary model in the system",
   "base": "PersistedModel",
   "idInjection": true,
   "indexes": {
