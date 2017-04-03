@@ -1,5 +1,6 @@
 {
   "name": "chart",
+  "description": "Endpoints for driving charts",
   "base": "Model",
   "idInjection": true,
   "options": {

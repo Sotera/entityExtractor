@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Eventnetwork) {
+module.exports = function(EventNetwork) {
 
 };

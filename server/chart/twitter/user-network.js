@@ -1,6 +1,9 @@
+'use strict';
+
+// def: collect user network data from twitter scraper with fallback to twitter api
+
 require('dotenv').config({silent: true});
 
-'use strict';
 const _ = require('lodash'),
   ptools = require('../../../server/util/promise-tools'),
   TwitterApi = require('twitter'),
@@ -247,8 +250,7 @@ module.exports = {
           if(twitter_scrape_method === 'twitter') {
             promiseChain = promiseChain
               .then(() => this.getDataForAuthorPromise(endpoint.endpoint, user_id, endpoint.key, authorRelations))
-          }
-          else{
+          } else{
             promiseChain = promiseChain
               .then(() => this.getDataForAuthorRedisPromise(endpoint.endpoint, user_id, endpoint.key, authorRelations))
           }
@@ -258,8 +260,7 @@ module.exports = {
         if(twitter_scrape_method === 'twitter'){
           promiseChain = promiseChain
             .then(() => ptools.delay(61))
-        }
-        else{
+        } else{
           promiseChain = promiseChain
             .then(() => ptools.delay(0))
         }

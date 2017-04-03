@@ -18,9 +18,9 @@ function userNetworkGraphController($scope, EventNetwork) {
 
   function createGraph(eventId, callback) {
     var query = {
-      "filter":{
-        "where": {
-          "event_id":eventId
+      filter: {
+        where: {
+          event_id: eventId
         }
       }
     };
