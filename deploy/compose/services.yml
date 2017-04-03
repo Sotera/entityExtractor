@@ -77,6 +77,14 @@ services:
     ports:
       - "8705:8701"
 
+  follow_along:
+    image: sotera/go_watchman_follow_along:1
+    hostname: follow_along
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis:6379
+
   mitie:
     image: lukewendling/mitie-server
     hostname: mitie
