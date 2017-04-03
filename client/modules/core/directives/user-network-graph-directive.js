@@ -24,7 +24,7 @@ function userNetworkGraphController($scope, EventNetwork) {
         }
       }
     };
-    return EventNetwork.findOne(query)
+    return EventNetwork.find(query)
       .$promise
       .then(getGraphData)
       .then(graphClusterLinks)
@@ -39,9 +39,10 @@ function userNetworkGraphController($scope, EventNetwork) {
     return createGraph(eventId, callback);
   };
 
-  function getGraphData(eventNetwork){
-    if(!eventNetwork.data){
-      return null;
+  function getGraphData(eventNetworks){
+    var eventNetwork = eventNetworks[0];
+    if(!eventNetwork || !eventNetwork.data){
+      return;
     }
     var graph = eventNetwork.data;
     graph.nodes.forEach(function(node){
