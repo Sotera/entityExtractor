@@ -71,7 +71,7 @@ function userNetworkGraphController($scope, EventNetwork) {
       .attr('viewBox', [0, 0, minDim, minDim])
       .attr('preserveAspectRatio','xMinYMin');
 
-    svg.call(addTitle, width);
+    // svg.call(addTitle, width);
 
     var zoom = d3.zoom()
       .scaleExtent([-40, 40])

@@ -18,6 +18,8 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
     $scope.selectedEvent = evnt;
 
     visualizeEvent(evnt);
+
+    console.info(`${$window.location.origin}/api/charts/twitter/user-network?eventid=${evnt.id}`);
   };
 
   $scope.eventNamed = function(evnt) {
@@ -149,7 +151,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
           featurizer: dataType
         },
         fields: ['text', 'image_urls', 'hashtags', 'primary_image_url',
-          'author_id', 'post_url', 'author_image_url', 'quote_post_id',
+          'screen_name', 'post_url', 'author_image_url', 'quote_post_id',
           'broadcast_post_id', 'reply_to_post_id']
       }
     })
