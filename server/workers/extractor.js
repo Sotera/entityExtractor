@@ -1,5 +1,6 @@
-// def: find stored feed data and send to ner
 'use strict';
+
+// def: find stored feed data and send to ner
 
 const request = require('request'),
   entityExtractor = require('../../lib/entity-extractor'),

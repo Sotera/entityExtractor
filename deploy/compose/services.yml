@@ -3,6 +3,8 @@ services:
   data-container:
     image: lukewendling/data-container:3
     hostname: data-container
+    volumes:
+      - /downloads:/downloads
 
   mongo:
     image: mongo:3.2
