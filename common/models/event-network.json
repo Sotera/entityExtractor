@@ -1,0 +1,39 @@
+{
+  "name": "eventNetwork",
+  "description": "A network graph data model for showing relationships between posters in a social media event",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "indexes": {
+    "idx_event_id": {
+      "keys": {
+        "event_id": 1
+      }
+    }
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "Timestamp": {},
+    "DestroyAll": {}
+  },
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "required": true
+    },
+    "status": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    },
+    "data": {
+      "type": "object",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -99,5 +99,13 @@
   "annotation": {
     "dataSource": "db",
     "public": true
+  },
+  "chart": {
+    "dataSource": null,
+    "public": true
+  },
+  "eventNetwork": {
+    "dataSource": "db",
+    "public": true
   }
 }
