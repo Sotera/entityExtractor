@@ -9,7 +9,8 @@ const _ = require('lodash'),
   TwitterApi = require('twitter'),
   app = require('../../../server/server'),
   https = require('https'),
-  redis = require('../../../lib/redis');
+  redis = require('../../../lib/redis'),
+  debug = require('debug')('user-network');
 
 let twitter_consumer_key = process.env.TWITTER_CONSUMER_KEY,
   twitter_consumer_secret = process.env.TWITTER_CONSUMER_SECRET,
@@ -76,7 +77,7 @@ module.exports = {
     let authorKey = twitter_scrape_method === 'twitter'?'author_id':'screen_name';
     let authorIds = _(posts).map(authorKey)
       .flatten().compact().uniq().value();
-    console.log(authorIds);
+    debug(authorIds);
     return {authorIds: authorIds, eventId:eventid};
   },
   getHash: function(str){
@@ -124,7 +125,7 @@ module.exports = {
   getRelationshipData: function (authorRelations, network) {
     let me = this;
     return new Promise((resolve)=> {
-      console.log("getting relationship data");
+      debug("getting relationship data");
       authorRelations.network = {links:[], nodes:[]};
       authorRelations.authorIds.forEach(function(authorId){
         me.getRelationships(authorId, authorRelations);
@@ -137,23 +138,23 @@ module.exports = {
         return false;
       });
 
-      console.log("saving network");
+      debug("saving network");
       network.event_id = authorRelations.eventId;
       network.status = 1;
       network.data = authorRelations.network;
       network.save(function(err,obj){
         if(err){
-          console.log(err);
+          console.error(err);
           network = obj;
         }
       });
-      console.log("network saved");
+      debug("network saved");
       resolve(authorRelations);
     });
   },
   getDataForAuthorPromise: function (endpoint, user_id, key, authorRelations) {
     return new Promise((resolve)=> {
-      let params = {'user_id': user_id, 'count': max_twitter_count};
+      let params = {user_id: user_id, count: max_twitter_count};
       twitterClient.get(endpoint, params, function (error, cursor) {
         if (error || !cursor) {
           resolve(authorRelations);
@@ -166,7 +167,7 @@ module.exports = {
   },
   getDataForAuthorRedisPromise: function (endpoint, user_id, key, authorRelations) {
     return new Promise((resolve)=> {
-      let params = {'id': user_id, 'state':'new', 'max':max_twitter_count};
+      let params = {id: user_id, state:'new', max:max_twitter_count};
       redis.hmset(user_id, params)
       .then(() =>{
         redis.lpush('genie:followfinder', user_id)
@@ -180,15 +181,13 @@ module.exports = {
               authorRelations[key][user_id] = data.data.split(',');
               resolve(authorRelations);
             }).catch(err => {
-              console.log(err);
+              console.error(err);
               resolve(authorRelations);
             });
           },100);
         });
       })
-        .catch(err => console.error(key, err.stack));
-
-
+      .catch(err => console.error(key, err.stack));
     });
   },
   getDataForAuthors: function (endpoints, authorRelations, network) {
@@ -224,7 +223,7 @@ module.exports = {
         resolve(authorRelations);
       })
         .catch(function (reason) {
-          console.log(reason + " :continuing...");
+          debug(reason + " :continuing...");
           resolve(authorRelations);
         });
     });
@@ -253,8 +252,8 @@ module.exports = {
             .then(postIds=>this.getPosts(postIds))
             .then(posts=>this.getAuthorIds(posts, filter.eventid))
             .then(authorRelations=>this.getDataForAuthors([{endpoint:'friends/ids',key:'follows'},{endpoint:'followers/ids',key:'followers'}], authorRelations, network))
-            .catch(function (reason) {
-              console.log(reason);
+            .catch(function (err) {
+              console.error(err);
             });
           return;
         }
