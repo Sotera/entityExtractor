@@ -78,7 +78,7 @@ services:
       - "8705:8701"
 
   follow_along:
-    image: sotera/go_watchman_follow_along:2
+    image: sotera/go_watchman_follow_along:3
     hostname: follow_along
     depends_on:
       - redis
