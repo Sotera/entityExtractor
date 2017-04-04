@@ -27,7 +27,7 @@ function eventGraphController($scope, Event) {
     // use cached value if none given
     start = start || $scope.selectedDates[0];
     end = end || $scope.selectedDates[1];
-    $scope.selectedEvents = $scope.events.filter(evnt => {
+    $scope.selectedEvents = _($scope.events).filter(evnt => {
       if (evnt.end_time_ms >= start && evnt.end_time_ms <= end) {
         return true;
       } else if (evnt.start_time_ms >= start && evnt.start_time_ms <= end) {
@@ -35,7 +35,7 @@ function eventGraphController($scope, Event) {
       } else if (evnt.start_time_ms <= start && evnt.end_time_ms >= end) {
         return true;
       }
-    });
+    }).orderBy('start_time_ms').value();
   }
 
   //we probably want to bound this in some way
