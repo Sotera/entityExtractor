@@ -11,7 +11,8 @@ function imageGridDirective($window, $compile) {
   };
 
   function link(scope, elem, attrs) {
-    // image hover orientation: top-left or bottom-right
+    // image hover orientation: top-left, bottom-right, left.
+    // depends on hoverImage directive.
     var hoverDir = attrs.hoverDir || 'top-left';
 
     scope.$watchCollection('imageUrls',
@@ -24,6 +25,16 @@ function imageGridDirective($window, $compile) {
       }
     );
 
+    // set selected image
+    elem.click(function(el) {
+      var $el = $(el.target);
+      elem.find('img').removeClass('highlight');
+      $el.addClass('highlight');
+
+      scope.$apply(function() {
+        scope.selectedImageUrl = $el.attr('src');
+      });
+    });
   }
 
   function getContainer(elem) {

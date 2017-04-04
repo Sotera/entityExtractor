@@ -9,6 +9,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
   $scope.filterText = null;
   $scope.authorPosts = null;
   $scope.retweetCounts = [];
+  $scope.selectedImageUrl = null;
 
   $scope.eventSelected = function(evnt) {
     // already selected
@@ -233,7 +234,8 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
     let similarPostIds = _(clusters).map('similar_post_ids')
       .flatten().compact().uniq().value();
 
-    return sampleSocialMediaPosts('text', similarPostIds, 200)
+    // use 'image' posts to get primary_image_url attr for ui convenience.
+    return sampleSocialMediaPosts('image', similarPostIds, 200)
     .catch(console.error);
   }
 
