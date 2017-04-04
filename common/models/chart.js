@@ -1,5 +1,7 @@
 'use strict';
 
+const jobs = require('../../lib/jobs');
+
 module.exports = function(Chart) {
 
   let routes = {};
@@ -30,17 +32,26 @@ module.exports = function(Chart) {
     }
   );
 
-  Chart.chart = function(src, type, filter, cb){
+  Chart.chart = function(src, type, filter, cb) {
+    // check module exists
     let routeKey = `../../server/chart/${src}/${type}`,
       route = routes[routeKey];
     if (!route) {
       try {
         route = require(routeKey);
       } catch(err) {
-        return cb({error: 'route does not exist'});
+        return cb(err);
       }
       routes[routeKey] = route;
     }
-    route.execute(filter, cb);
+
+    jobs.create('chart data', {
+      eventId: filter.eventid,
+      src,
+      type,
+      ttl: 120
+    });
+
+    cb(null, {ok: 1})
   };
 };
