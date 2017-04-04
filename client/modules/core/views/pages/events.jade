@@ -69,7 +69,7 @@ h5 drag mouse over an area to select
                 td {{post.text}}
                 td: a(ng-href='{{post.post_url}}' target='_blank') visit
         #tc-user-network.tab-pane(role='tabpanel')
-          .chart-container(style='width:100%; height:600px')
+          .chart-container(style='width:100%; height:300px')
             user-network-graph
 .row(ng-show='selectedEvent')
   .col-md-4(style='height:400px; overflow-y:auto')
@@ -98,8 +98,9 @@ h5 drag mouse over an area to select
   .col-md-4(ng-show='authorPosts' style='height:400px; overflow-y:auto')
     table.table.table-striped
       caption
-        img(ng-src='{{authorPosts[0].author_image_url}}' style='border:0; width:48px; height:48px')
-        | All {{authorPosts[0].screen_name}} Posts ({{authorPosts.length}})
+        a(ng-click='loadAuthorUrl(authorPosts[0])')
+          img(ng-src='{{authorPosts[0].author_image_url}}' style='border:0; width:48px; height:48px')
+          | All {{authorPosts[0].screen_name}} Posts ({{authorPosts.length}})
       tbody
         tr(ng-repeat='post in authorPosts')
           td: a(ng-href='{{post.post_url}}' target='_blank') visit

@@ -37,7 +37,7 @@ function hoverImageDirective() {
         angular.extend(css, { top: evt.clientY - 400, left: evt.clientX - 180 });
       } else if(hoverDir==='bottom-right') { // bottom-right
         angular.extend(css, { top: evt.clientY + 50, left: evt.clientX + 50 });
-      }else if(hoverDir==='left'){
+      } else if(hoverDir==='left') {
         angular.extend(css, { top: evt.clientY-200, left: evt.clientX - 400 });
       }
       var $dupe = $(this.cloneNode(true))
