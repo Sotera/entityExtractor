@@ -3,6 +3,8 @@ services:
   data-container:
     image: lukewendling/data-container:3
     hostname: data-container
+    volumes:
+      - /downloads:/downloads
 
   mongo:
     image: mongo:3.2
@@ -75,6 +77,14 @@ services:
     ports:
       - "8705:8701"
 
+  follow_along:
+    image: sotera/go_watchman_follow_along:4
+    hostname: follow_along
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis:6379
+
   mitie:
     image: lukewendling/mitie-server
     hostname: mitie
@@ -97,7 +107,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/dr-manhattan:24
+    image: sotera/dr-manhattan:27
     hostname: dr-manhattan
     depends_on:
       - redis

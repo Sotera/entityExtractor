@@ -32,9 +32,9 @@
     },
     "type": {
       "type": "string",
+      "required": true,
       "description": "options: int, float, boolean, object, or string. use 'object' for array.",
-      "default": "string",
-      "required": true
+      "default": "string"
     }
   },
   "validations": [],

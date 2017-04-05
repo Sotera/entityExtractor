@@ -1,5 +1,6 @@
-// def: parse rss feeds and store data
 'use strict';
+
+// def: parse rss feeds and store data
 
 const app = require('../../server/server');
 const INTERVAL = 15; // seconds

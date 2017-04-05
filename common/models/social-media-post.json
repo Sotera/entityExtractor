@@ -1,5 +1,6 @@
 {
   "name": "socialMediaPost",
+  "description": "User data that seeds event detection",
   "base": "PersistedModel",
   "idInjection": true,
   "indexes": {
@@ -31,6 +32,16 @@
       "keys": {
         "primary_image_url": 1
       }
+    },
+    "idx_author_id": {
+      "keys": {
+        "author_id": 1
+      }
+    },
+    "idx_screen_name_id": {
+      "keys": {
+        "screen_name": 1
+      }
     }
   },
   "options": {
@@ -42,8 +53,8 @@
   "properties": {
     "system_created": {
       "type": "date",
-      "default": "$now",
-      "description": "internal system timestamp. not using Timestamp mixin, to clearly differentiate from original post time."
+      "description": "internal system timestamp. not using Timestamp mixin, to clearly differentiate from original post time.",
+      "default": "$now"
     },
     "post_id": {
       "type": "string",
@@ -74,6 +85,12 @@
     "image_urls": {
       "type": [
         "object"
+      ],
+      "default": []
+    },
+    "domains": {
+      "type": [
+        "string"
       ],
       "default": []
     },
@@ -114,6 +131,27 @@
         "string"
       ],
       "default": []
+    },
+    "author_id": {
+      "type": "string"
+    },
+    "screen_name": {
+      "type": "string"
+    },
+    "author_image_url": {
+      "type": "string"
+    },
+    "quote_post_id": {
+      "type": "string",
+      "description": "Similar to twitter quoted_status id."
+    },
+    "broadcast_post_id": {
+      "type": "string",
+      "description": "Similar to twitter retweeted_status id."
+    },
+    "reply_to_post_id": {
+      "type": "string",
+      "description": "Similar to twitter in_reply_to id."
     }
   },
   "validations": [],

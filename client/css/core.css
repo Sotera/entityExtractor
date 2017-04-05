@@ -18,9 +18,18 @@ td.highlight {
   border: 3px solid #07582B !important;
 }
 
+img.highlight {
+  border: 3px solid #07582B !important;
+}
+
 table caption {
   font-weight: bold;
   font-size: 1.2em;
+}
+
+span.underline {
+  border-bottom: 1px dotted #ccc;
+  text-decoration: none;
 }
 
 .navigator .circle {

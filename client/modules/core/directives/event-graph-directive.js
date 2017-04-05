@@ -11,19 +11,35 @@ function eventGraphDirective() {
 
   function link(scope, elem, attrs, ctrls) {
     // run ctrl function immediately
-    ctrls.create(null, angular.noop);
+    ctrls.create();
   }
 }
 
 function eventGraphController($scope, Event) {
-  this.create = create;
+  // models primarily controlled by directive
+  $scope.events = null;
+  $scope.selectedDates = [0,0]
+  $scope.selectedEvents = null;
 
-  function create(event, callback) {
-    createGraph(0,0);
+  this.create = createGraph;
+
+  $scope.getEventsInRange = function(start, end) {
+    // use cached value if none given
+    start = start || $scope.selectedDates[0];
+    end = end || $scope.selectedDates[1];
+    $scope.selectedEvents = _($scope.events).filter(evnt => {
+      if (evnt.end_time_ms >= start && evnt.end_time_ms <= end) {
+        return true;
+      } else if (evnt.start_time_ms >= start && evnt.start_time_ms <= end) {
+        return true;
+      } else if (evnt.start_time_ms <= start && evnt.end_time_ms >= end) {
+        return true;
+      }
+    }).orderBy('start_time_ms').value();
   }
 
   //we probably want to bound this in some way
-  function createGraph(start, end) {
+  function createGraph() {
     $scope.showSpinner = true;
     return Event.find()
       .$promise
@@ -34,7 +50,7 @@ function eventGraphController($scope, Event) {
   }
 
   function aggregateEvents(events){
-    if(!events){
+    if (!events.length) {
       return;
     }
 
@@ -114,12 +130,12 @@ function eventGraphController($scope, Event) {
       .call(tooltip);
 
     var xScale = d3.scaleTime()
-        .domain([minDate, maxDate])
-        .range([0, navWidth]);
+      .domain([minDate, maxDate])
+      .range([0, navWidth]);
 
     var yScale = d3.scaleLinear()
-        .domain([yMin, yMax])
-        .range([navHeight, 0]);
+      .domain([yMin, yMax])
+      .range([navHeight, 0]);
 
     var navArea = d3.area()
       .x(function(d) {
@@ -148,7 +164,7 @@ function eventGraphController($scope, Event) {
 
     var viewport = d3.brushX()
       .on('end', function () {
-        redrawChart();
+        $scope.$apply(() => selectEvents());
       });
 
     var xAxis = d3.axisBottom(xScale);
@@ -170,14 +186,17 @@ function eventGraphController($scope, Event) {
       .style('text-anchor', 'end')
       .text('linkages');
 
-    function redrawChart() {
-      if(!d3.event.selection){
-        $scope.dateRangeSelected(0,0);
+    function selectEvents() {
+      var selection = d3.event.selection;
+      if (!selection) {
         return;
       }
-      var start = xScale.invert( d3.event.selection[0] );
-      var end = xScale.invert( d3.event.selection[1] );
-      $scope.dateRangeSelected(start.getTime(), end.getTime());
+      var start = xScale.invert( selection[0] ).getTime();
+      var end = xScale.invert( selection[1] ).getTime();
+      // cache dates for later use.
+      // TODO: better way to get selected values from chart?
+      $scope.selectedDates = [start, end];
+      $scope.getEventsInRange(start, end);
     }
 
     navChart.append('g')
@@ -200,7 +219,7 @@ function eventGraphController($scope, Event) {
       })
       .attr('r', 4)
       .on('mouseover', tooltip.show)
-      .on('mouseout', tooltip.hide)
+      .on('mouseout', tooltip.hide);
   }
 
 }

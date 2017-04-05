@@ -7,18 +7,18 @@ from text_utils import remove_punctuation
 from sentiment_filters import SentimentFilter
 from operator import itemgetter as iget
 
+# big list: load it once
+stop_path = os.path.join(os.path.dirname(__file__), 'files', 'stopWordList.txt')
+stop_file = open(stop_path, 'r')
+stop_list = {w.strip('\n').strip('\r') for w in stop_file}
+
 class Louvaine:
-    def __init__(self, base_url, ent_url, geo_url):
+    def __init__(self, base_url, geo_url):
         self.graph = nx.Graph()
         self.nodes_detailed = {}
-        stop_file = open(os.path.dirname(__file__) + '/files/' + 'stopWordList.txt', 'r')
-        self.stop = set([])
-        self.ent_url = ent_url
         self.geo_url = geo_url
-        for line in stop_file:
-            self.stop.add(line.strip('\n').strip('\r'))
-
         self.sf = SentimentFilter()
+
         if base_url[-1] == '/':
             self.url = base_url
         else:
@@ -44,12 +44,13 @@ class Louvaine:
         websites = set([])
         r_o["campaigns"]["total"] += n_posts
 
+        #TODO: fix query type once S.L. is fixed
         query_params = [{
             "query_type":"inq",
             "property_name":"post_id",
             "query_value":l_sample
         }]
-        lp = Loopy(self.url + 'socialMediaPosts', query_params, page_size=500)
+        lp = Loopy(self.url + 'socialMediaPosts', query_params)
         page = lp.get_next_page()
         if page is None:
             return
@@ -77,7 +78,7 @@ class Louvaine:
                     print "error getting locations from geocoder...continuing.", e
                     traceback.print_exc()
 
-            tokens = [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in self.stop]
+            tokens = [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in stop_list]
             for word in tokens:
                 if word[0] == '#':
                     continue
@@ -166,7 +167,7 @@ class Louvaine:
 
         print "Communities found, getting event summary information"
         n_nodes = len(self.graph.nodes())
-        checkpoints = [.1, .25, .5, .75, .9, .95, .99999, 1.1]
+        checkpoints = [.1, .25, .5, .75, .9, .95, .99, 1.1]
         ind_checked = 0
         n_checked = 0
         for n in self.graph.nodes():
@@ -204,19 +205,18 @@ class Louvaine:
             #Expand Summary data (hashtags, keywords, images, urls, geo, domains)
             if clust['data_type'] == 'hashtag':
                 d1[com]['hashtags'][clust['term']] = len(clust['similar_post_ids'])
-                images |= self.get_img_sum(clust)
                 #Add full text analysis, many communities have no image/text nodes
                 self.get_text_sum(clust, d1[com])
             elif clust['data_type'] == 'domain':
                 # TODO: Verify we don't need hashtag or a get_domain_sum function
                 d1[com]['domains'][clust['term']] = len(clust['similar_post_ids'])
-                images |= self.get_img_sum(clust)
                 self.get_text_sum(clust, d1[com])
             elif clust['data_type'] == 'image':
-                images |= self.get_img_sum(clust)
+                pass
             elif clust['data_type'] == 'text':
-                images |= self.get_img_sum(clust)
                 self.get_text_sum(clust, d1[com])
+
+            images |= self.get_img_sum(clust)
 
             d1[com]['image_urls'] = list(set(d1[com]['image_urls']) |images)
 
@@ -236,7 +236,8 @@ class Louvaine:
 
             d1[com]['campaigns'] = l_camps
 
-            l_tags = map(lambda x: x[0], sorted([(k, v) for k, v in d1[com]['hashtags'].iteritems()], key=iget(1)))
+            # l_tags = map(lambda x: x[0], sorted([(k, v) for k, v in d1[com]['hashtags'].iteritems()], key=iget(1)))
+            l_tags = sorted(list(d1[com]['hashtags'].iteritems()), key=iget(1), reverse=1)
             d1[com]['hashtags'] = l_tags[:100] # slice
 
             # l_terms = map(lambda x: x[0], sorted([(k, v) for k, v in d1[com]['keywords'].iteritems()], key=lambda x: x[1]))
@@ -254,17 +255,5 @@ class Louvaine:
                 dt['label'] = k
                 temp.append(dt)
             d1[com]['location'] = temp
-
-        return d1
-
-    def save_communities(self):
-        d1 = self.get_communities()
-        for com in d1.values():
-            if len(com['cluster_ids']) < 3:
-                continue
-
-            print 'Posting communities to {}'.format(self.url)
-            Loopy.post(self.url + 'events/', json=com)
-            print 'Communities Saved!'
 
         return d1

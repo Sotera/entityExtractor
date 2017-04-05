@@ -1,5 +1,6 @@
 {
   "name": "event",
+  "description": "A detected event: The primary model in the system",
   "base": "PersistedModel",
   "idInjection": true,
   "indexes": {
@@ -37,15 +38,15 @@
       "required": true
     },
     "of_interest": {
-      "type": "Boolean",
-      "default":true
+      "type": "boolean",
+      "default": true
     },
     "name": {
       "type": "string"
     },
     "hashtags": {
       "type": [
-        "string"
+        "object"
       ]
     },
     "domains": {
@@ -78,6 +79,10 @@
       "type": [
         "object"
       ]
+    },
+    "sibling_id": {
+      "type": "string",
+      "description": "id of adjacent, similar event"
     }
   },
   "validations": [],

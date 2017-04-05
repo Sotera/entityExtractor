@@ -1,5 +1,6 @@
 {
   "name": "qcr",
+  "description": "Validate input from QCR: required?, data type",
   "plural": "qcr",
   "base": "Model",
   "idInjection": true,
@@ -31,12 +32,6 @@
       "type": "string",
       "default": ""
     },
-    "domains": {
-      "type": [
-        "string"
-      ],
-      "default": []
-    },
     "hashtags": {
       "type": [
         "string"
@@ -48,6 +43,18 @@
         "object"
       ],
       "default": []
+    },
+    "author_id": {
+      "type": "string",
+      "required": false
+    },
+    "screen_name": {
+      "type": "string",
+      "required": false
+    },
+    "author_image_url": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],

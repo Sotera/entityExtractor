@@ -1,16 +1,12 @@
 {
-  "name": "geoCache",
-  "description": "Cache of geocoded results",
-  "plural": "geoCache",
+  "name": "eventNetwork",
+  "description": "A network graph data model for showing relationships between posters in a social media event",
   "base": "PersistedModel",
   "idInjection": true,
   "indexes": {
-    "idx_uniq": {
+    "idx_event_id": {
       "keys": {
-        "place": 1
-      },
-      "options": {
-        "unique": true
+        "event_id": 1
       }
     }
   },
@@ -22,21 +18,18 @@
     "DestroyAll": {}
   },
   "properties": {
-    "place": {
+    "event_id": {
       "type": "string",
       "required": true
     },
-    "res": {
-      "type": [
-        "object"
-      ],
+    "status": {
+      "type": "number",
       "required": true,
-      "description": "geocoded result",
-      "default": []
+      "default": 0
     },
-    "updated": {
-      "type": "date",
-      "default": "$now"
+    "data": {
+      "type": "object",
+      "required": true
     }
   },
   "validations": [],

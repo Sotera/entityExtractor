@@ -1,13 +1,13 @@
 {
-  "name": "geoCache",
-  "description": "Cache of geocoded results",
-  "plural": "geoCache",
+  "name": "annotation",
+  "description": "Name + other attrs given to event-campaign relation",
   "base": "PersistedModel",
   "idInjection": true,
   "indexes": {
     "idx_uniq": {
       "keys": {
-        "place": 1
+        "campaign": 1,
+        "event": 1
       },
       "options": {
         "unique": true
@@ -22,21 +22,27 @@
     "DestroyAll": {}
   },
   "properties": {
-    "place": {
+    "campaign": {
       "type": "string",
       "required": true
     },
-    "res": {
+    "event": {
+      "type": "string",
+      "required": true
+    },
+    "features": {
       "type": [
         "object"
-      ],
-      "required": true,
-      "description": "geocoded result",
-      "default": []
+      ]
     },
-    "updated": {
-      "type": "date",
-      "default": "$now"
+    "type": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "relevant": {
+      "type": "boolean"
     }
   },
   "validations": [],

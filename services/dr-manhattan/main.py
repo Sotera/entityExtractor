@@ -1,9 +1,9 @@
 import sys, os, json
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
+import event_matcher as matcher
 from loopy import Loopy
 from louvaine import Louvaine
-
 
 def set_err(job, msg):
     job['state'] = 'error'
@@ -24,6 +24,7 @@ def process_message(key,job):
     ts_end = job['end_time']
 
     if api_root[-1] != '/': api_root += '/'
+    job['api_root'] = api_root
 
     query_params = [{
         "query_type": "where",
@@ -31,7 +32,6 @@ def process_message(key,job):
         "query_value": ts_end
     }]
     com = Louvaine(api_root,
-       '{}extract/entities'.format(api_root),
        '{}geocoder/forward-geo'.format(api_root))
 
     nodes_to_lookup = set()
@@ -93,7 +93,9 @@ def process_message(key,job):
     del edges_to_remove
 
     print "Finding communities from {} nodes and {} edges.".format(len(com.graph.nodes()), len(com.graph.edges()))
-    l_com = com.save_communities()
+    l_com = save_communities(com, job)
+    job['kafka_url'] = "print"
+    job['kafka_topic'] = "bar"
     if 'kafka_url' in job and 'kafka_topic' in job:
         kafka_url = job['kafka_url']
         kafka_topic = job['kafka_topic']
@@ -103,11 +105,21 @@ def process_message(key,job):
         print "kafka_topic"
         print kafka_topic
         from event_to_kafka import stream_events
-        stream_events(l_com.values(), kafka_url, kafka_topic)
+        stream_events(l_com.values(), job)
 
     job['data'] = json.dumps({})  # no need to save anything to job
     job['state'] = 'processed'
 
+
+def save_communities(com, job):
+    d1 = com.get_communities()
+    for com in d1.values():
+        if len(com['cluster_ids']) < 3:
+            continue
+
+        matcher.match_and_create_event(com, job)
+
+    return d1
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
@@ -115,7 +127,7 @@ if __name__ == '__main__':
                             queues=['genie:eventfinder'])
     dispatcher.start()
 
-    # job = {u'api_root': u'http://172.17.0.1:3000/api', u'state': u'new', u'start_time': u'1481125254000', u'end_time': u'1481125373999'}
-    # job = {u'start_time': u'1481124894000', u'state': u'new', u'end_time': u'1481125013999', u'api_root': u'http://172.17.0.1:3000/api',
+    #job = {'start_time': '1490209183577', 'state': 'new', 'end_time': '1490209483576', 'api_root': 'http://172.17.0.1:3003/api'}
+    # job = {'start_time': '1481124894000', 'state': 'new', 'end_time': '1481125013999', 'api_root': 'http://172.17.0.1:3000/api',
     #     'kafka_url': 'kafka', 'kafka_topic': 'test:1:1'}
-    # process_message(1, job)
+    #process_message(1, job)

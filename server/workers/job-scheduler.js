@@ -26,7 +26,9 @@ const { SocialMediaPost, JobSet } = app.models,
   +process.env.JOBSET_QUERYSPAN_MIN :
   30,
   MIN_POSTS = 1000,
-  RETRY_MULTIPLIER = 3,
+  // expand the time we wait for min posts.
+  // good for slow producers.
+  RETRY_MULTIPLIER = +process.env.RETRY_MULTIPLIER || 1,
   QUERY_SPAN = 1000 * 60 * JOBSET_QUERYSPAN_MIN, // min
   LOOP_INTERVAL = 1000 * 60, // sec
   MAX_RETRIES = QUERY_SPAN * RETRY_MULTIPLIER / LOOP_INTERVAL;
@@ -53,10 +55,11 @@ function schedule(startTime) {
       .then(jobSet => {
         debug('current job set:', jobSet, new Date());
         if (_.includes(['skip', 'done'], jobSet.state))
-        // reschedule for immediate run
+          // reschedule for immediate run
           reschedule(endTime + 1, 0);
         else // new, running
-          reschedule(startTime);
+          // check more frequently
+          reschedule(startTime, 1000 * 10 /*sec*/);
       })
       .catch(console.error);
   }
