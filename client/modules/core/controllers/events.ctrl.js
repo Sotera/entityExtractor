@@ -241,10 +241,11 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
 
   function createPostsCharts(posts) {
     let counts = posts.reduce((acc, curr) => {
-      if (curr.quote_post_id)
-        acc['quote']++
-      else if (curr.broadcast_post_id)
+      // broadcast wins if also a quote
+      if (curr.broadcast_post_id)
         acc['broadcast']++
+      else if (curr.quote_post_id)
+        acc['quote']++
       else if (curr.reply_to_post_id)
         acc['reply']++
       else
