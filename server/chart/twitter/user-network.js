@@ -167,30 +167,31 @@ module.exports = {
   },
 
   getDataForAuthorRedisPromise(endpoint, user_id, key, authorRelations) {
-    return new Promise((resolve)=> {
+    return new Promise((resolve, reject) => {
       let params = {id: user_id, state:'new', max: max_twitter_count};
       redis.hmset(user_id, params)
-      .then(() =>{
+      .then(() => {
         redis.lpush('genie:followfinder', user_id)
-        .then(()=>{
-          let interval = setInterval(function(){
+        .then(() => {
+          let interval = setInterval(() => {
             redis.hgetall(user_id)
-            .then(data=>{
-              if(!data) return;
-              if(data.state === 'new') return;
+            .then(job => {
+              if(_.isEmpty(job)) {
+                clearInterval(interval);
+                return;
+              }
+              if(job.state === 'new') return;
               clearInterval(interval);
-              if(data.state === 'error') return;
-              authorRelations[key][user_id] = data.data.split(',');
+              if(job.state === 'error') return;
+              authorRelations[key][user_id] = job.data.split(',');
               resolve(authorRelations);
             })
-            .catch(err => {
-              console.error(err);
-              resolve(authorRelations);
-            });
-          },100);
-        });
+            .catch(reject);
+          }, 100);
+        })
+        .catch(reject);;
       })
-      .catch(err => console.error(key, err.stack));
+      .catch(reject);
     });
   },
 
@@ -201,7 +202,7 @@ module.exports = {
       authorRelations[endpoint.key] = {};
     }
 
-    return new Promise((resolve, reject)=> {
+    return new Promise((resolve, reject) => {
       let promiseChain = Promise.resolve();
       for (let user_id of authorRelations.authorIds) {
         for(let endpoint of endpoints){
@@ -224,13 +225,8 @@ module.exports = {
         }
       }
       promiseChain
-        .then(() => {
-          resolve(authorRelations);
-        })
-        .catch(reason => {
-          debug(reason + " :continuing...");
-          resolve(authorRelations);
-        });
+        .then(() => resolve(authorRelations))
+        .catch(reject);
     });
   },
 
