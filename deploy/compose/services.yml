@@ -107,7 +107,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/dr-manhattan:27
+    image: sotera/dr-manhattan:69.pmi
     hostname: dr-manhattan
     depends_on:
       - redis
@@ -116,7 +116,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/rorschach:8
+    image: sotera/rorschach:69.pmi
     hostname: text-featurizer
     depends_on:
       - redis
@@ -125,7 +125,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/comedian:20
+    image: sotera/comedian:69.pmi
     hostname: hashtag-clusterer
     environment:
       - TRUNCATE_POSTS=1
@@ -136,7 +136,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/ozymandias:b96
+    image: sotera/ozymandias:69.pmi
     hostname: cluster-linker
     depends_on:
       - redis
@@ -145,7 +145,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/feature-sim:10
+    image: sotera/feature-sim:69.pmi
     hostname: feature-sim
     environment:
       - TRUNCATE_POSTS=1
