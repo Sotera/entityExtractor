@@ -65,12 +65,11 @@ module.exports = {
   getEventNetwork(eventId) {
     const EventNetwork = app.models.EventNetwork;
 
-    return EventNetwork.findOne({
-      where: {
-        event_id: eventId
-      },
-      fields: ['data']
-    });
+    return EventNetwork.findOrCreate(
+      { where: { event_id: eventId } },
+      { event_id: eventId }
+    )
+    .then(networks => networks[0]) // findOrCreate() returns array
   },
 
   getAuthorIds(posts, eventId) {
@@ -100,14 +99,12 @@ module.exports = {
     let followers = authorRelations['followers'][authorId];
 
     authorRelations.authorIds.forEach(function(otherId){
-      if(authorId == otherId){ return;}
+      if(authorId == otherId) return;
       if(_.includes(follows,otherId)){relatedTo.push(otherId);}
       if(_.includes(followers,otherId)){relatedTo.push(otherId);}
     });
 
-    if(relatedTo.length == 0){
-      return;
-    }
+    if(relatedTo.length == 0) return;
 
     relatedTo = _(relatedTo).uniq().value();
     let authorHash = me.getHash(authorId);
@@ -163,7 +160,7 @@ module.exports = {
           resolve(authorRelations);
           return;
         }
-        authorRelations[key][user_id] =cursor.ids.map(String);
+        authorRelations[key][user_id] = cursor.ids.map(String);
         resolve(authorRelations);
       });
     });
@@ -221,13 +218,13 @@ module.exports = {
         if(twitter_scrape_method === 'twitter'){
           promiseChain = promiseChain
             .then(() => ptools.delay(61))
-        } else{
+        } else {
           promiseChain = promiseChain
             .then(() => ptools.delay(0))
         }
       }
       promiseChain
-        .then(()=> {
+        .then(() => {
           resolve(authorRelations);
         })
         .catch(reason => {
@@ -243,27 +240,24 @@ module.exports = {
       return done(new Error('twitter client not ready'));
     }
 
-    //check to see if we have already built this network
+    let network; // for later in the chain
     this.getEventNetwork(options.eventId)
-      .then(network=>{
-        if(!network || network.status <= 0) {
-          if(!network) {
-            const EventNetwork = app.models.EventNetwork;
-            EventNetwork.create({event_id: options.eventId, status: 0, data: {}}, function (err,obj){
-              network = obj;
-            });
-          }
-          //we haven't, bummer, lets get to work :(
-          this.getEvent(options.eventId)
-            .then(event=>this.getClusters(event.cluster_ids))
-            .then(clusters=>this.getPostIds(clusters))
-            .then(postIds=>this.getPosts(postIds))
-            .then(posts=>this.getAuthorIds(posts, options.eventId))
-            .then(authorRelations=>this.getDataForAuthors([{endpoint:'friends/ids',key:'follows'},{endpoint:'followers/ids',key:'followers'}], authorRelations, network))
-            .then(() => done())
-            .catch(done);
-        }
-      });
+      .then(n => {
+        // if running/complete, exit.
+        if (n.status) throw new Error(`${n.id} status ${n.status}`);
+        network = n
+      })
+      .then(() => this.getEvent(options.eventId))
+      .then(event => this.getClusters(event.cluster_ids))
+      .then(clusters => this.getPostIds(clusters))
+      .then(postIds => this.getPosts(postIds))
+      .then(posts => this.getAuthorIds(posts, options.eventId))
+      .then(authorRelations => this.getDataForAuthors([
+          { endpoint:'friends/ids', key:'follows' },
+          { endpoint:'followers/ids', key:'followers' }
+        ], authorRelations, network))
+      .then(() => done())
+      .catch(done);
   }
 };
 
