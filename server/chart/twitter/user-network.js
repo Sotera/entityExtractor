@@ -178,12 +178,18 @@ module.exports = {
             .then(job => {
               if(_.isEmpty(job)) {
                 clearInterval(interval);
+                redis.del(user_id);
                 return;
               }
               if(job.state === 'new') return;
               clearInterval(interval);
-              if(job.state === 'error') return;
+              if(job.state === 'error') {
+                redis.del(user_id);
+                reject(new Error(job.error));
+                return;
+              };
               authorRelations[key][user_id] = job.data.split(',');
+              redis.del(user_id);
               resolve(authorRelations);
             })
             .catch(reject);
