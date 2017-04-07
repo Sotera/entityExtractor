@@ -7,6 +7,9 @@
     "idx_event_id": {
       "keys": {
         "event_id": 1
+      },
+      "options": {
+        "unique": true
       }
     }
   },
@@ -24,12 +27,13 @@
     },
     "status": {
       "type": "number",
+      "description": "0 = new, 1 = running/done",
       "required": true,
       "default": 0
     },
     "data": {
       "type": "object",
-      "required": true
+      "default": {}
     }
   },
   "validations": [],

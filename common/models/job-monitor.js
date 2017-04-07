@@ -15,6 +15,7 @@ module.exports = function(JobMonitor) {
 
       jobs.create('job monitor', {
         jobMonitorId: jobMonitor.id,
+        ttl: 45,
         priority
       });
     }

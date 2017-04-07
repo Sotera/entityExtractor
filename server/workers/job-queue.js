@@ -23,7 +23,8 @@ if (require.main === module)
 function start() {
   // boot job processor with job handlers
   jobs.boot(new Map([
-    ['job monitor', startMonitor]
+    ['job monitor', startMonitor],
+    ['chart data', createChartData]
   ]));
 
   // mount kue UI
@@ -31,6 +32,12 @@ function start() {
 
   // let's run linkermonitor creation in this worker too
   createLinkerMonitor.start(app);
+}
+
+// options: src, type, per-chart variables
+function createChartData(options, done) {
+  let handler = require(`../chart/${options.src}/${options.type}`)
+  handler.execute(options, done);
 }
 
 // options: jobMonitorId
