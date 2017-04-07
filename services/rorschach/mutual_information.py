@@ -41,7 +41,7 @@ class MutualInformation:
             if page is None:
                 break
             for doc in page:
-                points.append(len(doc['similar_post_ids']))
+                points.append(doc['stats']['pmi'])
         if len(points)==0:
             return (-3.0, 0.5)
         if len(points)<3:
