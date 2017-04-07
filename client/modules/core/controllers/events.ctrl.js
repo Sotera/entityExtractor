@@ -57,8 +57,6 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
   };
 
   $scope.loadAuthorUrl = function(post) {
-    $scope.showSpinner = true;
-
     if (post.screen_name)
       $window.open(authorProfileURLFilter(post));
 
@@ -66,6 +64,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
   };
 
   $scope.loadAuthorPosts = function(screen_name) {
+    $scope.showSpinner = true;
     return SocialMediaPost.find({
       filter: {
         where: {
@@ -262,6 +261,14 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
     ];
     $scope.postTypeConf = [
       {path: 'header.title.text', value: 'post types'}
+    ];
+
+    let refs = _(posts)
+      .map(p => p.broadcast_post_id || p.quote_post_id)
+      .compact().uniq().value();
+
+    $scope.moreCounts = [
+      {label: 'referred to', value: refs.length}
     ];
   }
 }
