@@ -89,7 +89,7 @@ h5 drag mouse over an area to select
             caption Retweeted links
             tbody
               tr(ng-repeat='c in broadcastCounts')
-                td: a(ng-href='https://twitter.com/statuses/{{c.label}}' target='_blank') {{c.label}}
+                td: a(ng-href='{{c.label | statusUrl}}' target='_blank') {{c.label}}
                 td {{c.value}}
         #tc-user-network.tab-pane(role='tabpanel')
           .chart-container(style='width:100%; height:300px')
