@@ -289,6 +289,6 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
         acc.push({label: curr, value: broadcastCountByKey[curr]});
         return acc;
       }, []);
-    $scope.broadcastCounts = _.orderBy($scope.broadcastCounts, 'value', 'desc').slice(0,5);
+    $scope.broadcastCounts = _.orderBy($scope.broadcastCounts, 'value', 'desc').slice(0,10);
   }
 }
