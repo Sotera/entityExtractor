@@ -51,6 +51,7 @@ h5 drag mouse over an area to select
       ul.nav.nav-tabs(role='tablist')
         li.active(role='presentation'): a(data-target='#tc-post-types' role='tab' data-toggle='tab') Post types
         li(role='presentation'): a(data-target='#tc-posts' role='tab' data-toggle='tab') Posts
+        li(role='presentation'): a(data-target='#tc-refs' role='tab' data-toggle='tab') Most referenced
         li(role='presentation'): a(data-target='#tc-user-network' role='tab' data-toggle='tab') User network
 
       .tab-content
@@ -68,7 +69,7 @@ h5 drag mouse over an area to select
             table.table.table-condensed(style='margin-top:-8px')
               caption aggregates
               tbody
-                tr(ng-repeat='c in moreCounts')
+                tr(ng-repeat='c in aggCounts')
                   td {{c.label}}
                   td {{c.value}}
         #tc-posts.tab-pane(role='tabpanel')
@@ -83,6 +84,13 @@ h5 drag mouse over an area to select
                     img(ng-src='{{post.author_image_url}}' style='border:0; width:48px; height:48px')
                 td(ng-class='{highlight: (selectedImageUrl && selectedImageUrl === post.primary_image_url)}') {{post.text}}
                 td: a(ng-href='{{post.post_url}}' target='_blank') visit
+        #tc-refs.tab-pane(role='tabpanel')
+          table.table.table-condensed(style='margin-top:-8px')
+            caption Retweeted links
+            tbody
+              tr(ng-repeat='c in broadcastCounts')
+                td: a(ng-href='{{c.label | statusUrl}}' target='_blank') {{c.label}}
+                td {{c.value}}
         #tc-user-network.tab-pane(role='tabpanel')
           .chart-container(style='width:100%; height:300px')
             user-network-graph

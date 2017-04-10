@@ -263,12 +263,32 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
       {path: 'header.title.text', value: 'post types'}
     ];
 
+    // broadcast + quote
     let refs = _(posts)
       .map(p => p.broadcast_post_id || p.quote_post_id)
       .compact().uniq().value();
 
-    $scope.moreCounts = [
+    $scope.aggCounts = [
       {label: 'referred to', value: refs.length}
     ];
+
+    // just broadcast
+    let broadcasts = _(posts)
+      .map('broadcast_post_id')
+      .compact().value();
+
+    // first create a map of counts
+    let broadcastCountByKey = broadcasts.reduce((acc, curr) => {
+      acc[curr] ? acc[curr]++ : acc[curr] = 1;
+      return acc;
+    }, {});
+
+    // then reduce to a ui-friendly, sorted list
+    $scope.broadcastCounts = Object.keys(broadcastCountByKey)
+      .reduce((acc, curr) => {
+        acc.push({label: curr, value: broadcastCountByKey[curr]});
+        return acc;
+      }, []);
+    $scope.broadcastCounts = _.orderBy($scope.broadcastCounts, 'value', 'desc').slice(0,10);
   }
 }
