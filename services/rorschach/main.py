@@ -118,4 +118,7 @@ def truncate_posts(deletable_ids, loopy):
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
         queues=['genie:feature_txt', 'genie:clust_txt'])
-    dispatcher.start()
+    #dispatcher.start()
+
+    job = {u'lang': u'en', u'job_id': u'58e67e7a246ad2001674f8f1', u'data_type': u'text', u'end_time_ms': u'1491500666818', u'similarity_threshold': u'0.65', u'start_time_ms': u'1491500366819', u'query_url': u'http://172.17.0.1:3003/api/socialmediaposts/', u'min_post': u'10', u'state': u'new', u'result_url': u'http://172.17.0.1:3003/api/postsclusters/'}
+    process_message(1, job)

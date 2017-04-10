@@ -26,7 +26,7 @@ class MutualInformation:
         {
             "query_type":"where",
             "property_name":"data_type",
-            "query_value":"hashtag"
+            "query_value":"text"
         },
         {
             "query_type":"between",
