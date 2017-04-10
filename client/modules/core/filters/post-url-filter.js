@@ -7,7 +7,7 @@ angular.module('com.module.core')
   // TODO: other media sources than twitter
   return post => {
     if (!post.screen_name) return;
-    return `https:twitter.com/${post.screen_name}`;
+    return `https://twitter.com/${post.screen_name}`;
   };
 })
 
@@ -15,6 +15,6 @@ angular.module('com.module.core')
   // TODO: other media sources than twitter
   return id => {
     if (!id) return;
-    return `https:twitter.com/statuses/${id}`;
+    return `https://twitter.com/statuses/${id}`;
   };
 });
