@@ -36,7 +36,7 @@ function start() {
 
 // options: src, type, per-chart variables
 function createChartData(options, done) {
-  let handler = require(`../chart/${options.src}/${options.type}`)
+  let handler = require(`../chart/${options.src}/${options.type}`);
   handler.execute(options, done);
 }
 

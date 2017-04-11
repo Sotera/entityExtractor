@@ -36,6 +36,15 @@ h5 drag mouse over an area to select
             .row
               .cell
                 | {{evt.hashtags | sampleWeightedPairs}}
+              .cell
+                span.glyphicon.glyphicon-picture(title="This event has images" ng-show="evt.image_urls | isDefined")
+              .cell
+                span.glyphicon.glyphicon-map-marker(title="This event has locations" ng-show="evt.location | isDefined")
+              .cell
+                span(style="font-weight:bold" title="This event has hashtags" ng-show="evt.hashtags | isDefined") #
+              .cell
+                span.glyphicon.glyphicon-user(title="This event has a user network" ng-show="evt.hasUserNetwork")
+
   .col-md-4(style='height:550px; overflow-y:hidden')
     event-map(ng-show='mapPoints' points='mapPoints')
       iframe#map-frame(src='http://54.86.248.86:3005/index.html' style='width:100%; height:600px' scrolling='no' frameborder='0')

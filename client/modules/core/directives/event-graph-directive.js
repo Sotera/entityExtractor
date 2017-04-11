@@ -18,7 +18,7 @@ function eventGraphDirective() {
 function eventGraphController($scope, Event) {
   // models primarily controlled by directive
   $scope.events = null;
-  $scope.selectedDates = [0,0]
+  $scope.selectedDates = [0,0];
   $scope.selectedEvents = null;
 
   this.create = createGraph;
@@ -28,15 +28,14 @@ function eventGraphController($scope, Event) {
     start = start || $scope.selectedDates[0];
     end = end || $scope.selectedDates[1];
     $scope.selectedEvents = _($scope.events).filter(evnt => {
-      if (evnt.end_time_ms >= start && evnt.end_time_ms <= end) {
-        return true;
-      } else if (evnt.start_time_ms >= start && evnt.start_time_ms <= end) {
-        return true;
-      } else if (evnt.start_time_ms <= start && evnt.end_time_ms >= end) {
+      if ((evnt.end_time_ms >= start && evnt.end_time_ms <= end) ||
+        (evnt.start_time_ms >= start && evnt.start_time_ms <= end)||
+        (evnt.start_time_ms <= start && evnt.end_time_ms >= end)) {
+        $scope.hasUserNetwork(evnt);
         return true;
       }
     }).orderBy('start_time_ms').value();
-  }
+  };
 
   //we probably want to bound this in some way
   function createGraph() {

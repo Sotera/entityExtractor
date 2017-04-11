@@ -32,6 +32,21 @@ function userNetworkGraphController($scope, EventNetwork) {
       .catch(console.error);
   }
 
+  $scope.hasUserNetwork = function(event, callback) {
+    var query = {
+        where: {
+          event_id: event.id
+      }
+    };
+    return EventNetwork.count(query)
+      .$promise
+      .then(res => {
+        event.hasUserNetwork = res.count>0;
+      })
+      .then(callback || angular.noop)
+      .catch(console.error);
+  };
+
   $scope.loadUserNetworkGraph = function(eventId, callback) {
     if ($scope.networkGraphSvg)
       $scope.networkGraphSvg.remove();
