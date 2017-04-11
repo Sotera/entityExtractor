@@ -24,6 +24,16 @@ h5 drag mouse over an area to select
           td(ng-click='eventSelected(evt)' ng-class='{highlight: (selectedEvent && selectedEvent.id === evt.id)}')
             .row
               .cell
+                span(style="font-weight:bold" title="This event has hashtags" ng-show="evt.hashtags | isDefined") #
+                span(style="font-weight:bold") {{evt.hashtags | sampleWeightedPairs}}
+              .cell
+                span.glyphicon.glyphicon-picture(title="This event has images" ng-show="evt.image_urls | isDefined")
+              .cell
+                span.glyphicon.glyphicon-map-marker(title="This event has locations" ng-show="evt.location | isDefined")
+              .cell
+                span.glyphicon.glyphicon-user(title="This event has a user network" ng-show="evt.hasUserNetwork")
+            .row
+              .cell
                 p(style='display:inline') {{evt.start_time_ms | date:'short'}} - {{evt.end_time_ms | date:'short'}}
                 input.form-control(style='display:inline;width:100px;margin-left:16px' ng-model='evt.name' ng-model-options='{ debounce: 1000 }' ng-change='eventNamed(evt)')
             .row
@@ -33,17 +43,7 @@ h5 drag mouse over an area to select
                 label.switch
                   input(type='checkbox' ng-model='evt.of_interest' ng-change='ofInterestChanged(evt)')
                   .slider.round
-            .row
-              .cell
-                | {{evt.hashtags | sampleWeightedPairs}}
-              .cell
-                span.glyphicon.glyphicon-picture(title="This event has images" ng-show="evt.image_urls | isDefined")
-              .cell
-                span.glyphicon.glyphicon-map-marker(title="This event has locations" ng-show="evt.location | isDefined")
-              .cell
-                span(style="font-weight:bold" title="This event has hashtags" ng-show="evt.hashtags | isDefined") #
-              .cell
-                span.glyphicon.glyphicon-user(title="This event has a user network" ng-show="evt.hasUserNetwork")
+
 
   .col-md-4(style='height:550px; overflow-y:hidden')
     event-map(ng-show='mapPoints' points='mapPoints')
