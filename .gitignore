@@ -11,3 +11,5 @@ tmp
 .swp
 slc-conf.json
 docker-compose.override.yml
+.ipynb_checkpoints
+*.ipynb
