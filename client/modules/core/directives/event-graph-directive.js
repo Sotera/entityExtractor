@@ -15,10 +15,10 @@ function eventGraphDirective() {
   }
 }
 
-function eventGraphController($scope, Event) {
+function eventGraphController($scope, Event, EventNetwork) {
   // models primarily controlled by directive
   $scope.events = null;
-  $scope.selectedDates = [0,0]
+  $scope.selectedDates = [0,0];
   $scope.selectedEvents = null;
 
   this.create = createGraph;
@@ -28,14 +28,38 @@ function eventGraphController($scope, Event) {
     start = start || $scope.selectedDates[0];
     end = end || $scope.selectedDates[1];
     $scope.selectedEvents = _($scope.events).filter(evnt => {
-      if (evnt.end_time_ms >= start && evnt.end_time_ms <= end) {
-        return true;
-      } else if (evnt.start_time_ms >= start && evnt.start_time_ms <= end) {
-        return true;
-      } else if (evnt.start_time_ms <= start && evnt.end_time_ms >= end) {
+      if ((evnt.end_time_ms >= start && evnt.end_time_ms <= end) ||
+        (evnt.start_time_ms >= start && evnt.start_time_ms <= end) ||
+        (evnt.start_time_ms <= start && evnt.end_time_ms >= end)) {
         return true;
       }
     }).orderBy('start_time_ms').value();
+
+    decorateSelectedEvents();
+  };
+
+  // issue 'side' queries, to decorate events with additional attributes.
+  // an alternative to creating many one-off event-related network calls.
+  function decorateSelectedEvents(callback) {
+    $scope.showSpinner = true
+    let eventIds = _.map($scope.selectedEvents, 'id');
+    EventNetwork.find({
+      filter: {
+        where: {
+          event_id: { inq: eventIds }
+        },
+        fields: ['event_id']
+      }
+    })
+    .$promise
+    .then(networks => {
+      networks.forEach(n => {
+        // match with selected event
+        _.find($scope.selectedEvents, e => e.id == n.event_id).has_user_network = 1;
+      })
+    })
+    .then(() => $scope.showSpinner = false)
+    .catch(console.error)
   }
 
   //we probably want to bound this in some way
