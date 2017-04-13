@@ -26,26 +26,11 @@ function userNetworkGraphController($scope, EventNetwork) {
     };
     return EventNetwork.find(query)
       .$promise
-      .then(getGraphData)
-      .then(graphClusterLinks)
+      .then(compileData)
+      .then(createNetworkGraph)
       .then(callback || angular.noop)
       .catch(console.error);
   }
-
-  $scope.hasUserNetwork = function(event, callback) {
-    var query = {
-        where: {
-          event_id: event.id
-      }
-    };
-    return EventNetwork.count(query)
-      .$promise
-      .then(res => {
-        event.hasUserNetwork = res.count>0;
-      })
-      .then(callback || angular.noop)
-      .catch(console.error);
-  };
 
   $scope.loadUserNetworkGraph = function(eventId, callback) {
     if ($scope.networkGraphSvg)
@@ -54,23 +39,23 @@ function userNetworkGraphController($scope, EventNetwork) {
     return createGraph(eventId, callback);
   };
 
-  function getGraphData(eventNetworks){
+  function compileData(eventNetworks) {
     var eventNetwork = eventNetworks[0];
-    if(!eventNetwork || !eventNetwork.data){
+    if (!eventNetwork || _.isEmpty(eventNetwork.data)) {
       return;
     }
-    var graph = eventNetwork.data;
-    graph.nodes.forEach(function(node){
+    var d = eventNetwork.data;
+    d.nodes.forEach(function(node) {
       node.group = 'user';
     });
-    graph.links.forEach(function(link){
+    d.links.forEach(function(link) {
       link.value = 1;
     });
-    return graph;
+    return d;
   }
 
-  function graphClusterLinks(graphData) {
-    if(!graphData){
+  function createNetworkGraph(graphData) {
+    if (!graphData) {
       return;
     }
 
@@ -86,8 +71,6 @@ function userNetworkGraphController($scope, EventNetwork) {
       .attr('height', '100%')
       .attr('viewBox', [0, 0, minDim, minDim])
       .attr('preserveAspectRatio','xMinYMin');
-
-    // svg.call(addTitle, width);
 
     var zoom = d3.zoom()
       .scaleExtent([-40, 40])
@@ -203,11 +186,3 @@ function userNetworkGraphController($scope, EventNetwork) {
   }
 }
 
-function addTitle(selection, width) {
-  selection.append('text')
-    .attr('x', (width / 2))
-    .attr('y', 20)
-    .attr('text-anchor', 'middle')
-    .style('font-size', '20px')
-    .text('Post Clusters');
-}
