@@ -52,12 +52,14 @@ def process_message(key, job):
             linker.add_cluster(doc)
 
     print 'FINISHED LINKING CLUSTERS'
+    print 'SENDING LINKS'
     for link in linker.get_links():
         loopy.post_result(result_url, link)
 
     job['data'] = json.dumps({})  # no need to save anything to job
     job['state'] = 'processed'
-
+    print 'FINISHED SENDING LINKS'
+    print 'LINKING COMPLETE'
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
                             process_func=process_message,

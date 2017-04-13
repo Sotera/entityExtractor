@@ -12,8 +12,8 @@ module.exports = function(app, cb) {
       type: 'object',
       value: JSON.stringify(
         [
-          { lang: 'en', featurizer: 'text', service_args: { similarity_threshold: 0.65 }  },
-          { lang: 'ar', featurizer: 'text', service_args: { similarity_threshold: 0.65 }  },
+          { lang: 'en', featurizer: 'text', service_args: { similarity_threshold: 0.65 , min_post:10}  },
+          { lang: 'ar', featurizer: 'text', service_args: { similarity_threshold: 0.65 , min_post:10 }  },
           //{ featurizer: 'domain' },
           { featurizer: 'hashtag' },
           { featurizer: 'image', service_args: { similarity_threshold: 0.39 } }

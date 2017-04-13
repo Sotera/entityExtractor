@@ -85,7 +85,6 @@ class HashtagClusters:
                     continue
         return deletable_ids
 
-
     def get_clusters(self):
         d0 = {}
         for k, vSim in self.hash_groups.iteritems():

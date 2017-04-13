@@ -1,3 +1,5 @@
 redis
 numpy
 polyglot
+requests
+stop_words
