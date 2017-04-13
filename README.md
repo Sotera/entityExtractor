@@ -63,3 +63,14 @@ conda env create -f services/environment.yml
 source activate watchman
 python services/run_tests.py
 ```
+
+## PySpark Docker container
+
+```
+./script/docker/start-pyspark.mac.sh
+# or ./script/docker/start-pyspark.sh
+```
+
+## TODO
+
+* convert to docker-compose
