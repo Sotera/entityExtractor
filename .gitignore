@@ -13,3 +13,4 @@ slc-conf.json
 docker-compose.override.yml
 .ipynb_checkpoints
 *.ipynb
+**/pyspark-mongo-jupyter/data
