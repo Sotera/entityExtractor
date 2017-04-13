@@ -11,5 +11,6 @@ tmp
 .swp
 slc-conf.json
 docker-compose.override.yml
-
-services/rorschach/models/
+.ipynb_checkpoints
+*.ipynb
+**/pyspark-mongo-jupyter/data
