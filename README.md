@@ -64,13 +64,9 @@ source activate watchman
 python services/run_tests.py
 ```
 
-## PySpark Docker container
+## PySpark Docker container (local or standalone cluster mode)
 
 ```
-./script/docker/start-pyspark.mac.sh
-# or ./script/docker/start-pyspark.sh
+# watchman services must be running
+./script/docker/start-pyspark.sh
 ```
-
-## TODO
-
-* convert to docker-compose

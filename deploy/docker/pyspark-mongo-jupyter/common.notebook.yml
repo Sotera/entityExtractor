@@ -1,13 +1,7 @@
-# rm unsupported modes on macs, like host n/w mode
 version: '2.1'
 services:
-  pyspark-nb:
-    image: sotera/pyspark-mongo-jupyter:2
-    ports:
-      - "8888:8888"
+  pyspark:
     environment:
-      - GRANT_SUDO=yes
-      - TINI_SUBREAPER=true
       # Note: PYTHONPATH overwritten to include mounted dirs. better way to expose packages to workers?
       - PYTHONPATH=/usr/local/spark/python:/usr/local/spark/python/lib/py4j-0.10.4-src.zip:/home/jovyan/work/util:/home/jovyan/work/app
     volumes:
