@@ -1,6 +1,6 @@
 import sys, os, uuid
 from hashtag_similarity import HashtagClusters
-sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
 from redis_dispatcher import Dispatcher
 from loopy import Loopy
 
@@ -10,29 +10,13 @@ def set_err(job, msg):
     job['error'] = msg
 
 def err_check(job):
-    if 'query_url' not in job:
-        set_err(job, "No 'query_url' in job fields")
-    if 'result_url' not in job:
-        set_err(job, "No 'result_url' in job fields")
-    if 'start_time_ms' not in job:
-        set_err(job, "No 'start_time_ms' in job fields")
-    if 'end_time_ms' not in job:
-        set_err(job, "No 'end_time_ms' in job fields")
-    if 'job_id' not in job:
-        set_err(job, "No 'job_id' in job fields")
-    if 'min_post' not in job:
-        set_err(job, "No 'min_post' in job fields")
+    required = {'query_url', 'result_url', 'start_time_ms',
+    'end_time_ms', 'job_id', 'min_post'}
+
+    if not required.issubset(job):
+        set_err(job, 'Missing some required fields {}'.format(required))
 
 def process_message(key, job):
-
-
-    # if type == 'featurizer', immediately process and return b/c hashtags
-    # are not featurized. allows system to continue with clustering process.
-    if job.get('type') == 'featurizer':
-        job['state'] = 'processed'
-        job['data'] = []
-        return
-
     err_check(job)
     if job['state'] == 'error':
         return
@@ -41,40 +25,45 @@ def process_message(key, job):
     result_url = os.getenv('RESULT_URL', job['result_url'])
 
     print 'FINDING SIMILARITY'
-    print 'min_post set to %s' % job['min_post']
-    hash_clust = HashtagClusters(float(job['min_post']), result_url, job['start_time_ms'])
 
-    query_params = [{
-        "query_type": "between",
-        "property_name": "timestamp_ms",
-        "query_value": [job['start_time_ms'], job['end_time_ms']]
-    }, {
-        "query_type": "where",
-        "property_name": "featurizer",
-        "query_value": "hashtag"
-    }, {
-        "query_type": "neq",
-        "property_name": "hashtags",
-        "query_value": "null"
+    hash_clust = HashtagClusters(float(job['min_post']), result_url,
+        job['start_time_ms'])
+
+    query_params = [
+    {
+        'query_type': 'between',
+        'property_name': 'timestamp_ms',
+        'query_value': [job['start_time_ms'], job['end_time_ms']]
+    },
+    {
+        'query_type': 'where',
+        'property_name': 'featurizer',
+        'query_value': 'hashtag'
+    },
+    {
+        'query_type': 'neq',
+        'property_name': 'hashtags',
+        'query_value': 'null'
     }]
 
     if 'lang' in job:
         query_params.append({
-            "query_type": "where",
-            "property_name": "lang",
-            "query_value": job['lang']
+            'query_type': 'where',
+            'property_name': 'lang',
+            'query_value': job['lang']
         })
+
     loopy = Loopy(query_url, query_params)
 
     if loopy.result_count == 0:
-        print "No data to process"
+        print 'No data to process'
         job['data'] = []
-        job['error'] = "No data found to process."
+        job['error'] = 'No data found to process.'
         job['state'] = 'error'
         return
 
     while True:
-        print "Scrolling...{}".format(loopy.total_returned)
+        print 'Scrolling...{}'.format(loopy.total_returned)
         page = loopy.get_next_page()
         if page is None:
             break
