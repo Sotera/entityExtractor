@@ -5,7 +5,7 @@ angular.module('com.module.core')
 
 function termChartDirective() {
   return {
-    controller: navigationChartController,
+    controller: termChartController,
     link: link
   };
 
@@ -15,93 +15,70 @@ function termChartDirective() {
   }
 }
 
-function navigationChartController($scope, ClusterLink, JobMonitor) {
+function termChartController($scope, SocialMediaPost) {
   this.create = create;
 
   function create(event, callback) {
-    JobMonitor.find({
-      filter: {
-        where: {
-          featurizer: 'linker'
-        }
-      }
-    })
-    .$promise
-    .then(aggregateJobs)
-    .catch(console.error);
-  }
+    const intervalSize = 10 * 60 * 1000;
+    let maxDate = Date.now();
+    let queryTime = maxDate;
+    let windowCount = 100;
+    let minDate = maxDate - windowCount*intervalSize;
+    let maxY = 0;
+    let windows = [];
 
-  function aggregateJobs(jobs){
-    var minDate,maxDate;
-    var minCount = 0, maxCount = 0;
-    var data = [];
-    var finishedCount = 0;
-    jobs.forEach(function(job) {
-      var query = {where: {end_time_ms: job.end_time}};
-      ClusterLink.count(query)
-        .$promise
-        .then(function(result){
-          finishedCount++;
-          if (result.count != 0) {
-            if (!minDate) {
-              minDate = job.end_time;
-              maxDate = job.end_time;
+    for(let i=0; i<windowCount; i++){
+      windows.push({startTime:queryTime-intervalSize,endTime:queryTime});
+      queryTime-=intervalSize;
+    }
+    let terms = ["trump","missile","the"];
+    let graphData = [];
+    Promise.all(terms.map(term =>{
+      return Promise.all(windows.map(window=>{
+        return SocialMediaPost.find({
+          filter: {
+            where: {
+              lang:'en',
+              featurizer: 'text',
+              text:{like:term},
+              timestamp_ms:{between:[window.startTime,window.endTime]}
             }
-            minDate = job.end_time < minDate ? job.end_time : minDate;
-            maxDate = job.end_time > maxDate ? job.end_time : maxDate;
-
-            minCount = result.count < minCount ? result.count : minCount;
-            maxCount = result.count > maxCount ? result.count : maxCount;
           }
-
-          if (result.count == 0 && !minDate){
-            // ignore leading data points with 0 count.
-            // should rarely occur but can.
-          } else {
-            data.push({
-              count: result.count,
-              date: new Date(job.end_time)
-            });
-          }
-
-          if (finishedCount == jobs.length){
-            data.sort(function(a,b){
-              if (a.date < b.date) {
-                return -1;
-              }
-              if (a.date > b.date) {
-                return 1;
-              }
-              // a must be equal to b
-              return 0;
-            });
-            graphClusterLinkCounts(data, new Date(minDate), new Date(maxDate), minCount, maxCount);
-          }
+        }).$promise.then(posts => {
+          if(posts.length > maxY)maxY = posts.length;
+          return {posts:posts, term:term, window:window, count:posts.length};
         })
-        .catch(console.error);
+      })).then(results=>{
+        return results;
+      })
+    })).then(results=>{
+      console.log(results);
+      graphTermCounts(results, new Date(minDate), new Date(maxDate), 0, maxY);
     });
+
+
   }
 
-  function graphClusterLinkCounts(data, minDate, maxDate, yMin, yMax) {
-    var margin = {top: 30, right: 0, bottom: 20, left: 50};
+  function graphTermCounts(data, minDate, maxDate, yMin, yMax) {
+    const margin = {top: 30, right: 0, bottom: 20, left: 50};
 
-    var $container = $('.nav-chart-container'),
+    const $container = $('.term-chart-container'),
       width = $container.width(),
       height = $container.height();
 
-    var navWidth = width - margin.left - margin.right,
+    const navWidth = width - margin.left - margin.right,
       navHeight = height - margin.top - margin.bottom;
 
-    var parseTime = d3.timeFormat('%I:%M %p');
+    const parseTime = d3.timeFormat('%I:%M %p');
 
-    var tooltip = d3.tip()
+    const tooltip = d3.tip()
       .attr('class', 'd3-tip')
       .offset([-20, 20])
-      .html(function(d) {
-        return d.count + ' at ' + parseTime(d.date);
+      .html(function (d) {
+        return d.count + ' at ' + parseTime(d.window.startTime);
       });
 
-    var navChart = d3.select('.nav-chart-container')
+    const navChart = d3.select('.term-chart-container')
       .classed('chart', true).append('svg')
       .classed('navigator', true)
       .attr('width', width)
@@ -118,30 +95,21 @@ function navigationChartController($scope, ClusterLink, JobMonitor) {
         .domain([yMin, yMax])
         .range([navHeight, 0]);
 
-    var navArea = d3.area()
-      .x(function(d) {
-        return xScale(d.date);
-      })
-      .y0(navHeight)
-      .y1(function(d) {
-        return yScale(d.count);
-      });
 
     var navLine = d3.line()
       .x(function(d) {
-        return xScale(d.date);
+        return xScale(d.window.startTime);
       })
       .y(function(d) {
         return yScale(d.count);
       });
 
-    navChart.append('path')
-      .attr('class', 'data')
-      .attr('d', navArea(data));
+    data.forEach(single => {
+      navChart.append('path')
+        .attr('class', 'line')
+        .attr('d', navLine(single));
+    });
 
-    navChart.append('path')
-      .attr('class', 'line')
-      .attr('d', navLine(data));
 
     var viewport = d3.brushX()
       .on('end', function () {
@@ -183,20 +151,25 @@ function navigationChartController($scope, ClusterLink, JobMonitor) {
       .selectAll('rect')
       .attr('height', navHeight);
 
-    // add tooltips
-    navChart.selectAll('circle')
-      .data(data)
-      .enter()
-      .append('circle')
-      .attr('class', 'circle')
-      .attr('cx', function(d) {
-        return xScale(d.date);
-      })
-      .attr('cy', function(d) {
-        return yScale(d.count);
-      })
-      .attr('r', 4)
-      .on('mouseover', tooltip.show)
-      .on('mouseout', tooltip.hide)
+    data.forEach(single => {
+
+      // add tooltips
+      navChart.selectAll(single[0].term)
+        .data(single)
+        .enter()
+        .append('circle')
+        .attr('class', 'circle')
+        .attr('cx', function(d) {
+          return xScale(d.window.startTime);
+        })
+        .attr('cy', function(d) {
+          return yScale(d.count);
+        })
+        .attr('r', 2)
+        .on('mouseover', tooltip.show)
+        .on('mouseout', tooltip.hide)
+
+    });
+
   }
 }
