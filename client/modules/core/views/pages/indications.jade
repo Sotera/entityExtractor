@@ -6,15 +6,25 @@ h5 drag mouse over an area to select
   .col-md-12
     .term-chart-container(ng-model='terms', style='width:95%; height:160px')
       term-chart
+h3 settings
+.row
+  .col-md-2
+    |Interval size in minutes:
+    input.form-control(ng-model='interval')
+.row
+  .col-md-2
+    | Number of intervals from now:
+    input.form-control(ng-model='windowCount')
+
 h3 Terms
 .row
-  .col-md-3
-    input.form-control(ng-model='filterText')
   .col-md-2
+    input.form-control(ng-model='filterText')
+  .col-md-1
     button.btn.btn-info(ng-click='addTerm(filterText)')
       span.glyphicon.glyphicon-plus
 .row
-  .col-md-3
+  .col-md-2
     table.table.table-striped
       tbody
         tr(ng-repeat='term in terms')

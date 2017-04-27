@@ -6,6 +6,8 @@ angular.module('com.module.core')
 function IndicationsCtrl($scope, SocialMediaPost, $q) {
   $scope.clusterText = '';
   $scope.clusterTerm = '';
+  $scope.interval = 1440;
+  $scope.windowCount = 7;
   $scope.terms = ["assad","missile","syria","putin"];
   $scope.removeTerm = function(term){
     $scope.terms.splice($scope.terms.indexOf(term),1);

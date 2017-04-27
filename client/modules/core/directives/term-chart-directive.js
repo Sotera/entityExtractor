@@ -11,10 +11,18 @@ function termChartDirective() {
 
   function link(scope, elem, attrs, ctrls) {
 
-    scope.$watchCollection('terms', function() {
-      $('.term-chart-container').empty();
+    scope.$watch('interval', function() {
       ctrls.create();
     });
+
+    scope.$watch('windowCount', function() {
+      ctrls.create();
+    });
+
+    scope.$watchCollection('terms', function() {
+      ctrls.create();
+    });
+
   }
 }
 
@@ -22,15 +30,16 @@ function termChartController($scope, SocialMediaPost) {
   this.create = create;
 
   function create(event, callback) {
-    const intervalSize = 10 * 60 * 1000;
+    let minute = 60 * 1000;
+    let intervalSize = $scope.interval * minute;
     let maxDate = Date.now();
     let queryTime = maxDate;
-    let windowCount = 100;
-    let minDate = maxDate - windowCount*intervalSize;
+
+    let minDate = maxDate - $scope.windowCount*intervalSize;
     let maxY = 0;
     let windows = [];
 
-    for(let i=0; i<windowCount; i++){
+    for(let i=0; i<$scope.windowCount; i++){
       windows.push({startTime:queryTime-intervalSize,endTime:queryTime});
       queryTime-=intervalSize;
     }
@@ -55,18 +64,21 @@ function termChartController($scope, SocialMediaPost) {
       })
     })).then(results=>{
       console.log(results);
-      graphTermCounts(results, new Date(minDate), new Date(maxDate), 0, maxY);
+      graphTermCounts(_(results).orderBy('start_time_ms').value(), minDate+intervalSize, maxDate, 0, maxY);
     });
 
 
   }
 
   function graphTermCounts(data, minDate, maxDate, yMin, yMax) {
+
     const margin = {top: 30, right: 0, bottom: 20, left: 50};
 
     const $container = $('.term-chart-container'),
       width = $container.width(),
       height = $container.height();
+
+    $('.term-chart-container').empty();
 
     const navWidth = width - margin.left - margin.right,
       navHeight = height - margin.top - margin.bottom;
@@ -77,7 +89,7 @@ function termChartController($scope, SocialMediaPost) {
       .attr('class', 'd3-tip')
       .offset([-20, 20])
       .html(function (d) {
-        return d.term + " " + d.count + ' at ' + parseTime(d.window.startTime);
+        return d.term + " " + d.count + ' at ' + parseTime(d.window.endTime);
       });
 
     const navChart = d3.select('.term-chart-container')
@@ -100,7 +112,7 @@ function termChartController($scope, SocialMediaPost) {
 
     var navLine = d3.line()
       .x(function(d) {
-        return xScale(d.window.startTime);
+        return xScale(d.window.endTime);
       })
       .y(function(d) {
         return yScale(d.count);
@@ -162,7 +174,7 @@ function termChartController($scope, SocialMediaPost) {
         .append('circle')
         .attr('class', 'circle')
         .attr('cx', function(d) {
-          return xScale(d.window.startTime);
+          return xScale(d.window.endTime);
         })
         .attr('cy', function(d) {
           return yScale(d.count);
