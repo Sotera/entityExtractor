@@ -182,6 +182,9 @@ function termChartController($scope, SocialMediaPost) {
         .attr('r', 2)
         .on('mouseover', tooltip.show)
         .on('mouseout', tooltip.hide)
+        .on('click', function(d) {
+          $scope.dateSelected(d);
+        })
 
     });
 
