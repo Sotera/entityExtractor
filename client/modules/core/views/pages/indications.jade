@@ -4,14 +4,14 @@ spinner(show='showSpinner') //- boolean scope property to toggle spinner
 h5 drag mouse over an area to select
 .row(style='padding-bottom:20px')
   .col-md-12
-    .term-chart-container(style='width:95%; height:160px')
+    .term-chart-container(ng-model='terms', style='width:95%; height:160px')
       term-chart
 h3 Terms
 .row
   .col-md-3
     input.form-control(ng-model='filterText')
   .col-md-2
-    button.btn.btn-info(type='submit')
+    button.btn.btn-info(ng-click='addTerm(filterText)')
       span.glyphicon.glyphicon-plus
 .row
   .col-md-3
@@ -19,5 +19,5 @@ h3 Terms
       tbody
         tr(ng-repeat='term in terms')
           td {{term}}
-            button.btn.btn-info(type='submit' style='float:right')
+            button.btn.btn-info(ng-click='removeTerm(term, term-chart)' style='float:right')
               span.glyphicon.glyphicon-remove

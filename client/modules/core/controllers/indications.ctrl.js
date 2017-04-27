@@ -6,7 +6,14 @@ angular.module('com.module.core')
 function IndicationsCtrl($scope, SocialMediaPost, $q) {
   $scope.clusterText = '';
   $scope.clusterTerm = '';
-  $scope.terms = ["trump","missile","the"];
+  $scope.terms = ["assad","missile","syria","putin"];
+  $scope.removeTerm = function(term){
+    $scope.terms.splice($scope.terms.indexOf(term),1);
+  };
+  $scope.addTerm = function(term){
+    if($scope.terms.indexOf(term) >=0)return;
+    $scope.terms.push(term);
+  };
   $scope.dateRangeSelected = function(start, end) {
     $scope.showSpinner = true;
     $q.all([

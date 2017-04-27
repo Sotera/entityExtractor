@@ -10,8 +10,11 @@ function termChartDirective() {
   };
 
   function link(scope, elem, attrs, ctrls) {
-    // run ctrl function immediately
-    ctrls.create(null, angular.noop);
+
+    scope.$watchCollection('terms', function() {
+      $('.term-chart-container').empty();
+      ctrls.create();
+    });
   }
 }
 
@@ -31,22 +34,21 @@ function termChartController($scope, SocialMediaPost) {
       windows.push({startTime:queryTime-intervalSize,endTime:queryTime});
       queryTime-=intervalSize;
     }
-    let terms = ["trump","missile","the"];
-    let graphData = [];
-    Promise.all(terms.map(term =>{
+
+    Promise.all($scope.terms.map(term =>{
       return Promise.all(windows.map(window=>{
-        return SocialMediaPost.find({
-          filter: {
-            where: {
+        return SocialMediaPost.count({
+          /*filter: {*/
+           where: {
               lang:'en',
               featurizer: 'text',
               text:{like:term},
               timestamp_ms:{between:[window.startTime,window.endTime]}
-            }
-          }
-        }).$promise.then(posts => {
-          if(posts.length > maxY)maxY = posts.length;
-          return {posts:posts, term:term, window:window, count:posts.length};
+           }
+            /* }*/
+        }).$promise.then(results => {
+          if(results.count > maxY)maxY = results.count;
+          return {count:results.count, term:term, window:window};
         })
       })).then(results=>{
         return results;
@@ -75,7 +77,7 @@ function termChartController($scope, SocialMediaPost) {
       .attr('class', 'd3-tip')
       .offset([-20, 20])
       .html(function (d) {
-        return d.count + ' at ' + parseTime(d.window.startTime);
+        return d.term + " " + d.count + ' at ' + parseTime(d.window.startTime);
       });
 
     const navChart = d3.select('.term-chart-container')
