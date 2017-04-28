@@ -14,3 +14,5 @@ docker-compose.override.yml
 .ipynb_checkpoints
 *.ipynb
 **/pyspark-mongo-jupyter/data
+**/pyspark-mongo-jupyter/nb
+!**/pyspark-mongo-jupyter/nb/keep/*.ipynb
