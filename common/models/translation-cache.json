@@ -1,0 +1,45 @@
+{
+  "name": "translationCache",
+  "description": "Cache of language translations",
+  "plural": "translationCache",
+  "base": "PersistedModel",
+  "indexes": {
+    "idx_uniq": {
+      "keys": {
+        "phrase": 1,
+        "c_type": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  },
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "Timestamp": {},
+    "DestroyAll": {}
+  },
+  "properties": {
+    "phrase": {
+      "type": "string",
+      "required": true
+    },
+    "c_type": {
+      "description": "cache type: 'd'(etect) or 't'(ranslate)",
+      "type": "string",
+      "required": true
+    },
+    "res": {
+      "description": "translation result",
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
