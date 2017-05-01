@@ -37,16 +37,16 @@ module.exports = function(Translate) {
   );
 
   Translate.detect = (args, cb) => {
-    translator.detect(args, (err, res) => {
-      if (err) return cb(err);
-      cb(null, [args.text, res]);
-    });
+    translator.detect(args)
+    .then(res => cb(null, [args.text, res]))
+    .catch(cb);
   };
 
   Translate.toEnglish = (args, cb) => {
-    translator.translateToEnglish(args.text, (err, res) => {
-      if (err) return cb(err);
-      cb(null, [args.text, res]);
-    });
+    translator.translate({text: args.text, to: 'en'})
+    .then(res => cb(null, [args.text, res]))
+    .catch(cb);
   };
+
+  //TODO: Translate.trans for other 'to' langs
 };
