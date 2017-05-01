@@ -1,7 +1,7 @@
 spinner(show='showSpinner') //- boolean scope property to toggle spinner
 
 
-h5 drag mouse over an area to select
+h5 click circles in chart to load data
 .row(style='padding-bottom:20px')
   .col-md-12
     .term-chart-container(ng-model='terms', style='width:95%; height:160px')
@@ -47,7 +47,7 @@ h5 drag mouse over an area to select
         li.active(role='presentation'): a(data-target='#tc-post-types' role='tab' data-toggle='tab') Post types
         li(role='presentation'): a(data-target='#tc-posts' role='tab' data-toggle='tab') Posts
         li(role='presentation'): a(data-target='#tc-refs' role='tab' data-toggle='tab') Most referenced
-        li(role='presentation'): a(data-target='#tc-user-network' role='tab' data-toggle='tab') User network
+        li(role='presentation'): a(data-target='#tc-telegram' role='tab' data-toggle='tab') Telegram
 
       .tab-content
         #tc-post-types.tab-pane.active(role='tabpanel')
@@ -86,6 +86,22 @@ h5 drag mouse over an area to select
               tr(ng-repeat='c in broadcastCounts')
                 td: a(ng-href='{{c.label | statusUrl}}' target='_blank') {{c.label}}
                 td {{c.value}}
-        #tc-user-network.tab-pane(role='tabpanel')
-          .chart-container(style='width:100%; height:300px')
-            user-network-graph
+        #tc-telegram.tab-pane(role='tabpanel')
+          table.table.table-striped.table-condensed
+            caption Telegram ({{telegramData.length}})
+              tbody
+                tr(ng-repeat='gram in telegramData' ng-click='selectTelegram(gram)')
+                  td {{gram.id}}
+                  td {{gram.term}}
+                  td {{gram.translatedTerm}}
+          table.table.table-striped.table-condensed
+            caption Related Twitter Posts
+              tbody
+                tr(ng-repeat='post in tposts')
+                  td
+                    a(ng-click='loadAuthorUrl(post)')
+                      | {{post.user.screen_name}}
+                      br
+                      img(ng-src='{{post.user.profile_image_url}}' style='border:0; width:48px; height:48px')
+                  td(ng-class='{highlight: (selectedImageUrl && selectedImageUrl === post.user.profile_image_url)}') {{post.text}}
+                  td: a(ng-href='{{post.post_url}}' target='_blank') visit

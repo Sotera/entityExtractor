@@ -54,4 +54,36 @@ module.exports = function(Chart) {
 
     cb(null, {ok: 1})
   };
+
+  Chart.remoteMethod(
+    'locationsearch',
+    {
+      description: 'Fetch data for various charts',
+      accepts: {
+        arg: 'args',
+        type: 'object',
+        description: 'object with property "term"',
+        required: true,
+        http: { source: 'body' }
+      },
+      http: {path: '/locationsearch', verb: 'post'},
+      returns: { type: 'object',root:true }
+    }
+  );
+
+  Chart.locationsearch = function(args, cb) {
+    let routeKey = `../../server/chart/twitter/location-search`,
+      route = routes[routeKey];
+    if (!route) {
+      try {
+        route = require(routeKey);
+      } catch(err) {
+        cb(err);
+        return;
+      }
+      routes[routeKey] = route;
+    }
+
+    routes[routeKey].execute(args.term,cb);
+  };
 };

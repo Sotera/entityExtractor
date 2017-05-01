@@ -3,8 +3,10 @@
 angular.module('com.module.core')
 .controller('IndicationsCtrl', IndicationsCtrl);
 
-function IndicationsCtrl($scope, SocialMediaPost, $q) {
+function IndicationsCtrl($scope, SocialMediaPost,Translate, Extract, Chart, $q) {
   $scope.posts = [];
+  $scope.tposts = [];
+  $scope.telegramData = [];
   $scope.broadcastCounts;
   $scope.aggCounts = [];
   $scope.clusterText = '';
@@ -30,13 +32,13 @@ function IndicationsCtrl($scope, SocialMediaPost, $q) {
     let counts = posts.reduce((acc, curr) => {
       // broadcast wins if also a quote
       if (curr.broadcast_post_id)
-        acc['broadcast']++
+        acc['broadcast']++;
       else if (curr.quote_post_id)
-        acc['quote']++
+        acc['quote']++;
       else if (curr.reply_to_post_id)
-        acc['reply']++
+        acc['reply']++;
       else
-        acc['direct']++
+        acc['direct']++;
 
       return acc;
     }, {quote: 0, broadcast: 0, reply: 0, direct: 0});
@@ -82,6 +84,7 @@ function IndicationsCtrl($scope, SocialMediaPost, $q) {
 
   $scope.dateSelected = function(data) {
     $scope.showSpinner = true;
+
     SocialMediaPost.find({
       filter: {
         where: {
@@ -94,11 +97,54 @@ function IndicationsCtrl($scope, SocialMediaPost, $q) {
     }).$promise.then(results => {
       $scope.posts = results;
       $scope.createPostsCharts(results);
-    }).then(function() {
+    }).catch(console.error);
+
+    $scope.getTelegramData(data.window)
+    .then(telegrams => {
+      return $scope.processTelegramData(telegrams);
+    })
+    .then(telegramEntities =>{
+      $scope.telegramData = telegramEntities;
+    })
+    .then(function() {
       $scope.showSpinner = false;
     })
-      .catch(console.error);
+    .catch(console.error);
 
+  };
+
+  $scope.selectTelegram = function(gram) {
+    Chart.locationsearch({term:gram.term},function(res){
+      $scope.tposts = res.statuses;
+    });
+  };
+
+  $scope.getTelegramData = function(window){
+
+    return SocialMediaPost.find({
+      filter: {
+        where: {
+          post_type: 'telegram',
+          featurizer: 'text',
+          timestamp_ms:{between:[window.startTime,window.endTime]}
+        }
+      }
+    }).$promise
+  };
+
+  $scope.processTelegramData = function(telegrams){
+    let locs = [];
+    return Promise.all(telegrams.map(telegram=> {
+      Extract.entities({text:telegram.text, extract_type:'polyglot'})
+        .$promise.then(results=>{
+          results.forEach(function(loc){
+              Translate.toEnglish({text:loc})
+              .$promise.then(translatedTerm=>{
+                locs.push({id:telegram.id, term: translatedTerm[0], translatedTerm:translatedTerm[1]});
+              });
+          });
+      })
+    })).then(()=>{return locs});
   };
 
 }
