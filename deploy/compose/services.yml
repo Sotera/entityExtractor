@@ -15,7 +15,7 @@ services:
       - data-container
 
   redis:
-    image: sotera/redis-watchman:1
+    image: sotera/redis-watchman:2
     hostname: redis
     ports:
       - "6379:6379"
