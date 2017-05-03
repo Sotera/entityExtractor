@@ -96,6 +96,10 @@
     "dataSource": "cache",
     "public": true
   },
+  "translationCache": {
+    "dataSource": "cache",
+    "public": true
+  },
   "annotation": {
     "dataSource": "db",
     "public": true
