@@ -72,6 +72,8 @@ module.exports = function(Chart) {
   );
 
   Chart.locationsearch = function(args, cb) {
+
+
     let routeKey = `../../server/chart/twitter/location-search`,
       route = routes[routeKey];
     if (!route) {

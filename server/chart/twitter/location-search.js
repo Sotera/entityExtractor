@@ -5,13 +5,16 @@
 require('dotenv').config({silent: true});
 
 const _ = require('lodash'),
+  app = require('../../../server/server'),
   TwitterApi = require('twitter'),
   https = require('https'),
-  debug = require('debug')('user-network');
+  debug = require('debug')('user-network'),
+  idGen = require('../../util/id-generator'),
+  jobs = require('../../../lib/jobs');
 
 let twitter_consumer_key = process.env.TWITTER_CONSUMER_KEY,
   twitter_consumer_secret = process.env.TWITTER_CONSUMER_SECRET,
-  twitter_bearer_token = process.env.TWITTER_BEARER_TOKEN
+  twitter_bearer_token = process.env.TWITTER_BEARER_TOKEN;
 
 let twitterClient = new TwitterApi({
     consumer_key: twitter_consumer_key,
@@ -19,9 +22,17 @@ let twitterClient = new TwitterApi({
     bearer_token: twitter_bearer_token
   });
 
+const ScoredPost = app.models.ScoredPost;
+
 module.exports = {
 
   execute(options, done) {
+    //job already created?
+      //job complete?
+        //return results
+      //job in progress?
+        //return job status
+
     debug(options);
     if (!twitterClient) {
       return done(new Error('twitter client not ready'));
@@ -32,7 +43,27 @@ module.exports = {
         done(error);
         return;
       }
-      done(null,tweets);
+      let job_id = idGen.randomish(0, 9999999999).toString();
+
+      Promise.all(tweets.statuses.map(tweet=>{
+        return ScoredPost.create({             //persist twitter data
+          job_id:job_id,
+          post_id:tweet.id_str,
+          text:tweet.text
+        })
+        .$promise;
+      }))
+      .then(()=>{
+        return jobs.create('post scoring', { //Create new Job
+          job_id:job_id,
+          start_time_ms:options.start_time_ms,
+          key:options.term,
+          ttl: 120
+        });
+      })
+      .then(()=>{                              //return job status
+        done(null,"Job Created");
+      });
     });
   }
 };

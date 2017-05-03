@@ -27,8 +27,8 @@
     },
     "status": {
       "type": "number",
-      "description": "0 = new, 1 = running/done",
       "required": true,
+      "description": "0 = new, 1 = running/done",
       "default": 0
     },
     "data": {
