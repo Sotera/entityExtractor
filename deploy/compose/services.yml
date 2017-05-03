@@ -15,7 +15,7 @@ services:
       - data-container
 
   redis:
-    image: sotera/redis-watchman:1
+    image: sotera/redis-watchman:2
     hostname: redis
     ports:
       - "6379:6379"
@@ -89,7 +89,7 @@ services:
     image: lukewendling/mitie-server
     hostname: mitie
     ports:
-      - "8888:8888"
+      - "9990:8888"
 
   trained-models:
     image: sotera/trained-models:1
@@ -102,6 +102,15 @@ services:
       - "3000"
     ports:
       - "3005:3000"
+
+  score-text:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/score-text:1
+    hostname: score-text
+    depends_on:
+      - redis
 
   dr-manhattan:
     extends:

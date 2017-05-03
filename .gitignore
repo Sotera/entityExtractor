@@ -16,3 +16,4 @@ docker-compose.override.yml
 **/pyspark-mongo-jupyter/data
 **/pyspark-mongo-jupyter/nb
 !**/pyspark-mongo-jupyter/nb/keep/*.ipynb
+*.pkl
