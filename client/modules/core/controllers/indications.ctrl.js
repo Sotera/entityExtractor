@@ -115,6 +115,8 @@ function IndicationsCtrl($scope, SocialMediaPost,Translate, Extract, Chart, $q) 
 
   $scope.selectTelegram = function(gram) {
     Chart.locationsearch({term:gram.term},function(res){
+      //no longer doing this..need to pull down finished job or something.
+      /*
       $scope.tposts = res.statuses;
       Promise.all(res.statuses.map(function(status){
         Translate.toEnglish({text:status.text})
@@ -122,7 +124,7 @@ function IndicationsCtrl($scope, SocialMediaPost,Translate, Extract, Chart, $q) 
             status.text = translated[1];
             return status;
         });
-      }));
+      }));*/
     });
   };
 

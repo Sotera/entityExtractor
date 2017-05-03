@@ -18,4 +18,6 @@ docker build -f Dockerfile-py3 # ... same as above
 # for Dr-Manhattan
 docker build -f Dockerfile-dr-manhattan -t sotera/dr-manhattan:<tag> --build-arg SERVICE=dr-manhattan --build-arg MAIN=myscript.py .
 
+# for Pyspark
+docker build -f Dockerfile-pyspark -t sotera/score-text:<tag> --build-arg SERVICE=score-text --build-arg MAIN=myscript.py .
 ```
