@@ -116,6 +116,13 @@ function IndicationsCtrl($scope, SocialMediaPost,Translate, Extract, Chart, $q) 
   $scope.selectTelegram = function(gram) {
     Chart.locationsearch({term:gram.term},function(res){
       $scope.tposts = res.statuses;
+      Promise.all(res.statuses.map(function(status){
+        Translate.toEnglish({text:status.text})
+          .$promise.then(translated=>{
+            status.text = translated[1];
+            return status;
+        });
+      }));
     });
   };
 
