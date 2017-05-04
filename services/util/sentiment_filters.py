@@ -1,6 +1,7 @@
 import re
 import traceback
-# from polyglot.text import Text
+# TODO: needed by flask but can't be used in score-text svc (polyglot doesn't work with conda/py 3.5)
+from polyglot.text import Text
 from stop_words import get_stop_words
 from nltk.tokenize import TweetTokenizer
 

@@ -3,7 +3,7 @@
 angular.module('com.module.core')
 .controller('IndicationsCtrl', IndicationsCtrl);
 
-function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http) {
+function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http, JobService) {
   $scope.posts = [];
   $scope.tposts = [];
   $scope.telegramData = [];
@@ -115,7 +115,8 @@ function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http) {
 
   $scope.selectTelegram = function(gram) {
     $http.get(`/api/charts/twitter/location-search?loc=${gram.term}`)
-    .then(res => console.info(res.data))
+    .then(res => JobService.poll(res.data.job_id))
+    .then(() => console.info('job complete'))
     .catch(console.error);
   };
 
