@@ -112,7 +112,7 @@
     "dataSource": "db",
     "public": true
   },
-  "scored-post": {
+  "scoredPost": {
     "dataSource": "db",
     "public": true
   }

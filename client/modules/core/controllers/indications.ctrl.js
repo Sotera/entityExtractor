@@ -3,7 +3,7 @@
 angular.module('com.module.core')
 .controller('IndicationsCtrl', IndicationsCtrl);
 
-function IndicationsCtrl($scope, SocialMediaPost,Translate, Extract, Chart, $q) {
+function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http) {
   $scope.posts = [];
   $scope.tposts = [];
   $scope.telegramData = [];
@@ -114,18 +114,9 @@ function IndicationsCtrl($scope, SocialMediaPost,Translate, Extract, Chart, $q) 
   };
 
   $scope.selectTelegram = function(gram) {
-    Chart.locationsearch({term:gram.term},function(res){
-      //no longer doing this..need to pull down finished job or something.
-      /*
-      $scope.tposts = res.statuses;
-      Promise.all(res.statuses.map(function(status){
-        Translate.toEnglish({text:status.text})
-          .$promise.then(translated=>{
-            status.text = translated[1];
-            return status;
-        });
-      }));*/
-    });
+    $http.get(`/api/charts/twitter/location-search?loc=${gram.term}`)
+    .then(res => console.info(res.data))
+    .catch(console.error);
   };
 
   $scope.getTelegramData = function(window){

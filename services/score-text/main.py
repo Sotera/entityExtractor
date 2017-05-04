@@ -8,7 +8,7 @@ from score_text import Scorer
 
 # reusable client
 mongo_spark = MongoSpark()
-mongo_spark.collection = 'scoredText'
+mongo_spark.collection = 'scoredPost'
 scorer = Scorer(mongo_spark)
 
 def set_err(job, msg):

@@ -16,8 +16,8 @@ module.exports = function(Job) {
         required: true,
         http: { source: 'body' }
       },
-      returns: {type: 'object', root: true},
-      http: {path: '/status', verb: 'post'}
+      returns: { type: 'object', root: true },
+      http: { path: '/status', verb: 'post' }
     }
   );
 

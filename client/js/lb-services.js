@@ -3618,10 +3618,6 @@ if (typeof module !== 'undefined' && typeof exports !== 'undefined' &&
  *
  * A $resource object for interacting with the `SocialMediaPost` model.
  *
- * **Details**
- *
- * User data that seeds event detection
- *
  * ## Example
  *
  * See
@@ -6707,10 +6703,6 @@ if (typeof module !== 'undefined' && typeof exports !== 'undefined' &&
  * @description
  *
  * A $resource object for interacting with the `Event` model.
- *
- * **Details**
- *
- * A detected event: The primary model in the system
  *
  * ## Example
  *
@@ -10442,10 +10434,6 @@ if (typeof module !== 'undefined' && typeof exports !== 'undefined' &&
  *
  * A $resource object for interacting with the `Chart` model.
  *
- * **Details**
- *
- * Endpoints for driving charts
- *
  * ## Example
  *
  * See
@@ -10470,13 +10458,13 @@ if (typeof module !== 'undefined' && typeof exports !== 'undefined' &&
              *
              * @description
              *
-             * Fetch data for various charts
+             * Twitter endpoint to receive followers
              *
              * @param {Object=} parameters Request parameters.
              *
-             *  - `src` – `{string=}` - chart source
+             *  - `src` – `{string=}` - the chart source
              *
-             *  - `type` – `{string=}` - chart type
+             *  - `type` – `{string=}` - the chart type
              *
              *  - `filter` – `{object=}` -
              *
@@ -10498,44 +10486,6 @@ if (typeof module !== 'undefined' && typeof exports !== 'undefined' &&
             "chart": {
               url: urlBase + "/charts/:src/:type",
               method: "GET",
-            },
-
-            /**
-             * @ngdoc method
-             * @name lbServices.Chart#locationsearch
-             * @methodOf lbServices.Chart
-             *
-             * @description
-             *
-             * Fetch data for various charts
-             *
-             * @param {Object=} parameters Request parameters.
-             *
-             *   This method does not accept any parameters.
-             *   Supply an empty object or omit this argument altogether.
-             *
-             * @param {Object} postData Request data.
-             *
-             * This method expects a subset of model properties as request parameters.
-             *
-             * @param {function(Object,Object)=} successCb
-             *   Success callback with two arguments: `value`, `responseHeaders`.
-             *
-             * @param {function(Object)=} errorCb Error callback with one argument:
-             *   `httpResponse`.
-             *
-             * @returns {Object} An empty reference that will be
-             *   populated with the actual data once the response is returned
-             *   from the server.
-             *
-             * <em>
-             * (The remote method definition does not provide any description.
-             * This usually means the response is a `Chart` object.)
-             * </em>
-             */
-            "locationsearch": {
-              url: urlBase + "/charts/locationsearch",
-              method: "POST",
             },
           }
         );
@@ -10567,10 +10517,6 @@ if (typeof module !== 'undefined' && typeof exports !== 'undefined' &&
  * @description
  *
  * A $resource object for interacting with the `EventNetwork` model.
- *
- * **Details**
- *
- * A network graph data model for showing relationships between posters in a social media event
  *
  * ## Example
  *

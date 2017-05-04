@@ -19,8 +19,8 @@ class Scorer(object):
     def __init__(self, spark):
         self.spark = spark
 
-    def score(self, set_id):
-        df = self.spark.read().where(col('set_id') == set_id)
+    def score(self, job_id):
+        df = self.spark.read().where(col('job_id') == job_id)
 
         df = df.withColumn('score', u_predict(df['text']))
 
