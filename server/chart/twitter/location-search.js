@@ -39,7 +39,11 @@ module.exports = {
         });
       }))
       .then(() => startJob(jobId))
-      .catch(console.error);
+      .then(() => done())
+      .catch(err => {
+        console.error(err);
+        done(err);
+      });
     });
   }
 };
