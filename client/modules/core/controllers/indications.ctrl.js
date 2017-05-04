@@ -97,7 +97,9 @@ function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http, Job
     }).$promise.then(results => {
       $scope.posts = results;
       $scope.createPostsCharts(results);
-    }).catch(console.error);
+    }).catch(err=>{
+      console.log(err);
+    });
 
     $scope.getTelegramData(data.window)
     .then(telegrams => {
