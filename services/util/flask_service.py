@@ -1,7 +1,6 @@
-#!flask/bin/python
-from flask import request
-from flask import abort
-from flask import Flask, jsonify
+#! /usr/bin/env python
+
+from flask import request, abort, Flask, jsonify
 import json
 from sentiment_filters import SentimentFilter
 sf = SentimentFilter()
