@@ -3,7 +3,6 @@ import traceback
 # from polyglot.text import Text
 from stop_words import get_stop_words
 from nltk.tokenize import TweetTokenizer
-from polyglot.text import Text
 
 tknzr = TweetTokenizer()
 
