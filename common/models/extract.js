@@ -30,9 +30,7 @@ module.exports = function(Extract) {
     var extract = entityExtractor[method](args.text, mimeType);
 
     extract
-    .then(entities => {
-      cb(null, entities)
-    })
+    .then(entities => cb(null, entities))
     .catch(err => cb(err));
   };
 
