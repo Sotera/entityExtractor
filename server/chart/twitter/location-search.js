@@ -23,7 +23,7 @@ module.exports = {
       bearer_token: process.env.TWITTER_BEARER_TOKEN
     });
 
-    ScoredPost = app.models.ScoredPost
+    ScoredPost = app.models.ScoredPost;
 
     twitterClient.get('search/tweets', { q: options.qs.loc }, (err, tweets, _) => {
       if (err) return done(err);
@@ -39,7 +39,7 @@ module.exports = {
         });
       }))
       .then(() => startJob(jobId))
-      .then(() => done())
+      .then(() => done(jobId))
       .catch(err => {
         console.error(err);
         done(err);

@@ -116,21 +116,31 @@ function IndicationsCtrl($scope, ScoredPost, SocialMediaPost, Translate, Extract
   };
 
   $scope.selectTelegram = function(gram) {
+    $scope.showSpinner = true;
     $http.get(`/api/charts/twitter/location-search?loc=${gram.term}`)
-    .then(res => JobService.poll(res.data.job_id))
-    .then(() => console.info('job complete'))
-    .then(() => $scope.getScoredPosts(res.data))
+    .then(res => {
+      return JobService.poll(res.data.job_id)
+      .then(()=>res.data.job_id);
+    })
+    .then(job_id => $scope.getScoredPosts(job_id))
     .then(scoredPosts=>{
-      $scope.tposts = scoredPosts;
+      $scope.showSpinner = false;
+      $scope.tposts = _(scoredPosts).orderBy('score','desc').value();
+      $scope.tposts.forEach(function(post){
+        Translate.toEnglish({text:post.text})
+          .$promise.then(translated=>{
+            post.text = translated[1];
+        });
+      });
     })
     .catch(console.error);
   };
 
-  $scope.getScoredPosts = function(job){
+  $scope.getScoredPosts = function(job_id){
     return ScoredPost.find({
       filter: {
         where: {
-          job_id:job.job_id
+          job_id:job_id
         }
       }
     }).$promise
