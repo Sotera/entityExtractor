@@ -98,10 +98,13 @@ h5 click circles in chart to load data
             caption Related Twitter Posts
               tbody
                 tr(ng-repeat='post in tposts')
-                  td
-                    a(ng-click='loadAuthorUrl(post)')
-                      | {{post.user.screen_name}}
-                      br
-                      img(ng-src='{{post.user.profile_image_url}}' style='border:0; width:48px; height:48px')
-                  td(ng-class='{highlight: (selectedImageUrl && selectedImageUrl === post.user.profile_image_url)}') {{post.text}}
-                  td: a(ng-href='{{post.post_url}}' target='_blank') visit
+                  td {{post.text}}
+                  td {{post.score}}
+                  td {{post.post_id}}
+                  //td
+                  //  a(ng-click='loadAuthorUrl(post)')
+                  //    | {{post.user.screen_name}}
+                  //    br
+                  //    img(ng-src='{{post.user.profile_image_url}}' style='border:0; width:48px; height:48px')
+                  //td(ng-class='{highlight: (selectedImageUrl && selectedImageUrl === post.user.profile_image_url)}') {{post.text}}
+                  //td: a(ng-href='{{post.post_url}}' target='_blank') visit

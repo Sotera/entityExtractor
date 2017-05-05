@@ -3,7 +3,7 @@
 angular.module('com.module.core')
 .controller('IndicationsCtrl', IndicationsCtrl);
 
-function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http, JobService) {
+function IndicationsCtrl($scope, ScoredPost, SocialMediaPost, Translate, Extract, $http, JobService) {
   $scope.posts = [];
   $scope.tposts = [];
   $scope.telegramData = [];
@@ -119,7 +119,21 @@ function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http, Job
     $http.get(`/api/charts/twitter/location-search?loc=${gram.term}`)
     .then(res => JobService.poll(res.data.job_id))
     .then(() => console.info('job complete'))
+    .then(() => $scope.getScoredPosts(res.data))
+    .then(scoredPosts=>{
+      $scope.tposts = scoredPosts;
+    })
     .catch(console.error);
+  };
+
+  $scope.getScoredPosts = function(job){
+    return ScoredPost.find({
+      filter: {
+        where: {
+          job_id:job.job_id
+        }
+      }
+    }).$promise
   };
 
   $scope.getTelegramData = function(window){
