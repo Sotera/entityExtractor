@@ -3,7 +3,7 @@
 angular.module('com.module.core')
 .controller('IndicationsCtrl', IndicationsCtrl);
 
-function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http, JobService) {
+function IndicationsCtrl($scope, ScoredPost, SocialMediaPost, Translate, Extract, $http, JobService) {
   $scope.posts = [];
   $scope.tposts = [];
   $scope.telegramData = [];
@@ -97,7 +97,9 @@ function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http, Job
     }).$promise.then(results => {
       $scope.posts = results;
       $scope.createPostsCharts(results);
-    }).catch(console.error);
+    }).catch(err=>{
+      console.log(err);
+    });
 
     $scope.getTelegramData(data.window)
     .then(telegrams => {
@@ -114,10 +116,34 @@ function IndicationsCtrl($scope, SocialMediaPost, Translate, Extract, $http, Job
   };
 
   $scope.selectTelegram = function(gram) {
+    $scope.showSpinner = true;
     $http.get(`/api/charts/twitter/location-search?loc=${gram.term}`)
-    .then(res => JobService.poll(res.data.job_id))
-    .then(() => console.info('job complete'))
+    .then(res => {
+      return JobService.poll(res.data.job_id)
+      .then(()=>res.data.job_id);
+    })
+    .then(job_id => $scope.getScoredPosts(job_id))
+    .then(scoredPosts=>{
+      $scope.showSpinner = false;
+      $scope.tposts = _(scoredPosts).orderBy('score','desc').value();
+      $scope.tposts.forEach(function(post){
+        Translate.toEnglish({text:post.text})
+          .$promise.then(translated=>{
+            post.text = translated[1];
+        });
+      });
+    })
     .catch(console.error);
+  };
+
+  $scope.getScoredPosts = function(job_id){
+    return ScoredPost.find({
+      filter: {
+        where: {
+          job_id:job_id
+        }
+      }
+    }).$promise
   };
 
   $scope.getTelegramData = function(window){
