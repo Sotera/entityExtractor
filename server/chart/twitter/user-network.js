@@ -195,7 +195,7 @@ module.exports = {
             .catch(reject);
           }, 100);
         })
-        .catch(reject);;
+        .catch(reject);
       })
       .catch(reject);
     });
@@ -238,22 +238,23 @@ module.exports = {
 
   execute(options, done) {
     debug(options)
+    const eventId = options.qs.eventid;
     if (twitter_scrape_method === 'twitter' && !twitterClient) {
       return done(new Error('twitter client not ready'));
     }
 
     let network; // for later in the chain
-    this.getEventNetwork(options.eventId)
+    this.getEventNetwork(eventId)
       .then(n => {
         // if running/complete, exit.
         if (n.status) throw new Error(`${n.id} status ${n.status}`);
         network = n
       })
-      .then(() => this.getEvent(options.eventId))
+      .then(() => this.getEvent(eventId))
       .then(event => this.getClusters(event.cluster_ids))
       .then(clusters => this.getPostIds(clusters))
       .then(postIds => this.getPosts(postIds))
-      .then(posts => this.getAuthorIds(posts, options.eventId))
+      .then(posts => this.getAuthorIds(posts, eventId))
       .then(authorRelations => this.getDataForAuthors([
           { endpoint:'friends/ids', key:'follows' },
           { endpoint:'followers/ids', key:'followers' }

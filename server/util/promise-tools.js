@@ -4,7 +4,8 @@
 
 module.exports = {
 
-  delay(interval) {
+  // interval in sec.
+  delay(interval=1) {
     return new Promise((res, rej) => {
       setTimeout(res, interval * 1000);
     });

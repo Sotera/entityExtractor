@@ -1,6 +1,7 @@
 'use strict';
 
-const jobs = require('../../lib/jobs');
+const jobs = require('../../lib/jobs'),
+  idGen = require('../../server/util/id-generator');
 
 module.exports = function(Chart) {
 
@@ -23,7 +24,8 @@ module.exports = function(Chart) {
           description: 'chart type'
         },
         {
-          arg: 'filter',
+          arg: 'qs',
+          description: 'querystring',
           type: 'object',
           http: ctx => ctx.req.query
         }
@@ -32,7 +34,7 @@ module.exports = function(Chart) {
     }
   );
 
-  Chart.chart = function(src, type, filter, cb) {
+  Chart.chart = function(src, type, qs, cb) {
     // check module exists
     let routeKey = `../../server/chart/${src}/${type}`,
       route = routes[routeKey];
@@ -45,13 +47,18 @@ module.exports = function(Chart) {
       routes[routeKey] = route;
     }
 
+    // for client to poll /jobs for job completion.
+    const jobId = idGen.randomish(0, 9999999999).toString();
+
+    // send to kue.
     jobs.create('chart data', {
-      eventId: filter.eventid,
+      qs,
       src,
       type,
-      ttl: 120
+      ttl: 60,
+      jobId
     });
 
-    cb(null, {ok: 1})
+    cb(null, { job_id: jobId })
   };
-};
+}
