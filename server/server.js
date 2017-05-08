@@ -2,19 +2,19 @@
 
 require('dotenv').config({silent: true});
 
-var loopback = require('loopback');
-var boot = require('loopback-boot');
-var app = module.exports = loopback();
-var path = require('path');
+let loopback = require('loopback');
+let boot = require('loopback-boot');
+let app = module.exports = loopback();
+let path = require('path');
 
 app.start = function() {
   // start the web server
   return app.listen(function() {
     app.emit('started');
-    var baseUrl = app.get('url').replace(/\/$/, '');
+    let baseUrl = app.get('url').replace(/\/$/, '');
     console.log('Web server listening at: %s', baseUrl);
     if (app.get('loopback-component-explorer')) {
-      var explorerPath = app.get('loopback-component-explorer').mountPath;
+      let explorerPath = app.get('loopback-component-explorer').mountPath;
       console.log('Browse your REST API at %s%s', baseUrl, explorerPath);
     }
   });
@@ -28,23 +28,30 @@ boot(app, __dirname, function(err) {
   // start the server if `$ node server.js`
   if (require.main === module) {
     // if WORKER_SCRIPT present, start it instead of api.
-    var scriptPath = process.env.WORKER_SCRIPT,
-      worker;
+    // 'worker' can be anything: websocket server, another http server, etc.
+    let scriptPath = process.env.WORKER_SCRIPT;
+
     if (scriptPath) {
-      scriptPath = path.join(__dirname, scriptPath);
-      console.log('Attempting to start worker at %s...', scriptPath);
-      try {
-        worker = require(scriptPath);
-      } catch(e) {
-        console.error('script path \'%s\' invalid? \
-Must be relative to %s', scriptPath, __dirname);
-        console.error(e);
-      }
-      worker.start();
-      console.log('%s started', scriptPath);
-      return;
+      return startWorker(scriptPath, app);
     } else {
       app.start();
     }
   }
 });
+
+function startWorker(scriptPath, app) {
+  let worker;
+
+  scriptPath = path.join(__dirname, scriptPath);
+  console.log('Attempting to start worker|server at %s...', scriptPath);
+  try {
+    worker = require(scriptPath);
+  } catch(e) {
+    console.error('script path \'%s\' invalid? \
+Must be relative to %s', scriptPath, __dirname);
+    console.error(e);
+  }
+  worker.start(app);
+  console.log('%s started', scriptPath);
+  return;
+}
