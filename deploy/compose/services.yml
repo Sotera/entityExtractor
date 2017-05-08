@@ -91,6 +91,12 @@ services:
     ports:
       - "9990:8888"
 
+  polyglot:
+    image: sotera/polyglot-server:1
+    hostname: polyglot
+    ports:
+      - "5000:5000"
+
   trained-models:
     image: sotera/trained-models:1
     hostname: trained-models
@@ -102,6 +108,15 @@ services:
       - "3000"
     ports:
       - "3005:3000"
+
+  score-text:
+    extends:
+      file: common.yml
+      service: analytic
+    image: sotera/score-text:1
+    hostname: score-text
+    depends_on:
+      - redis
 
   dr-manhattan:
     extends:

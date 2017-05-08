@@ -1,0 +1,52 @@
+{
+  "name": "scoredPost",
+  "description": "Posts' text scored via supervised learning programs",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "indexes": {
+    "idx_job_id": {
+      "keys": {
+        "job_id": 1
+      }
+    },
+    "idx_post_id": {
+      "keys": {
+        "post_id": 1
+      }
+    }
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "Timestamp": {},
+    "DestroyAll": {}
+  },
+  "properties": {
+    "job_id": {
+      "description": "a collection of posts for batch processing",
+      "type": "string",
+      "required": true
+    },
+    "text": {
+      "type": "string",
+      "required": true
+    },
+    "post_id": {
+      "type": "string",
+      "required": true
+    },
+    "score": {
+      "type": "string"
+    },
+    "score_type": {
+      "description": "service that scored the post",
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

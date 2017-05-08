@@ -111,5 +111,9 @@
   "eventNetwork": {
     "dataSource": "db",
     "public": true
+  },
+  "scoredPost": {
+    "dataSource": "db",
+    "public": true
   }
 }

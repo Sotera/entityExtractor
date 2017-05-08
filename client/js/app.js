@@ -31,6 +31,10 @@ angular.module('watchman', [
     templateUrl: '/app/pages/diagram',
     controller: 'DiagramCtrl'
   })
+  .when('/indications', {
+    templateUrl: '/app/pages/indications',
+    controller: 'IndicationsCtrl'
+  })
   .when('/events', {
     templateUrl: '/app/pages/events',
     controller: 'EventsCtrl'
