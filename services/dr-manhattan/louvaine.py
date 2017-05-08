@@ -5,6 +5,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from loopy import Loopy
 from text_utils import remove_punctuation
 from sentiment_filters import SentimentFilter
+from entity_extractor import EntityExtractor
 from operator import itemgetter as iget
 
 # big list: load it once
@@ -18,6 +19,7 @@ class Louvaine:
         self.nodes_detailed = {}
         self.geo_url = geo_url
         self.sf = SentimentFilter()
+        self.ent_ext = EntityExtractor()
 
         if base_url[-1] == '/':
             self.url = base_url
@@ -66,7 +68,7 @@ class Louvaine:
                     else:
                         r_o["campaigns"]["ids"][cam] = 1
 
-            locs = self.sf.extract_loc(doc['text'])
+            locs = self.ent_ext.extract(doc['text'], tag='I-LOC')
             for loc in locs:
                 print 'Location:', loc.encode('utf-8')
                 try:
