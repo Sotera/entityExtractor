@@ -15,9 +15,9 @@ docker build -f Dockerfile-rorschach # ... same as above
 # for Python 3 modules
 docker build -f Dockerfile-py3 # ... same as above
 
-# for Dr-Manhattan
-docker build -f Dockerfile-dr-manhattan -t sotera/dr-manhattan:<tag> --build-arg SERVICE=dr-manhattan --build-arg MAIN=myscript.py .
+# for Dr-Manhattan / polyglot-server
+docker build -f Dockerfile-dr-manhattan -t sotera/<service>:<tag> --build-arg SERVICE=<service> --build-arg MAIN=myscript.py .
 
-# for Pyspark
+# for PySpark
 docker build -f Dockerfile-pyspark -t sotera/score-text:<tag> --build-arg SERVICE=score-text --build-arg MAIN=myscript.py .
 ```

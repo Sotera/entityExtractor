@@ -10,10 +10,10 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 RUN apt-get update && apt-get install -y \
-    vim \
-    less \
-    nano \
-    libicu-dev
+  vim \
+  less \
+  nano \
+  libicu-dev
 
 RUN apt-get autoremove -y
 

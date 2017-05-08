@@ -3,9 +3,6 @@ import traceback
 # TODO: needed by flask but can't be used in score-text svc (polyglot doesn't work with conda/py 3.5)
 from polyglot.text import Text
 from stop_words import get_stop_words
-from nltk.tokenize import TweetTokenizer
-
-tknzr = TweetTokenizer()
 
 class SentimentFilter:
     def __init__(self):
@@ -30,8 +27,8 @@ class SentimentFilter:
 
     def is_scoreable(self, caption, lang, b_filter_url=True, b_filter_special=True):
         all_words = filter(lambda x: self.is_url(x) is False,
-                           self.tokenize(caption, lang, b_filter_url=b_filter_url, b_filter_special=b_filter_special)
-                          )
+            self.tokenize(caption, lang, b_filter_url=b_filter_url, b_filter_special=b_filter_special)
+        )
         if len(all_words) > 2:
             return True
         return False
@@ -54,7 +51,7 @@ class SentimentFilter:
             try:
                 if b_filter_special:
                     caption = ' '.join(filter(lambda x: self.is_special(x)==False, caption.split(' ')))
-                tokens = filter(lambda x: len(x)>1, tknzr.tokenize(caption))
+                tokens = filter(lambda x: len(x)>1, Text(caption).words)
                 if b_filter_url:
                     tokens = filter(lambda x: self.is_url(x) is not True, tokens)
                 if b_remove_stop:
@@ -83,12 +80,3 @@ class SentimentFilter:
                 return []
         else:
             return []
-
-    def extract_loc(self, caption):
-        try:
-            text = Text(caption)
-            ll = [u' '.join(list(x)) for x in filter(lambda x: x.tag=='I-LOC', text.entities)]
-            return set(ll)
-        except:
-            traceback.print_exc()
-            return set([])
