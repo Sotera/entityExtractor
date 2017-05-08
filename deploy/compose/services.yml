@@ -63,6 +63,18 @@ services:
       - "8703:8701"
       - "3002:3002"
 
+  node-red:
+    extends:
+      file: common.yml
+      service: loopback
+    hostname: node-red
+    depends_on:
+      - mongo
+    volumes_from:
+      - data-container
+    ports:
+      - "1880:1880"
+
   scheduler:
     extends:
       file: common.yml

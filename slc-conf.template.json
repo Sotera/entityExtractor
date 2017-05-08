@@ -34,6 +34,18 @@
     "cluster_size": 1
   },
   {
+    "name": "node-red",
+    "slc_host": "http://localhost:8704",
+    "env": [
+      "NODE_ENV=production",
+      "API_ROOT=http://172.17.0.1:3003/api",
+      "WORKER_SCRIPT=./servers/node-red",
+      "DEBUG=*node-red*",
+      "DB_HOST=mongo",
+    ],
+    "cluster_size": 1
+  },
+  {
     "name": "job-scheduler",
     "slc_host": "http://localhost:8705",
     "env": [
