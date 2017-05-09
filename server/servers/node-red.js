@@ -19,22 +19,23 @@ if (require.main === module)
   start();
 
 function start() {
-  // access Express app
   const app = express();
 
   // Add a simple route for static content served from 'public'
   // app.use('/', express.static('public'));
 
-  // Create a server
   const server = http.createServer(app);
 
-  // Create the settings object - see default settings.js file for other options
-  let settings = {
+  // flow file name: local user or USER or ubuntu
+  let user = process.env.NODE_RED_USER || process.env.USER || 'ubuntu',
+    settings = {
     httpAdminRoot: '/',
     httpNodeRoot: '/',
-    // ui: { path: 'ui' },
-    userDir: `${process.env.HOME}/.node-red-${VERSION}/`,
-    functionGlobalContext: { }  // enables global context
+    // from proj root
+    userDir: `./deploy/node-red-${VERSION}`,
+    flowFile: `flows_${user}.json`,
+    // for using global.get('process').env in nodes
+    functionGlobalContext: { process }
   };
 
   RED.init(server, settings);
@@ -47,6 +48,5 @@ function start() {
 
   server.listen(process.env.NODE_RED_PORT || 1880);
 
-  // Start the runtime
   RED.start();
 }
