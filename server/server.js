@@ -2,10 +2,10 @@
 
 require('dotenv').config({silent: true});
 
-let loopback = require('loopback');
-let boot = require('loopback-boot');
-let app = module.exports = loopback();
-let path = require('path');
+let loopback = require('loopback'),
+  boot = require('loopback-boot'),
+  app = module.exports = loopback(),
+  path = require('path');
 
 app.start = function() {
   // start the web server

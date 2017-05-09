@@ -2,13 +2,12 @@
 
 // def: start and monitor job sets
 
+require('dotenv').config({silent: true});
+
 const app = require('../server'),
   debug = require('debug')('job-scheduler'),
   _ = require('lodash');
 
-try {
-  require('dotenv').config({silent: true});
-} catch(ex) {}
 
 const API_ROOT = process.env.API_ROOT;
 if (!API_ROOT) {

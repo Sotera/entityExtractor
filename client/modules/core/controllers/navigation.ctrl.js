@@ -10,4 +10,8 @@ function NavigationCtrl($scope, $window) {
     $window.open(kueUrl);
   };
 
+  $scope.openNodeRed = function() {
+    let nrUrl = `//${window.location.hostname}:1880/ui`;
+    $window.open(nrUrl);
+  };
 }
