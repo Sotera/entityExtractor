@@ -73,6 +73,7 @@ services:
     volumes_from:
       - data-container
     ports:
+      - "8704:8701"
       - "1880:1880"
 
   scheduler:
