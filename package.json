@@ -39,6 +39,8 @@
     "node-dir": "^0.1.14",
     "node-geocoder": "^3.8.0",
     "node-ner": "git+https://github.com/Sotera/node-ner.git",
+    "node-red": "^0.16.2",
+    "node-red-dashboard": "^2.3.10",
     "redis": "^2.6.2",
     "request": "^2.69.0",
     "request-json": "^0.6.1",
