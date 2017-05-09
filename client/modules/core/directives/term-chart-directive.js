@@ -23,16 +23,20 @@ function termChartDirective() {
       ctrls.create();
     });
 
+    scope.$watch('maxDate', function() {
+      ctrls.create();
+    });
+
   }
 }
 
 function termChartController($scope, SocialMediaPost) {
   this.create = create;
 
-  function create(event, callback) {
+  function create() {
     let minute = 60 * 1000;
     let intervalSize = $scope.interval * minute;
-    let maxDate = Date.now();
+    let maxDate = $scope.maxDate.getTime();
     let queryTime = maxDate;
 
     let minDate = maxDate - $scope.windowCount*intervalSize;
@@ -47,14 +51,12 @@ function termChartController($scope, SocialMediaPost) {
     Promise.all($scope.terms.map(term =>{
       return Promise.all(windows.map(window=>{
         return SocialMediaPost.count({
-          /*filter: {*/
            where: {
               lang:'en',
               featurizer: 'text',
               text:{like:term},
               timestamp_ms:{between:[window.startTime,window.endTime]}
            }
-            /* }*/
         }).$promise.then(results => {
           if(results.count > maxY)maxY = results.count;
           return {count:results.count, term:term, window:window};

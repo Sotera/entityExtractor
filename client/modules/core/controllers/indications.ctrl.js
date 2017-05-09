@@ -13,7 +13,8 @@ function IndicationsCtrl($scope, ScoredPost, SocialMediaPost, Translate, Extract
   $scope.clusterTerm = '';
   $scope.interval = 1440;
   $scope.windowCount = 7;
-  $scope.terms = ["assad","missile","syria","putin"];
+  $scope.maxDate = new Date();
+  $scope.terms = ['us troops', 'joint patrol', 'us soldiers'];
   $scope.removeTerm = function(term){
     $scope.terms.splice($scope.terms.indexOf(term),1);
   };
@@ -24,7 +25,7 @@ function IndicationsCtrl($scope, ScoredPost, SocialMediaPost, Translate, Extract
 
   $scope.forPosts= function(posts) {
     $scope.posts = _(posts).orderBy(p => p.screen_name.toLowerCase()).value();
-    createPostsCharts(posts);
+    $scope.createPostsCharts(posts);
   };
 
 

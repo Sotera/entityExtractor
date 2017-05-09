@@ -11,12 +11,17 @@ h5 click circles in chart to load data
     h3 settings
     .row
       .col-md-12
-        |Interval size in minutes:
-        input.form-control(ng-model='interval')
+        | The chart end date:
+        input.form-control(type = 'date', ng-model='maxDate')
     .row
       .col-md-12
-        | Number of intervals from now:
+        | The number of intervals back from the chart end date:
         input.form-control(ng-model='windowCount')
+    .row
+      .col-md-12
+        | The interval size in minutes (1440 = 1 day):
+        input.form-control(ng-model='interval')
+
 
     h3 Terms
     .row
@@ -101,10 +106,3 @@ h5 click circles in chart to load data
                   td {{post.text}}
                   td {{post.score}}
                   td {{post.post_id}}
-                  //td
-                  //  a(ng-click='loadAuthorUrl(post)')
-                  //    | {{post.user.screen_name}}
-                  //    br
-                  //    img(ng-src='{{post.user.profile_image_url}}' style='border:0; width:48px; height:48px')
-                  //td(ng-class='{highlight: (selectedImageUrl && selectedImageUrl === post.user.profile_image_url)}') {{post.text}}
-                  //td: a(ng-href='{{post.post_url}}' target='_blank') visit
