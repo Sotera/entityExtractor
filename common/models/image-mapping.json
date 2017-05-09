@@ -1,0 +1,38 @@
+{
+  "name": "imageMapping",
+  "description": "Map posts to preprocessed image attrs: url, downloaded file, etc.",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "indexes": {
+    "idx_uniq": {
+      "keys": {
+        "post_id": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "initially, the broadcast_post_id from smposts",
+      "required": true
+    },
+    "primary_image_url": {
+      "type": "string",
+      "required": true
+    },
+    "primary_image_download_path": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

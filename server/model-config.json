@@ -111,5 +111,9 @@
   "eventNetwork": {
     "dataSource": "db",
     "public": true
+  },
+  "imageMapping": {
+    "dataSource": "db",
+    "public": true
   }
 }
