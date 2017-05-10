@@ -1,21 +1,31 @@
+# builds
 node_modules
 client/bower_components
 client/build
+
+# editors, dev files
 temp
 .idea
 *.log
-.env
 *.pyc
 *.bak
 tmp
 .swp
+
+# deploy
+.env
 slc-conf.json
 docker-compose.override.yml
+
+# jupyter
 .ipynb_checkpoints
 *.ipynb
 **/pyspark-mongo-jupyter/data
 **/pyspark-mongo-jupyter/nb
 !**/pyspark-mongo-jupyter/nb/keep/*.ipynb
 *.pkl
+
+# node-red
 .config.json
 *.backup
+*_cred.json
