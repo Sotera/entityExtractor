@@ -1,22 +1,63 @@
 #!/bin/bash
 
 ## example call
-## ./stage.sh -h 54.87.253.51 -s 1490729833207 -e 1490731633206 -k "../../../.ssh/MFrame_Datawake.pem" -p 27017
+## ./stage.sh -h 1.1.1.1 -s 1490729833207 -e 1490731633206 -i "../../../.ssh/MyKeyFile.pem" -p 27017
 
 REMOTE_DB="rancor"
 LOCAL_DB="rancor"
 
-while getopts k:h:p:e:s: option
+usage="$(basename "$0") [-h] [-i] [-r] [-p] [-s] [-e] -- stage the a local watchman instance from data on a remote instance
+
+where:
+    -h  print this text
+    -i  path to ssh key file
+    -r  remote mongodb host (ip)
+    -p  mongodb port on the remote host
+    -s  start time in ms
+    -e  end time in ms"
+
+iflag=false
+rflag=false
+pflag=false
+sflag=false
+eflag=false
+
+while getopts ':hi:r:p:s:e:' option
 do
- case "${option}"
- in
- k) KEYFILEPATH=${OPTARG};;
- h) HOST=${OPTARG};;
- p) PORT=${OPTARG};;
- e) ENDTIMEMS=${OPTARG};;
- s) STARTTIMEMS=${OPTARG};;
- esac
+   case $option in
+     h) echo "$usage"
+        exit
+        ;;
+     i) KEYFILEPATH=$OPTARG
+        iflag=true
+        ;;
+     r) HOST=$OPTARG
+        rflag=true
+        ;;
+     p) PORT=$OPTARG
+        pflag=true
+        ;;
+     s) STARTTIMEMS=$OPTARG
+        sflag=true
+        ;;
+     e) ENDTIMEMS=$OPTARG
+        eflag=true
+        ;;
+     \?) echo "Unknown option: -$OPTARG" >&2; exit 1;;
+     :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+     *) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+   esac
 done
+shift $(($OPTIND - 1))
+
+if [ $iflag = false ] || [ $rflag = false ] || [ $pflag = false ] || [ $sflag = false ] || [ $eflag = false ]
+then
+    echo  "
+          ****** ALL FLAGS MUST BE PROVIDED! *****
+          "
+    echo "$usage"
+    exit 1
+fi
 
 ## add -v to get verbose info to debug ssh connection
 ssh -M -S my-ctrl-socket -i $KEYFILEPATH ubuntu@$HOST -L 9999:localhost:$PORT -fnNT
@@ -53,7 +94,7 @@ echo "Removing dump files..."
 rm -r dump
 
 ## RESET SOCIAL MEDIA POSTS TO "NEW" STATE
-mongo --eval "db=db.getSiblingDB('rancor');db.socialMediaPost.update({}, {\$set: {state: 'new'}}, {multi: 1})"
+## mongo --eval "db=db.getSiblingDB('rancor'); db.socialMediaPost.update({}, {\$set: {state: 'new'}}, {multi: 1})"
 
 echo =============================================================
 echo set SYSTEM_START_TIME in your .env file to $STARTTIMEMS
