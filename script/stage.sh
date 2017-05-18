@@ -3,6 +3,7 @@
 ## example call
 ## ./stage.sh -h 1.1.1.1 -s 1490729833207 -e 1490731633206 -i "../../../.ssh/MyKeyFile.pem" -p 27017
 
+## assume we are using rancor...cause we are
 REMOTE_DB="rancor"
 LOCAL_DB="rancor"
 
@@ -16,11 +17,11 @@ where:
     -s  start time in ms
     -e  end time in ms"
 
-iflag=false
-rflag=false
-pflag=false
-sflag=false
-eflag=false
+i_flag=false
+r_flag=false
+p_flag=false
+s_flag=false
+e_flag=false
 
 while getopts ':hi:r:p:s:e:' option
 do
@@ -28,20 +29,20 @@ do
      h) echo "$usage"
         exit
         ;;
-     i) KEYFILEPATH=$OPTARG
-        iflag=true
+     i) KEY_FILE_PATH=$OPTARG
+        i_flag=true
         ;;
      r) HOST=$OPTARG
-        rflag=true
+        r_flag=true
         ;;
      p) PORT=$OPTARG
-        pflag=true
+        p_flag=true
         ;;
-     s) STARTTIMEMS=$OPTARG
-        sflag=true
+     s) START_TIME_MS=$OPTARG
+        s_flag=true
         ;;
-     e) ENDTIMEMS=$OPTARG
-        eflag=true
+     e) END_TIME_MS=$OPTARG
+        e_flag=true
         ;;
      \?) echo "Unknown option: -$OPTARG" >&2; exit 1;;
      :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
@@ -50,17 +51,37 @@ do
 done
 shift $(($OPTIND - 1))
 
-if [ $iflag = false ] || [ $rflag = false ] || [ $pflag = false ] || [ $sflag = false ] || [ $eflag = false ]
+if [ $i_flag = false ] || [ $r_flag = false ] || [ $p_flag = false ] || [ $s_flag = false ] || [ $e_flag = false ]
 then
     echo  "
-          ****** ALL FLAGS MUST BE PROVIDED! *****
-          "
+****** ALL FLAGS MUST BE PROVIDED! *****"
+    if [ $i_flag = false ]
+    then
+      echo "*** missing -i"
+    fi
+    if [ $r_flag = false ]
+    then
+      echo "*** missing -r"
+    fi
+    if [ $p_flag = false ]
+    then
+      echo "*** missing -p"
+    fi
+    if [ $s_flag = false ]
+    then
+      echo "*** missing -s"
+    fi
+    if [ $e_flag = false ]
+    then
+      echo "*** missing -e"
+    fi
+    echo
     echo "$usage"
     exit 1
 fi
 
 ## add -v to get verbose info to debug ssh connection
-ssh -M -S my-ctrl-socket -i $KEYFILEPATH ubuntu@$HOST -L 9999:localhost:$PORT -fnNT
+ssh -M -S my-ctrl-socket -i $KEY_FILE_PATH ubuntu@$HOST -L 9999:localhost:$PORT -fnNT
 ssh -S my-ctrl-socket -O ubuntu@$HOST
 
 ##Query Example
@@ -72,13 +93,13 @@ echo mongodump --host localhost:9999 --db $REMOTE_DB --collection "setting"
 mongodump --host localhost:9999 --db $REMOTE_DB --collection "setting"
 
 ## DUMP THE REMOTE SOCIAL MEDIA POST COLLECTION
-QUERY_SOCIAL_MEDIA_POST="{'timestamp_ms':{\$gte:$STARTTIMEMS,\$lte:$ENDTIMEMS}}"
+QUERY_SOCIAL_MEDIA_POST="{'timestamp_ms':{\$gte:$START_TIME_MS,\$lte:$END_TIME_MS}}"
 echo "Dumping '$HOST:$PORT/$REMOTE_DB/SocialMediaPost'..."
 echo mongodump --host localhost:9999 --db $REMOTE_DB --query $QUERY_SOCIAL_MEDIA_POST --collection "socialMediaPost"
 mongodump --host localhost:9999 --db $REMOTE_DB --query $QUERY_SOCIAL_MEDIA_POST --collection "socialMediaPost"
 
 ## DUMP THE REMOTE POSTS CLUSTER COLLECTION
-QUERY_POSTS_CLUSTER="{'start_time_ms':{\$gte:$(expr $STARTTIMEMS - 604800000),\$lte:$STARTTIMEMS}}"
+QUERY_POSTS_CLUSTER="{'start_time_ms':{\$gte:$(expr $START_TIME_MS - 604800000),\$lte:$START_TIME_MS}}"
 echo "Dumping '$HOST:$PORT/$REMOTE_DB/postsClusters'..."
 echo mongodump --host localhost:9999 --db $REMOTE_DB --query $QUERY_POSTS_CLUSTER --collection "postsCluster"
 mongodump --host localhost:9999 --db $REMOTE_DB --query $QUERY_POSTS_CLUSTER --collection "postsCluster"
@@ -97,7 +118,7 @@ rm -r dump
 ## mongo --eval "db=db.getSiblingDB('rancor'); db.socialMediaPost.update({}, {\$set: {state: 'new'}}, {multi: 1})"
 
 echo =============================================================
-echo set SYSTEM_START_TIME in your .env file to $STARTTIMEMS
-echo set JOBSET_QUERYSPAN_MIN in your .env file to $(expr $(expr $ENDTIMEMS - $STARTTIMEMS + 1) / 60000)
+echo set SYSTEM_START_TIME in your .env file to $START_TIME_MS
+echo set JOBSET_QUERYSPAN_MIN in your .env file to $(expr $(expr $END_TIME_MS - $START_TIME_MS + 1) / 60000)
 echo =============================================================
 echo "Done."
