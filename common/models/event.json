@@ -49,11 +49,6 @@
         "object"
       ]
     },
-    "domains": {
-      "type": [
-        "string"
-      ]
-    },
     "keywords": {
       "type": [
         "object"
