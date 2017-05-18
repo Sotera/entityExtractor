@@ -24,21 +24,9 @@ def err_check(job):
         set_err(job, "No 'min_post' in job fields")
 
 def process_message(key, job):
-
-
-    # if type == 'featurizer', immediately process and return b/c hashtags
-    # are not featurized. allows system to continue with clustering process.
-    if job.get('type') == 'featurizer':
-        job['state'] = 'processed'
-        job['data'] = []
-        return
-
     err_check(job)
     if job['state'] == 'error':
         return
-
-    query_url = os.getenv('QUERY_URL', job['query_url'])
-    result_url = os.getenv('RESULT_URL', job['result_url'])
 
     print 'FINDING SIMILARITY'
     print 'min_post set to %s' % job['min_post']
@@ -82,12 +70,6 @@ def process_message(key, job):
         for doc in page:
             hash_clust.process_vector(doc['id'], doc['post_id'], doc['hashtags'])
 
-    if int(os.getenv('TRUNCATE_POSTS') or 0):
-        print 'Truncating posts...'
-        print truncate_posts(hash_clust.get_deletable_ids(), loopy)
-    else:
-        print 'Skipping truncate posts because TRUNCATE_POSTS env var is not set...'
-
     print 'FINISHED SIMILARITY PROCESSING'
     for k, v in hash_clust.get_clusters().iteritems():
         cluster = {
@@ -115,12 +97,9 @@ def process_message(key, job):
         job['state'] = 'processed'
 
 
-def truncate_posts(deletable_ids, loopy):
-    return loopy.post_result('/destroy', {'ids': deletable_ids})
-
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
                             process_func=process_message,
-                            queues=['genie:feature_hash', 'genie:clust_hash'])
+                            queues=['genie:clust_hash'])
     dispatcher.start()
 

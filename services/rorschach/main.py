@@ -12,10 +12,10 @@ def set_err(job, msg):
 
 def process_message(key, job):
     # Examine job for correct fields
-    if 'txt' not in job.keys():
+    if 'txt' not in job:
         set_err(job, "No 'txt' in job fields")
         return
-    if 'lang' not in job.keys():
+    if 'lang' not in job:
         set_err(job, "No 'lang' in job fields")
         return
 

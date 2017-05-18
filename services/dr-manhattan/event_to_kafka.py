@@ -43,7 +43,6 @@ def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
             'relevant': True,
             'startDate': datetime.fromtimestamp(rec['start_time_ms']/1000.0).isoformat(),
             'endDate': datetime.fromtimestamp(rec['end_time_ms']/1000.0).isoformat(),
-            'domains': rec['domains'],
             'hashtags': hashtags,
             'keywords': keywords,
             'urls': rec['urls'],

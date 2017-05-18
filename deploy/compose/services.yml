@@ -140,8 +140,6 @@ services:
       service: analytic
     image: sotera/comedian:20
     hostname: hashtag-clusterer
-    environment:
-      - TRUNCATE_POSTS=1
     depends_on:
       - redis
 
@@ -160,8 +158,6 @@ services:
       service: analytic
     image: sotera/feature-sim:10
     hostname: feature-sim
-    environment:
-      - TRUNCATE_POSTS=1
     depends_on:
       - redis
 
