@@ -1,4 +1,0 @@
-redis
-requests
-scipy
-numpy
