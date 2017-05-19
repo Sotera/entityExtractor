@@ -124,7 +124,7 @@ echo "Removing dump files..."
 rm -r dump
 
 ## RESET SOCIAL MEDIA POSTS TO "NEW" STATE
-## mongo --eval "db=db.getSiblingDB('rancor'); db.socialMediaPost.update({}, {\$set: {state: 'new'}}, {multi: 1})"
+mongo --eval "db=db.getSiblingDB('rancor'); db.socialMediaPost.update({}, {\$set: {state: 'new'}}, {multi: 1})"
 
 echo =============================================================
 echo set SYSTEM_START_TIME of the Scheduler secion in your slc-conf.json file to $START_TIME_MS
