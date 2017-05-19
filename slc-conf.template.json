@@ -41,7 +41,7 @@
       "API_ROOT=http://172.17.0.1:3003/api",
       "WORKER_SCRIPT=./servers/node-red",
       "DEBUG=*node-red*",
-      "DB_HOST=mongo",
+      "DB_HOST=mongo"
     ],
     "cluster_size": 1
   },

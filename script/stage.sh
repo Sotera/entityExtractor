@@ -127,7 +127,7 @@ rm -r dump
 ## mongo --eval "db=db.getSiblingDB('rancor'); db.socialMediaPost.update({}, {\$set: {state: 'new'}}, {multi: 1})"
 
 echo =============================================================
-echo set SYSTEM_START_TIME in your .env file to $START_TIME_MS
-echo set JOBSET_QUERYSPAN_MIN in your .env file to $(expr $(expr $END_TIME_MS - $START_TIME_MS + 1) / 60000)
+echo set SYSTEM_START_TIME of the Scheduler secion in your slc-conf.json file to $START_TIME_MS
+echo set JOBSET_QUERYSPAN_MIN of the Scheduler secion in your slc-conf.json file to $(expr $(expr $END_TIME_MS - $START_TIME_MS + 1) / 60000)
 echo =============================================================
 echo "Done."
