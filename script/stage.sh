@@ -102,13 +102,13 @@ echo mongodump --host localhost:$TUNNEL_PORT --db $REMOTE_DB --collection "setti
 mongodump --host localhost:$TUNNEL_PORT --db $REMOTE_DB --collection "setting"
 
 ## DUMP THE REMOTE SOCIAL MEDIA POST COLLECTION
-QUERY_SOCIAL_MEDIA_POST="{'timestamp_ms':{\$gte:$START_TIME_MS,\$lte:$END_TIME_MS}}"
+QUERY_SOCIAL_MEDIA_POST="{'state':{\$ne:'new'},'timestamp_ms':{\$gte:$START_TIME_MS,\$lte:$END_TIME_MS}}"
 echo "Dumping '$HOST:$PORT/$REMOTE_DB/SocialMediaPost'..."
 echo mongodump --host localhost:$TUNNEL_PORT --db $REMOTE_DB --query $QUERY_SOCIAL_MEDIA_POST --collection "socialMediaPost"
 mongodump --host localhost:$TUNNEL_PORT --db $REMOTE_DB --query $QUERY_SOCIAL_MEDIA_POST --collection "socialMediaPost"
 
 ## DUMP THE REMOTE POSTS CLUSTER COLLECTION
-QUERY_POSTS_CLUSTER="{'start_time_ms':{\$gte:$(expr $START_TIME_MS - 604800000),\$lte:$START_TIME_MS}}"
+QUERY_POSTS_CLUSTER="{'start_time_ms':{\$gte:$(expr $START_TIME_MS - 604800000),\$lt:$START_TIME_MS}}"
 echo "Dumping '$HOST:$PORT/$REMOTE_DB/postsClusters'..."
 echo mongodump --host localhost:$TUNNEL_PORT --db $REMOTE_DB --query $QUERY_POSTS_CLUSTER --collection "postsCluster"
 mongodump --host localhost:$TUNNEL_PORT --db $REMOTE_DB --query $QUERY_POSTS_CLUSTER --collection "postsCluster"
