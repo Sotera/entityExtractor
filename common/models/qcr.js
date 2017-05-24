@@ -51,7 +51,6 @@ module.exports = function(Qcr) {
     processedAttrs.text = attrs.text || '';
     processedAttrs.image_urls = attrs.image_urls || [];
     processedAttrs.hashtags = attrs.hashtags || [];
-    processedAttrs.domains = attrs.domains || [];
 
     // Twitter-specific modifications
     processedAttrs = preprocessor(processedAttrs);
