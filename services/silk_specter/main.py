@@ -46,5 +46,5 @@ if __name__ == '__main__':
     if args.englishModel != '':
         topic_modeler.load_lang('en', args.modelPath, args.englishModel)
     dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
-        queues=['genie:feature_txt'])
+        queues=['genie:topic_txt'])
     dispatcher.start()
