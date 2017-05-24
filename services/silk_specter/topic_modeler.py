@@ -13,7 +13,7 @@ class TopicModeler:
 
     def load_lang(self, lang, model_path, model_name):
         if model_path[-1] != "/":
-            medel_path = model_path + "/"
+            model_path = model_path + "/"
         self.models[lang] = LdaModel.load(model_path + model_name)
 
     def assign_topics(self, lang, text):
