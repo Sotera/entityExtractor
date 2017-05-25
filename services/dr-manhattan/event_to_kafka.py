@@ -17,7 +17,7 @@ def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
 
     loc = sorted(rec['location'], key=iget('weight'), reverse=True)
     o_loc = None
-    if len(loc) > 0:
+    if len(loc):
         o_loc = {
             "type": "Point",
             "coordinates": [
@@ -35,11 +35,14 @@ def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
     for camp in camps:
         keywords = map(iget(0), sorted(rec['keywords'], key=iget(1), reverse=True))
         hashtags = map(iget(0), sorted(rec['hashtags'], key=iget(1), reverse=True))
+        # per QCR: send top kwd if no hashtags
+        if not len(hashtags):
+            hashtags = [keywords[0]]
 
         event = {
             'uid': rec['id'],
-            'label': rec['hashtags'][0][0] if len(rec['hashtags']) > 0 else
-                        rec['keywords'][0][0] if len(rec['keywords']) > 0 else 'None',
+            'label': rec['hashtags'][0][0] if len(rec['hashtags']) else
+                rec['keywords'][0][0] if len(rec['keywords']) else 'None',
             'relevant': True,
             'startDate': datetime.fromtimestamp(rec['start_time_ms']/1000.0).isoformat(),
             'endDate': datetime.fromtimestamp(rec['end_time_ms']/1000.0).isoformat(),
@@ -48,7 +51,7 @@ def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
             'urls': rec['urls'],
             'photos': rec['image_urls'],
             'importanceScore': camp[1],
-            'topicMessageCount':rec['topic_message_count'],
+            'topicMessageCount': rec['topic_message_count'],
             'campaignId': camp[0],
             'newsEventIds': [],
             'location': o_loc
@@ -117,6 +120,7 @@ def stream_events(l_clusts, job, debug=False):
         for clust in l_clusts:
             kds.extend(to_qcr_format(clust, job, debug=debug))
     except Exception as exc:
+        print exc
         traceback.print_exc()
 
     if kafka_url == 'print':
