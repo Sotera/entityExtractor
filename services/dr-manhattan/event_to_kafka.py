@@ -8,8 +8,6 @@ from loopy import Loopy
 from switch import switch
 from operator import itemgetter as iget
 
-MIN_ANNOTATION_MATCH_SCORE = float(getenv('MIN_ANNOTATION_MATCH_SCORE', 0.6))
-
 def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
     if debug:
         print "Start conv, doing location"
@@ -56,60 +54,10 @@ def to_qcr_format(rec, job, campaign_thresh = 0.7, debug=False):
             'newsEventIds': [],
             'location': o_loc
         }
-        if len(rec["hashtags"])>0:
-            annotate_event(event, {"features":rec['hashtags']}, job)
+
         l_rec.append(event)
 
     return l_rec
-
-
-def annotate_event(event, event_features, job):
-    print 'annotating community: '
-
-    annotations_url = '{}annotations'.format(job['api_root'])
-
-    query_params = [{
-        'query_type': 'where',
-        'property_name': 'campaign',
-        'query_value': event['campaignId']
-    }]
-
-    loopy = Loopy(annotations_url, query_params)
-
-    # if no events in prior window, create new event
-    if loopy.result_count == 0:
-        print 'no annotations found'
-        return
-
-    matched_relevant_annotation, match_relevant_score = None, 0
-    matched_label_annotation, match_label_score = None, 0
-
-    while True:
-        page = loopy.get_next_page()
-        if page is None:
-            break
-        for annotation in page:
-            score = math_utils.dot_comparison(event_features, annotation, key='features')
-            print 'score: {}'.format(score)
-            for case in switch(annotation['type'].lower()):
-                if case('label'):
-                    if score > match_label_score:
-                        match_label_score = score
-                        matched_label_annotation = annotation
-                    break
-                if case('relevant'):
-                    if score > match_relevant_score:
-                        match_relevant_score = score
-                        matched_relevant_annotation = annotation
-                    break
-                if case():
-                    print('huh?')
-
-    if matched_label_annotation is not None and match_label_score >= MIN_ANNOTATION_MATCH_SCORE:
-        event['label'] = matched_label_annotation['name']
-    if matched_relevant_annotation is not None and match_relevant_score >= MIN_ANNOTATION_MATCH_SCORE:
-        event['relevant'] = matched_relevant_annotation['relevant']
-
 
 def stream_events(l_clusts, job, debug=False):
     print "Converting to QCR format"
