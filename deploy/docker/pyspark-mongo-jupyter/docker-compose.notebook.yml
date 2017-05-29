@@ -16,9 +16,10 @@ services:
   pyspark-nb:
     networks:
       - watchman
-    image: sotera/pyspark-mongo-jupyter:3
+    image: sotera/pyspark-mongo-jupyter:4
     ports:
       - "8888:8888"
+      - "6006:6006"
     environment:
       GRANT_SUDO: "yes"
     extends:
@@ -28,7 +29,7 @@ services:
   master:
     networks:
       - watchman
-    image: sotera/pyspark-mongo-jupyter:3
+    image: sotera/pyspark-mongo-jupyter:4
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master -h master
     environment:
       MASTER: spark://master:7077
@@ -56,7 +57,7 @@ services:
   worker:
     networks:
       - watchman
-    image: sotera/pyspark-mongo-jupyter:3
+    image: sotera/pyspark-mongo-jupyter:4
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
     environment:
       SPARK_CONF_DIR: /conf
