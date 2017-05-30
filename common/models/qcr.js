@@ -2,6 +2,7 @@
 
 const _ = require('lodash'),
   preprocessor = require('../../lib/preprocessors/twitter'),
+  traffic = require('../../lib/traffic-governor'),
   debug = require('debug')('qcr');
 
 // def: QCR endpoint to inspect post data and create SocialMediaPost entries.
@@ -23,6 +24,12 @@ module.exports = function(Qcr) {
   );
 
   Qcr.insert = function(req, cb) {
+
+    // run thru traffic governor
+    if (+process.env.GOVERN_ON && !traffic.allow())
+      // disallow, send back bogus success
+      return cb(null, {govern: 1});
+
     const attrs = req.body;
 
     // stop the deluge
