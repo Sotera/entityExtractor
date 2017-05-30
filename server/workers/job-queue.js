@@ -7,12 +7,13 @@ require('dotenv').config({silent: true});
 const app = require('../server'),
   { JobMonitor } = app.models,
   jobs = require('../../lib/jobs'),
-  _ = require('lodash'),
   PreprocessMonitor = require('../../lib/job-monitors/preprocess-monitor'),
   FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
   ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
   LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
-  createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor');
+  eventFinder = require('../../lib/event-finder'),
+  createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor'),
+  redis = require('../../lib/redis');
 
 module.exports = { start };
 
@@ -68,8 +69,7 @@ function linkerize(jobMonitor, done) {
     })
     .then(updateJobSet)
     .then(() => {
-      //TODO: Remove this when we turn event finding into a job monitor
-      findEvents(jobMonitor);
+      eventFinder.run(jobMonitor.start_time, jobMonitor.end_time);
       done();
     })
     .catch(done);
@@ -128,40 +128,3 @@ function featurize(jobMonitor, done) {
   }
 }
 
-
-//// TODO: Remove these when event finding is turned into a job monitor.
-const redis = require('../../lib/redis'),
-  idGen = require('../util/id-generator'),
-  { API_ROOT, KAFKA_URL, KAFKA_TOPIC } = process.env;
-////
-
-//TODO: Remove this when we turn event finding into a job monitor
-function generateJobKey(keyPrefix) {
-  // N.B. not universally unique if queue is in-memory.
-  // assumes rare mishaps are ok.
-  return keyPrefix + idGen.randomish(0, 9999999999);
-}
-
-//TODO: Remove this when we turn event finding into a job monitor
-function findEvents(jobMonitor) {
-  const queueName = 'genie:eventfinder',
-    key = generateJobKey(queueName),
-    jobAttrs = {
-      api_root: API_ROOT,
-      start_time: jobMonitor['start_time'].toString(),
-      end_time: jobMonitor['end_time'].toString(),
-      state: 'new'
-    };
-
-  if (KAFKA_URL) {
-    jobAttrs.kafka_url = KAFKA_URL;
-  }
-  if (KAFKA_TOPIC) {
-    jobAttrs.kafka_topic = KAFKA_TOPIC;
-  }
-
-  return redis
-    .hmset(key, jobAttrs)
-    .then(() => redis.lpush(queueName, key))
-    .catch(err => console.error(key, err.stack));
-}

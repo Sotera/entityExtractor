@@ -1,4 +1,4 @@
-import community, sys, os, uuid, traceback
+import community, sys, os, uuid, traceback, operator
 import networkx as nx
 from random import sample
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
@@ -14,10 +14,11 @@ stop_file = open(stop_path, 'r')
 stop_list = {w.strip('\n').strip('\r') for w in stop_file}
 
 class Louvaine:
-    def __init__(self, base_url, geo_url):
+    def __init__(self, base_url, geo_url, geo_threshold):
         self.graph = nx.Graph()
         self.nodes_detailed = {}
         self.geo_url = geo_url
+        self.geo_threshold = geo_threshold
         self.sf = SentimentFilter()
         self.ent_ext = EntityExtractor()
 
@@ -130,8 +131,10 @@ class Louvaine:
                         "lat": place['latitude'],
                         "lng":place['longitude']}
                     ],
-                    "weight":weight
+                    "weight": weight
                 }
+
+        r_o['location'] = dict((k, v) for k, v in r_o['location'].items() if v['weight'] >= self.geo_threshold)
 
         for url in list(websites):
             r_o['urls'].add(url)

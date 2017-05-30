@@ -176,10 +176,6 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
           if (_.isEmpty(location.label))
             return;
 
-          // country weight is .05
-          if (location.weight < 0.05)
-            return;
-
           points[location.label] = {
             lat: location.coords[0].lat,
             lng: location.coords[0].lng,
