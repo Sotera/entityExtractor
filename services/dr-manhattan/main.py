@@ -23,6 +23,8 @@ def process_message(key,job):
     api_root = job['api_root']
     ts_end = job['end_time']
 
+    geo_threshold = 5.0 if 'geo_threshold' not in job else float(job['geo_threshold'])
+
     if api_root[-1] != '/': api_root += '/'
     job['api_root'] = api_root
 
@@ -32,7 +34,7 @@ def process_message(key,job):
         "query_value": ts_end
     }]
     com = Louvaine(api_root,
-       '{}geocoder/forward-geo'.format(api_root))
+       '{}geocoder/forward-geo'.format(api_root), geo_threshold)
 
     nodes_to_lookup = set()
     nodes_to_add = list()
@@ -128,6 +130,5 @@ if __name__ == '__main__':
     dispatcher.start()
 
     #job = {'start_time': '1490209183577', 'state': 'new', 'end_time': '1490209483576', 'api_root': 'http://172.17.0.1:3003/api'}
-    # job = {'start_time': '1481124894000', 'state': 'new', 'end_time': '1481125013999', 'api_root': 'http://172.17.0.1:3000/api',
-    #     'kafka_url': 'kafka', 'kafka_topic': 'test:1:1'}
+    #job = {u'start_time': u'1495826344820', u'state': u'new', u'end_time': u'1495826644819', u'api_root': u'http://172.17.0.1:3003/api'}
     #process_message(1, job)
