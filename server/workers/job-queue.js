@@ -11,7 +11,7 @@ const app = require('../server'),
   FeaturizeMonitor = require('../../lib/job-monitors/featurize-monitor'),
   ClusterizeMonitor = require('../../lib/job-monitors/clusterize-monitor'),
   LinkerMonitor = require('../../lib/job-monitors/linker-monitor'),
-  EventFinder = require('../../lib/event-finder'),
+  eventFinder = require('../../lib/event-finder'),
   createLinkerMonitor = require('../../lib/job-monitors/create-linker-monitor'),
   redis = require('../../lib/redis');
 
@@ -69,7 +69,7 @@ function linkerize(jobMonitor, done) {
     })
     .then(updateJobSet)
     .then(() => {
-      EventFinder.findEvents(jobMonitor.start_time, jobMonitor.end_time);
+      eventFinder.run(jobMonitor.start_time, jobMonitor.end_time);
       done();
     })
     .catch(done);
