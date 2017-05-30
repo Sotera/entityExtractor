@@ -17,5 +17,5 @@ class TopicModeler:
         self.models[lang] = LdaModel.load(model_path + model_name)
 
     def assign_topics(self, lang, text):
-        tokens = self.sf(text, lang)
+        tokens = self.sf.tokenize(text, lang)
         return self.models[lang][self.models[lang].id2word.doc2bow(tokens)]

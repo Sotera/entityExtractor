@@ -1,4 +1,4 @@
 redis
 gensim
 polyglot
-stopwords
+stop_words

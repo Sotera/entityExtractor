@@ -2,7 +2,6 @@ import sys, os, argparse
 from topic_modeler import TopicModeler
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
-from sentiment_filters import SentimentFilter
 
 def set_err(job, msg):
     job['state'] = 'error'
@@ -37,7 +36,7 @@ def process_message(key, job):
 if __name__ == '__main__':
     ar = argparse.ArgumentParser()
     ar.add_argument("-modelPath", help="Path to model (e.g. ./models)")
-    ar.add_argument("-englishModel", help="Name of Engilsh model")
+    ar.add_argument("-englishModel", help="Name of English model")
     args = ar.parse_args()
     print "Making filter"
     global topic_modeler
