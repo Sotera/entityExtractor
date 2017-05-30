@@ -10,7 +10,7 @@ temp
 *.pyc
 *.bak
 tmp
-.swp
+*.swp
 
 # deploy
 .env

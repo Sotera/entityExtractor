@@ -88,12 +88,6 @@
       ],
       "default": []
     },
-    "domains": {
-      "type": [
-        "string"
-      ],
-      "default": []
-    },
     "featurizer": {
       "type": "string",
       "required": true,
