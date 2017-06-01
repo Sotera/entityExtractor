@@ -18,6 +18,9 @@ class Client(object):
     def write(self, df, mode='append'):
         df.write.format(mongo_fmt).mode(mode).options(**self.mongo_uri).save()
 
+    def stop(self):
+        self.spark.stop()
+
     # getters/setters
     @property
     def collection(self):

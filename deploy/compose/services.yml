@@ -116,6 +116,16 @@ services:
     ports:
       - "3005:3000"
 
+  event-classifier:
+    image: sotera/event-classifier:2
+    hostname: event-classifier
+    environment:
+      - SPARK_EXECUTOR_MEMORY=5g
+    expose:
+      - "4040"
+    depends_on:
+      - redis
+
   dr-manhattan:
     extends:
       file: common.yml

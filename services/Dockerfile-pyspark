@@ -1,4 +1,4 @@
-FROM sotera/pyspark-mongo-jupyter:3
+FROM sotera/pyspark-mongo-jupyter:4
 
 ENV TERM=xterm
 
