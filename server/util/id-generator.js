@@ -1,5 +1,7 @@
 'use strict';
 
+// def: generate id's for jobs, etc.
+
 module.exports = {
   // when random isn't uber important
   randomish(min, max) {
