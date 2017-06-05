@@ -30,7 +30,10 @@ class Classifier(object):
             'keywords', 'hashtags', 'image_urls',
             F.explode('cluster_ids').alias('cluster_id'))
 
-        clusters = self._readPostsClusters()
+        #### F.size() triggers an action (vs. transform)
+        #### so lets filter it by cluster_ids right away.
+        cluster_ids = list(events.toPandas()['cluster_id'].values)
+        clusters = self._readPostsClusters(cluster_ids)
 
         events_clusters = events.join(clusters,
             events['cluster_id'] == clusters['_id'])
@@ -90,12 +93,16 @@ class Classifier(object):
 
         self.spark.write(df_final)
 
-    def _readPostsClusters(self):
+    def _readPostsClusters(self, cluster_ids):
+        # change collection temporarily for this query
         self.spark.collection = 'postsCluster'
 
+        #### F.size() triggers an action (vs. transform)
+        #### so lets filter it by cluster_ids right away.
         clusters = self.spark.read()\
         .select('_id', 'similar_ids', 'data_type',
-            F.size('similar_ids').alias('posts_cnt'))
+            F.size('similar_ids').alias('posts_cnt'))\
+        .where(F.col('_id').isin(cluster_ids))
 
         ### Reset to event
         self.spark.collection = 'event'

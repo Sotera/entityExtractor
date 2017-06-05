@@ -117,7 +117,7 @@ services:
       - "3005:3000"
 
   event-classifier:
-    image: sotera/event-classifier:2
+    image: sotera/event-classifier:3
     hostname: event-classifier
     environment:
       - SPARK_EXECUTOR_MEMORY=5g
