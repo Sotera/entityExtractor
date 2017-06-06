@@ -109,7 +109,7 @@ services:
     hostname: trained-models
 
   embed-map:
-    image: lukewendling/embed-map:2
+    image: sotera/embed-map:4
     hostname: embed-map
     expose:
       - "3000"
