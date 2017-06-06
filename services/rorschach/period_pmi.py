@@ -19,7 +19,7 @@ def calc_PMI(term, term_count, n_v, bc_wc):
     c1, c2 = (bc_wc.value[terms[0]], bc_wc.value[terms[1]])
     return log2((1.*term_count*n_v)/(1.*c1*c2))
 
-def baseline_pmi(spk_master="local[*]", mongo_url="mongodb://127.0.0.1/rancor.socialMediaPost", lang='en', min_ts = 0., max_ts = 999999999999):
+def period_pmi(spk_master="local[*]", mongo_url="mongodb://127.0.0.1/rancor.socialMediaPost", lang='en', min_ts = 0., max_ts = 999999999999):
     # init spark, connect to mongo, get collection
     spk = SparkSession.builder\
         .master(spk_master)\
