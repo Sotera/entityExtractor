@@ -170,6 +170,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
       forMap() {
         let points = {};
         let locations = _.orderBy($scope.selectedEvent.location, 'weight', 'desc');
+        locations = _.uniqBy(locations, 'label');
         let focus = true;
         locations.forEach(location => {
           if (location.geo_type !== 'point')
@@ -178,7 +179,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
           if (_.isEmpty(location.label))
             return;
 
-          points[location.label] = {
+          points[location.label.replace(/-/g, "")] = {
             lat: location.coords[0].lat,
             lng: location.coords[0].lng,
             message: location.label,
