@@ -11,16 +11,17 @@ def set_err(job, msg):
 
 
 def process_message(key, job):
-    # Examine job for correct fields
-    if 'txt' not in job:
-        set_err(job, "No 'txt' in job fields")
-        return
     if 'lang' not in job:
         set_err(job, "No 'lang' in job fields")
         return
+    if 'start_time_ms' not in job:
+        set_err(job, "No 'start_time_ms' in job fields")
+    if 'end_time_ms' not in job:
+        set_err(job, "No 'end_time_ms' in job fields")
+    if 'start_period_ms' not in job:
+        set_err(job, "No 'start_period_ms")
 
     # Check if the text language can be featurized
-    lng = job['lang']
     if lng in model_langs:
         try:
             if sent_filt.is_scoreable(job['txt'], lng) is False:
