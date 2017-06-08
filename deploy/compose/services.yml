@@ -98,6 +98,16 @@ services:
     environment:
       - REDIS_HOST=redis:6379
 
+  location_extractor:
+    image: sotera/location_extractor:1
+    hostname: location_extractor
+    environment:
+      - API_ROOT=http://172.17.0.1:3003/api
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+
   mitie:
     image: lukewendling/mitie-server
     hostname: mitie

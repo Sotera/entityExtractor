@@ -1,0 +1,6 @@
+flask
+requests
+polyglot
+kafka-python
+stop_words
+gunicorn
