@@ -79,3 +79,15 @@ class SentimentFilter:
                 return []
         else:
             return []
+
+    def ents(self, caption, lang):
+        if lang not in self.good_langs:
+            return []
+        tx = Text(caption)
+        l_ents = []
+        for ent in tx.entities:
+            if ent.tag in ['I-PER', 'I-ORG']:
+                if len(ent) == 1:
+                    continue
+            l_ents.append((" ".join(ent), ent.tag))
+        return l_ents
