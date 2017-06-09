@@ -46,17 +46,17 @@ class EntityClusters:
                 beta += doc['stats']['total_posts']
         return (alpha, beta)
 
-    def process_vector(self, vector_id, post_id, text):
+    def process_vector(self, vector_id, post_id, vector):
         self.total_posts += 1
         for term in vector:
             try:
-                tl = term.lower()
-                if tl in self.hash_groups.keys():
-                    self.hash_groups[tl]['similar_ids'].append(vector_id)
-                    self.hash_groups[tl]['similar_post_ids'].append(post_id)
+                tl = term[0].lower()
+                if tl in self.ent_groups.keys():
+                    self.ent_groups[tl]['similar_ids'].append(vector_id)
+                    self.ent_groups[tl]['similar_post_ids'].append(post_id)
                 else:
                     alpha, beta = self.get_priors(tl)
-                    self.hash_groups[tl] = {
+                    self.ent_groups[tl] = {
                         'similar_ids': [vector_id],
                         'similar_post_ids': [post_id],
                         'stats':{
@@ -65,4 +65,19 @@ class EntityClusters:
                         }
                     }
             except:
-                print "Error processing term:", term
+                print("Error processing term:", term)
+
+    def get_clusters(self):
+        d0 = {}
+        for k, vSim in self.ent_groups.items():
+            n_terms = len(vSim['similar_post_ids'])
+            if n_terms >= self.min_post:
+                vSim['stats']['total_posts'] = self.total_posts
+                lam = float(n_terms)/self.total_posts
+                vSim['stats']['likelihood'] = gdtr(vSim['stats']['prior_beta'], vSim['stats']['prior_alpha'], lam)
+                vSim['stats']['is_unlikely'] = 1 if vSim['stats']['likelihood'] > self.l_thresh else 0
+                d0[k] = vSim
+        return d0
+
+    def to_json(self):
+        return json.dumps(self.get_clusters())
