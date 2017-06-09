@@ -1,7 +1,8 @@
 from flask import request, abort, Flask
 from json import dumps as jd
 from locate import Locate
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
 
 api_root = os.getenv('API_ROOT', 'http://172.17.0.1:3003/api')

@@ -1,14 +1,16 @@
-import sys, os, traceback
-sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
-from text_utils import remove_punctuation
 from entity_extractor import EntityExtractor
 from loopy import Loopy
+import sys
+import os
+import traceback
+sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 
 # big list: load it once
 stop_path = os.path.join(os.path.dirname(__file__), 'files', 'stopWordList.txt')
 stop_file = open(stop_path, 'r')
 stop_list = {w.strip('\n').strip('\r') for w in stop_file}
 ent_ext = EntityExtractor()
+
 
 def max_pair(d):
     v = list(d.values())
