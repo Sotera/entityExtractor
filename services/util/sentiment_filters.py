@@ -89,5 +89,5 @@ class SentimentFilter:
             if ent.tag in ['I-PER', 'I-ORG']:
                 if len(ent) == 1:
                     continue
-            l_ents.append((" ".join(ent), ent.tag))
+            l_ents = l_ents+ent
         return l_ents

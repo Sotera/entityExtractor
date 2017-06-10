@@ -110,7 +110,7 @@
     },
     "text_features": {
       "type": [
-        "number"
+        "string"
       ],
       "default": []
     },

@@ -87,5 +87,5 @@ def process_message(key, job):
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
-                            queues=['genie:clust_txt', 'genie:clust_img'])
+                            queues=['genie:clust_img'])
     dispatcher.start()

@@ -1,5 +1,5 @@
 import sys, os, uuid
-from hashtag_similarity import HashtagClusters
+from entity_docs import EntityClusters
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
 from redis_dispatcher import Dispatcher
 from loopy import Loopy
@@ -23,6 +23,7 @@ def err_check(job):
     if 'min_post' not in job:
         set_err(job, "No 'min_post' in job fields")
 
+
 def process_message(key, job):
     err_check(job)
     if job['state'] == 'error':
@@ -30,7 +31,7 @@ def process_message(key, job):
 
     print 'FINDING SIMILARITY'
     print 'min_post set to %s' % job['min_post']
-    hash_clust = HashtagClusters(float(job['min_post']), result_url, job['start_time_ms'])
+    text_clust = EntityClusters(float(job['min_post']), job['result_url'], job['start_time_ms'])
 
     query_params = [{
         "query_type": "between",
@@ -39,20 +40,14 @@ def process_message(key, job):
     }, {
         "query_type": "where",
         "property_name": "featurizer",
-        "query_value": "hashtag"
+        "query_value": "text"
     }, {
         "query_type": "neq",
-        "property_name": "hashtags",
+        "property_name": "text_features",
         "query_value": "null"
     }]
 
-    if 'lang' in job:
-        query_params.append({
-            "query_type": "where",
-            "property_name": "lang",
-            "query_value": job['lang']
-        })
-    loopy = Loopy(query_url, query_params)
+    loopy = Loopy(job['query_url'], query_params)
 
     if loopy.result_count == 0:
         print "No data to process"
@@ -68,10 +63,10 @@ def process_message(key, job):
             break
         # Do something with the obtained page
         for doc in page:
-            hash_clust.process_vector(doc['id'], doc['post_id'], doc['hashtags'])
+            text_clust.process_vector(doc['id'], doc['post_id'], doc['text_features'])
 
     print 'FINISHED SIMILARITY PROCESSING'
-    for k, v in hash_clust.get_clusters().iteritems():
+    for k, v in text_clust.get_clusters().iteritems():
         cluster = {
             'id': str(uuid.uuid4()),
             'term': k,
@@ -81,11 +76,11 @@ def process_message(key, job):
             'start_time_ms': job['start_time_ms'],
             'end_time_ms': job['end_time_ms'],
             'stats': v['stats'],
-            'data_type': 'hashtag'
+            'data_type': 'text'
         }
 
         try:
-            loopy.post_result(result_url, cluster)
+            loopy.post_result(job['result_url'], cluster)
         except Exception as e:
             # TODO: we should set data = None when error.
             job['data'] = []
@@ -93,13 +88,13 @@ def process_message(key, job):
             job['error'] = e
             break
     else: # no errors
-        job['data'] = hash_clust.to_json()
+        job['data'] = text_clust.to_json()
         job['state'] = 'processed'
 
 
 if __name__ == '__main__':
     dispatcher = Dispatcher(redis_host='redis',
                             process_func=process_message,
-                            queues=['genie:clust_hash'])
+                            queues=['genie:clust_txt'])
     dispatcher.start()
 

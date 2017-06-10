@@ -129,7 +129,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/rorschach:8
+    image: sotera/rorschach:b169
     hostname: text-featurizer
     depends_on:
       - redis
@@ -142,6 +142,15 @@ services:
     hostname: hashtag-clusterer
     depends_on:
       - redis
+
+  text-clusterer:
+      extends:
+        file: common.yml
+        service: analytic
+      image: sotera/text-clustering:b169
+      hostname: text-clusterer
+      depends_on:
+        - redis
 
   cluster-linker:
     extends:
@@ -156,7 +165,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/feature-sim:10
+    image: sotera/feature-sim:b169
     hostname: feature-sim
     depends_on:
       - redis

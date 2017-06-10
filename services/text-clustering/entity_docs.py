@@ -50,7 +50,7 @@ class EntityClusters:
         self.total_posts += 1
         for term in vector:
             try:
-                tl = term[0].lower()
+                tl = term.lower()
                 if tl in self.ent_groups.keys():
                     self.ent_groups[tl]['similar_ids'].append(vector_id)
                     self.ent_groups[tl]['similar_post_ids'].append(post_id)
