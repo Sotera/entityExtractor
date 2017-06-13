@@ -138,7 +138,7 @@ services:
     extends:
       file: common.yml
       service: analytic
-    image: sotera/comedian:20
+    image: sotera/comedian:21
     hostname: hashtag-clusterer
     depends_on:
       - redis
