@@ -1,9 +1,11 @@
-from entity_extractor import EntityExtractor
-from loopy import Loopy
+
+
 import sys
 import os
 import traceback
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
+from entity_extractor import EntityExtractor
+from loopy import Loopy
 
 # big list: load it once
 stop_path = os.path.join(os.path.dirname(__file__), 'files', 'stopWordList.txt')
@@ -16,7 +18,6 @@ def max_pair(d):
     v = list(d.values())
     k = list(d.keys())
     return d[k[v.index(max(v))]]
-
 
 class Locate:
     def __init__(self, base_url, geo_url, geo_threshold):
@@ -88,13 +89,9 @@ class Locate:
                     "city": city,
                     "state": state,
                     "country": country,
-                    "type": "inferred point",
-                    "geo_type": "point",
+                    "type": "Point",
                     "weight": weight,
-                    "coords": {
-                        "lat": place['latitude'],
-                        "lng": place['longitude']
-                    }
+                    "coordinates": [place['longitude'], place['latitude']]
                 }
 
             location = dict((k, v) for k, v in location.items() if v['weight'] >= self.geo_threshold)
