@@ -10,6 +10,8 @@ if api_root[-1] != '/':
     api_root += '/'
 
 app = Flask('Location Extraction Service')
+geo_threshold = float(os.getenv('GEO_THRESHOLD', '0.0'))
+locate = Locate(api_root, '{}geocoder/forward-geo'.format(api_root), geo_threshold)
 
 
 def set_err(job, msg):
@@ -29,9 +31,6 @@ def process_message(job):
     if 'state' in job and job['state'] == 'error':
         return
 
-    geo_threshold = 0.0 if 'geo_threshold' not in job else float(job['geo_threshold'])
-
-    locate = Locate(api_root, '{}geocoder/forward-geo'.format(api_root), geo_threshold)
     job['location'] = locate.get_location(job['text'])
     return jd(job)
 

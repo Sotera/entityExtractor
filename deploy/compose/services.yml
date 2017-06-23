@@ -99,7 +99,7 @@ services:
       - REDIS_HOST=redis:6379
 
   location_extractor:
-    image: sotera/location_extractor:2
+    image: sotera/location_extractor:3
     hostname: location_extractor
     environment:
       - API_ROOT=http://172.17.0.1:3003/api

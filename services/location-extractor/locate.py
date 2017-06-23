@@ -94,5 +94,5 @@ class Locate:
                     "coordinates": [place['longitude'], place['latitude']]
                 }
 
-            location = dict((k, v) for k, v in location.items() if v['weight'] >= self.geo_threshold)
-            return max_pair(location)
+        location = dict((k, v) for k, v in location.items() if v['weight'] >= self.geo_threshold)
+        return max_pair(location)
