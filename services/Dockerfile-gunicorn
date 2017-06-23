@@ -31,4 +31,4 @@ COPY $SERVICE/$MAIN docker_main.py
 # match project dir structure to satisfy imports
 COPY util /usr/src/util
 
-ENTRYPOINT ["gunicorn", "--workers=4","--bind", "0.0.0.0:5000", "docker_main:app"]
+ENTRYPOINT ["gunicorn", "--workers=17","--bind", "0.0.0.0:5000", "docker_main:app"]
