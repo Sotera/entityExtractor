@@ -1,0 +1,7 @@
+redis
+requests
+networkx
+python-louvain
+polyglot
+kafka-python
+stop_words
