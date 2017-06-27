@@ -1,0 +1,22 @@
+{
+  "name": "topic",
+  "description": "Learned topics from smposts",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "indexes": {
+  },
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "Timestamp": {},
+    "DestroyAll": {}
+  },
+  "properties": {
+
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
