@@ -14,11 +14,9 @@ stop_file = open(stop_path, 'r')
 stop_list = {w.strip('\n').strip('\r') for w in stop_file}
 
 class Louvaine:
-    def __init__(self, base_url, geo_url, geo_threshold):
+    def __init__(self, base_url):
         self.graph = nx.Graph()
         self.nodes_detailed = {}
-        self.geo_url = geo_url
-        self.geo_threshold = geo_threshold
         self.sf = SentimentFilter()
         self.ent_ext = EntityExtractor()
 
@@ -68,18 +66,6 @@ class Louvaine:
                         r_o["campaigns"]["ids"][cam] += 1
                     else:
                         r_o["campaigns"]["ids"][cam] = 1
-
-            locs = self.ent_ext.extract(doc['text'], tag='I-LOC')
-            for loc in locs:
-                print 'Location:', loc.encode('utf-8')
-                try:
-                    geos = Loopy.post(self.geo_url, json={'address': loc})
-                    for place in geos:
-                        places.append(place)
-                        break
-                except Exception as e:
-                    print "error getting locations from geocoder...continuing.", e
-                    traceback.print_exc()
 
             tokens = [w for w in self.sf.pres_tokenize(doc['text'], doc['lang']) if w not in stop_list]
             for word in tokens:
