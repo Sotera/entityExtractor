@@ -132,6 +132,8 @@ def process_message(key,job):
         group_id= group_id + 1
 
     job['network'] = json.dumps(combined_data)
+    with open('network.json', 'w') as outfile:
+        json.dump(combined_data, outfile)
 
     for node in combined_data['nodes']:
         for community in communities:

@@ -96,8 +96,6 @@ def process_message(key,job):
 
     print "Finding communities from {} nodes and {} edges.".format(len(com.graph.nodes()), len(com.graph.edges()))
     l_com = save_communities(com, job)
-    job['kafka_url'] = "print"
-    job['kafka_topic'] = "bar"
     if 'kafka_url' in job and 'kafka_topic' in job:
         kafka_url = job['kafka_url']
         kafka_topic = job['kafka_topic']

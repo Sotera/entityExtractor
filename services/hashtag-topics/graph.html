@@ -28,7 +28,7 @@ var simulation = d3.forceSimulation()
     .force("charge", d3.forceManyBody())
     .force("center", d3.forceCenter(width / 2, height / 2));
 
-d3.json("community_network.json", function(error, graph) {
+d3.json("network.json", function(error, graph) {
   if (error) throw error;
 
   var link = svg.append("g")
@@ -44,14 +44,14 @@ d3.json("community_network.json", function(error, graph) {
     .data(graph.nodes)
     .enter().append("circle")
       .attr("r", 5)
-      .attr("fill", function(d) { return color(d.group); })
+      .attr("fill", function(d) { return color(d.group||0); })
       .call(d3.drag()
           .on("start", dragstarted)
           .on("drag", dragged)
           .on("end", dragended));
 
   node.append("title")
-      .text(function(d) { return d.id; });
+      .text(function(d) { return d.term; });
 
   simulation
       .nodes(graph.nodes)
