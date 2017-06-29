@@ -23,6 +23,7 @@ def err_check(job):
     if 'min_post' not in job:
         set_err(job, "No 'min_post' in job fields")
 
+
 def process_message(key, job):
     err_check(job)
     if job['state'] == 'error':
@@ -30,7 +31,7 @@ def process_message(key, job):
 
     print 'FINDING SIMILARITY'
     print 'min_post set to %s' % job['min_post']
-    hash_clust = HashtagClusters(float(job['min_post']), result_url, job['start_time_ms'])
+    hash_clust = HashtagClusters(float(job['min_post']), job['result_url'], job['start_time_ms'])
 
     query_params = [{
         "query_type": "between",
@@ -52,7 +53,7 @@ def process_message(key, job):
             "property_name": "lang",
             "query_value": job['lang']
         })
-    loopy = Loopy(query_url, query_params)
+    loopy = Loopy(job['query_url'], query_params)
 
     if loopy.result_count == 0:
         print "No data to process"
@@ -85,7 +86,7 @@ def process_message(key, job):
         }
 
         try:
-            loopy.post_result(result_url, cluster)
+            loopy.post_result(job['result_url'], cluster)
         except Exception as e:
             # TODO: we should set data = None when error.
             job['data'] = []
