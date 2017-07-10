@@ -10,6 +10,7 @@ class Client(object):
         db='rancor', collection=None):
 
         self.spark = SparkSession.builder.master(master).getOrCreate()
+        self.sparkContext = self.spark.sparkContext
         self.mongo_uri = dict(uri=uri, database=db, collection=collection)
 
     def read(self):

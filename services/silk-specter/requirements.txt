@@ -2,3 +2,4 @@ redis
 gensim
 polyglot
 stop_words
+fasttext

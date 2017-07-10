@@ -1,12 +1,12 @@
 import re
 import traceback
-from polyglot.text import Text
+# from polyglot.text import Text
 from stop_words import get_stop_words
 
 class SentimentFilter:
     def __init__(self):
         self.good_langs = ['en', 'ar', 'ru']
-        black_list = ['rt', 'amp']
+        black_list = ['rt', 'amp', 'man', 'you', 'i', 'we', 'me', 'he', 'she', 'they', 'them']
         self.stop = {'ar':set(get_stop_words('ar') + black_list), 'en':set(map(lambda x: re.sub('[^\w\s]', '', x, flags=re.UNICODE) ,get_stop_words('en')+black_list))}
 
 
