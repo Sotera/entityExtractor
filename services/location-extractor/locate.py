@@ -95,4 +95,6 @@ class Locate:
                 }
 
         location = dict((k, v) for k, v in location.items() if v['weight'] >= self.geo_threshold)
+        if not location:
+            return location
         return max_pair(location)
