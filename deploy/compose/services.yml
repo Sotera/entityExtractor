@@ -130,9 +130,8 @@ services:
     image: sotera/silk-specter:1
     hostname: silk-specter
     environment:
-      - SPARK_EXECUTOR_MEMORY=15g
-    expose:
-      - "4040"
+      - SPARK_EXECUTOR_MEMORY=10g
+      - SPARK_DRIVER_MEMORY=10g
     depends_on:
       - redis
 
