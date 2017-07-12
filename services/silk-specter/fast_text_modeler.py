@@ -101,12 +101,25 @@ class Model(object):
         )
 
         df_campaign4=df_campaign3\
-        .withColumn('sorted_topics', u_sort_topics(F.col('all_topics')))
+        .withColumn('sorted_topics', u_sort_topics(F.col('all_topics')))\
+        .withColumn('start_time', F.lit(start_time))\
+        .withColumn('end_time', F.lit(end_time))
+
+        df_campaign4 = df_campaign4.drop('all_topics')
 
         df_campaign4.show()
 
         # TODO: output format
-        courier.deliver([dict(a=1)], kafka_url, kafka_topic)
+        topics = df_campaign4.toPandas().to_dict()
+        courier.deliver(topics, kafka_url, kafka_topic)
+
+        self.save(df_campaign4)
+
+        self.spark.stop()
+
+    def save(self, df):
+        self.spark.collection = 'topic'
+        self.spark.write(df)
 
     def collect_hashtag_posts(self, start_time=1, end_time=1):
         df = self.spark.read()\

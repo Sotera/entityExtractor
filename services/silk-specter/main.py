@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, os, argparse
+import sys, os
 # from topic_modeler import TopicModeler
 from fast_text_modeler import Model
 sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
@@ -39,30 +39,13 @@ def process_message(key, job):
     job['state'] = 'processed'
     return
 
-dispatcher = Dispatcher(redis_host='redis',
-                        process_func=process_message,
-                        queues=['genie:topic_model'])
-dispatcher.start()
-
-
 if __name__ == '__main__':
-    model = Model()
-    model.train()
-    model.predict()
+    dispatcher = Dispatcher(redis_host='redis',
+                            process_func=process_message,
+                            queues=['genie:topic_model'])
+    dispatcher.start()
 
 
-
-    # ar = argparse.ArgumentParser()
-    # ar.add_argument("-modelPath", help="Path to model (e.g. ./models)")
-    # ar.add_argument("-englishModel", help="Name of English model")
-    # args = ar.parse_args()
-    # print "Making filter"
-    # global topic_modeler
-    # topic_modeler = TopicModeler()
-
-    # if args.englishModel != '':
-    #     topic_modeler.load_lang('en', args.modelPath, args.englishModel)
-    # dispatcher = Dispatcher(redis_host='redis', process_func=process_message,
-    #     queues=['genie:topic_txt'])
-    # dispatcher.start()
-
+    # model = Model()
+    # model.train()
+    # model.predict(kafka_topic='abc', kafka_url='print')

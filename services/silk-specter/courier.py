@@ -1,6 +1,6 @@
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
-import traceback
+import traceback, json
 
 def deliver(topics, kafka_url='print', kafka_topic='print'):
     if kafka_url == 'print':
@@ -20,4 +20,6 @@ def deliver(topics, kafka_url='print', kafka_topic='print'):
             print(record_metadata.partition)
             print(record_metadata.offset)
         except KafkaError as err:
+            traceback.print_exc()
+        except KafkaTimeoutError as err:
             traceback.print_exc()
