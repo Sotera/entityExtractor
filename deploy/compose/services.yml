@@ -116,14 +116,14 @@ services:
     ports:
       - "3005:3000"
 
-  event-classifier:
-    image: sotera/event-classifier:3
-    hostname: event-classifier
-    environment:
-      - SPARK_EXECUTOR_MEMORY=10g
-      - SPARK_DRIVER_MEMORY=10g
-    depends_on:
-      - redis
+  # event-classifier:
+  #   image: sotera/event-classifier:3
+  #   hostname: event-classifier
+  #   environment:
+  #     - SPARK_EXECUTOR_MEMORY=10g
+  #     - SPARK_DRIVER_MEMORY=10g
+  #   depends_on:
+  #     - redis
 
   silk-specter:
     image: sotera/silk-specter:1
