@@ -18,14 +18,11 @@ class Model(object):
 
         df_hash = df.rdd
 
-        df_hash.map(lambda x: (len(x.hashtags), 1))\
-        .reduceByKey(lambda x, y: x+y)\
-        .sortBy(lambda x: x[0]).collect()
+        df_single_hash = df.rdd\
+        .filter(lambda x: len(x.hashtags)==1 and not_a_retweet(x))
 
-        df_single_hash = df.rdd.filter(lambda x: len(x.hashtags)==1)
-        df_single_hash = df_single_hash.filter(lambda x: not_a_retweet(x))
-
-        hashtags = df_single_hash.map(lambda x: (x.hashtags[0], 1)).reduceByKey(lambda x, y: x+y).sortBy(lambda x: x[1]).collect()
+        hashtags = df_single_hash.map(lambda x: (x.hashtags[0].lower(), 1))\
+        .reduceByKey(lambda x, y: x+y).sortBy(lambda x: x[1]).collect()
 
         labels = list(map(lambda x: x[0], hashtags[-50:]))
         bc_labels = self.spark.sparkContext.broadcast(labels)
@@ -39,7 +36,7 @@ class Model(object):
 
         d_labels = {}
         ind = 1
-        for k in list(labels):
+        for k in labels:
             d_labels[k] = ind
             ind += 1
 
@@ -110,7 +107,8 @@ class Model(object):
         df_campaign4.show()
 
         # TODO: output format
-        topics = df_campaign4.toPandas().to_dict()
+        topics = list(map(lambda s: json.loads(s), df_campaign4.toJSON().collect()))
+        print(topics)
         courier.deliver(topics, kafka_url, kafka_topic)
 
         self.save(df_campaign4)
