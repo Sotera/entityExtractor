@@ -7,9 +7,9 @@
     "postinstall": "npm run build",
     "pretest": "jshint .",
     "dev": "nodemon . -w server -w common -w lib --ext js,json",
-    "queue": "WORKER_SCRIPT=workers/job-queue npm run dev",
-    "scheduler": "WORKER_SCRIPT=workers/job-scheduler npm run dev",
-    "node-red": "WORKER_SCRIPT=servers/node-red npm run dev",
+    "queue": "WORKER_SCRIPT=workers/job-queue DEBUG=*queue* npm run dev",
+    "scheduler": "WORKER_SCRIPT=workers/job-scheduler DEBUG=*scheduler* npm run dev",
+    "node-red": "WORKER_SCRIPT=servers/node-red DEBUG=*node-red* npm run dev",
     "lb-ng": "lb-ng server/server.js client/js/lb-services.js",
     "build": "bower install && npm run build:env",
     "build:env": "mkdir -p client/build && ./script/deploy/env.js > client/build/env.js"
