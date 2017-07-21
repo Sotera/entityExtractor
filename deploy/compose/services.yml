@@ -124,6 +124,7 @@ services:
   #     - SPARK_DRIVER_MEMORY=10g
   #   depends_on:
   #     - redis
+  #     - mongo
 
   silk-specter:
     image: sotera/silk-specter:1
@@ -133,6 +134,7 @@ services:
       - SPARK_DRIVER_MEMORY=16g
     depends_on:
       - redis
+      - mongo
 
   dr-manhattan:
     extends:
