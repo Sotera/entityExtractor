@@ -53,7 +53,7 @@ function formatData(topics) {
     acc.push(o)
     return acc
 
-  }, []).slice(0,4)
+  }, []).filter(c => c.weight >= 0.05)
 
   return parent
 }
