@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 import sys, os
-# from topic_modeler import TopicModeler
 from fast_text_modeler import Model
-sys.path.append(os.path.join(os.path.dirname(__file__), "../util"))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
 from redis_dispatcher import Dispatcher
 
 def set_err(job, msg):

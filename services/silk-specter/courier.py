@@ -4,7 +4,8 @@ import traceback, json
 
 def deliver(topics, kafka_url='print', kafka_topic='print'):
     if kafka_url == 'print':
-        for doc in topics:
+        print('sample of topics')
+        for doc in topics[:3]:
             for k, v in doc.items():
                 print(k, v)
         return
