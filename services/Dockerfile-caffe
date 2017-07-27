@@ -76,7 +76,7 @@ WORKDIR /home/caffe-user/src/service
 
 COPY $SERVICE .
 # create consistent top-level filename
-COPY $SERVICE/$MAIN docker_main.py
+COPY $SERVICE/$MAIN main.py
 # match project dir structure to satisfy imports
 COPY util ../util/
 
@@ -86,4 +86,4 @@ USER caffe-user
 
 ENV CAFFE_ROOT /home/caffe-user/caffe
 
-CMD ["python", "-u", "docker_main.py"]
+CMD ["python", "-u", "main.py"]
