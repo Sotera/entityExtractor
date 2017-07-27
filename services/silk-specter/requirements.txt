@@ -1,6 +1,4 @@
 redis
-gensim
-polyglot
 stop_words
 fasttext
 kafka-python

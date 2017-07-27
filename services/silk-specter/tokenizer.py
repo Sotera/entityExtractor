@@ -1,3 +1,4 @@
+# def: text tokenize util.
 # modified from util/sentiment_filters.py
 
 import re, traceback
@@ -24,13 +25,13 @@ def pres_tokenize(caption, lang, b_filter_special=True, b_filter_url=True):
             tokens = filter(lambda x: is_special(x) is not True, tokens)
         if b_filter_url:
             tokens = filter(lambda x: is_url(x) is not True, tokens)
-        return tokens
-    elif lang=='ar':
-        try:
-            caption = re.sub('[#]', ' ',caption, flags=re.UNICODE)
-            return list(filter(lambda x: len(x)>1, Text(caption).words))
-        except:
-            traceback.print_exc()
-            return []
+        return list(tokens)
+    # elif lang=='ar':
+    #     try:
+    #         caption = re.sub('[#]', ' ',caption, flags=re.UNICODE)
+    #         return list(filter(lambda x: len(x)>1, Text(caption).words))
+    #     except:
+    #         traceback.print_exc()
+    #         return []
     else:
         return []

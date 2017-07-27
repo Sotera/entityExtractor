@@ -25,7 +25,7 @@ def process_message(key, job):
         start_time = int(job['start_time_ms'])
         end_time = int(job['end_time_ms'])
         kafka_url = job['kafka_url'] if 'kafka_url' in job else 'print'
-        kafka_topic = job['kafka_topic'] if 'kafka_url' in job else 'print'
+        kafka_topic = job['kafka_topic'] if 'kafka_topic' in job else 'print'
 
         model = Model()
         model.train(start_time, end_time)

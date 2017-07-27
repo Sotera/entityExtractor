@@ -127,11 +127,13 @@ services:
   #     - mongo
 
   silk-specter:
-    image: sotera/silk-specter:2
+    image: sotera/silk-specter:8
     hostname: silk-specter
     environment:
       - SPARK_EXECUTOR_MEMORY=30g
       - SPARK_DRIVER_MEMORY=30g
+      - DB_HOST=mongo
+      - DB_PORT=27017
     depends_on:
       - redis
       - mongo
