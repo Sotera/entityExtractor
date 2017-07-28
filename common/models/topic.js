@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Annotation) {
+module.exports = function(Topic) {
 
 };
