@@ -6,7 +6,7 @@ abort() {
 trap abort ERR
 
 display_usage() {
-  echo -e $"\n\tUsage: $0 {up|tail|(Compose COMMAND)} [Compose options]
+  echo -e $"\n\tUsage: $0 {up|tail|bash|(Compose COMMAND)} [Compose options]
     \n\tDeploy: $0 up deploy [branch]
     \n\tDeploy: $0 up deploy local"
   abort
@@ -27,7 +27,7 @@ case "$1" in
     ;;
 
   up)
-    docker-compose $compose_files up -d
+    docker-compose $compose_files up -d "${@:2}"
 
     if [ "$2" == "deploy" ]; then
       curr_branch=`git rev-parse --abbrev-ref HEAD`
@@ -45,19 +45,19 @@ case "$1" in
     fi
     ;;
 
+  bash)
+    docker-compose $compose_files exec $2 bash
+    ;;
+
   tail)
-    docker-compose $compose_files logs --tail 100 -f $2
+    docker-compose $compose_files logs --tail 100 -f "${@:2}"
     ;;
 
   log*)
-    docker-compose $compose_files logs $2
-    ;;
-
-  ps|down|start|stop|restart|exec|scale|rm|config|version)
-    docker-compose $compose_files "$@"
+    docker-compose $compose_files logs "${@:2}"
     ;;
 
   *)
-    display_usage
+    docker-compose $compose_files "$@"
 
 esac
