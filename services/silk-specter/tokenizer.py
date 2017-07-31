@@ -16,11 +16,14 @@ def is_url(word):
 
 def pres_tokenize(caption, lang, b_filter_special=True, b_filter_url=True):
     if lang=='en':
-        caption = re.sub('^rt ',' ', caption.lower(), flags=re.UNICODE)
+        caption = re.sub('^rt ','', caption.lower(), flags=re.UNICODE)
+        # rm newlines
         caption = re.sub('[\s]',' ', caption, flags=re.UNICODE)
-        caption = re.sub('[^\w\s#]','',caption, flags=re.UNICODE)
+        # keep alphanums + hashtags + mentions
+        caption = re.sub('[^\w\s#@]','', caption, flags=re.UNICODE)
         caption = list(filter(lambda x: x!='', caption.strip().split(' ')))
         tokens = caption
+        # optionally rm hashtags, mentions, urls
         if b_filter_special:
             tokens = filter(lambda x: is_special(x) is not True, tokens)
         if b_filter_url:
