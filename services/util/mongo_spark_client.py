@@ -1,4 +1,5 @@
 from pyspark.sql import SparkSession
+from os import getenv
 
 mongo_fmt = 'com.mongodb.spark.sql'
 
@@ -11,6 +12,7 @@ class Client(object):
 
         self.spark = SparkSession.builder.master(master).getOrCreate()
         self.sparkContext = self.spark.sparkContext
+        self.sparkContext.setLogLevel(getenv('SPARK_LOG_LEVEL', 'ERROR'))
         self.mongo_uri = dict(uri=uri, database=db, collection=collection)
 
     def read(self):
