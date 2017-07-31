@@ -43,6 +43,8 @@ class Model(object):
         self.labels = labels
         bc_labels = self.spark.sparkContext.broadcast(labels)
 
+        # keep tweets with a top hashtag, and format data for training:
+        #  list of pairs: ( [label1, label2, ...], text )
         all_hash = rdd_hash\
         .filter(lambda x: len(set(map(lambda x: x.lower(), x.hashtags)) & set(bc_labels.value)))\
         .map(lambda x: (list(set(map(lambda x: x.lower(), x.hashtags)) & set(bc_labels.value)), x.text))
@@ -51,13 +53,13 @@ class Model(object):
 
         train_file, test_file = '/tmp/tweet_data_train.txt', '/tmp/tweet_data_test.txt'
 
-        # train-test split
+        # train-test split, multiple labels per line.
         fo, fo2 = open(train_file, 'w'), open(test_file, 'w')
         i = 0
         for tweet in tweets:
             tokens = pres_tokenize(tweet[1], 'en', 1)
             i+=1
-            if i%5==0: # to test
+            if i%10==0: # to test
                 for htag in tweet[0]:
                     _=fo2.write("__label__{} ".format(htag))
                 _=fo2.write("{}\n".format(" ".join(tokens)))
@@ -212,7 +214,7 @@ class Model(object):
         df = self.spark.read()\
         .select(['_id', 'text', 'featurizer', 'broadcast_post_id', 'campaigns',
             'hashtags', 'lang',  'post_id', 'timestamp_ms'])\
-        .where('lang = "en"')
+        .where('lang = "en"').cache()
 
         return df
 
