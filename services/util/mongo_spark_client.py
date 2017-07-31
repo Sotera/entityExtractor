@@ -1,4 +1,5 @@
 from pyspark.sql import SparkSession
+from os import getenv
 
 mongo_fmt = 'com.mongodb.spark.sql'
 
@@ -10,6 +11,8 @@ class Client(object):
         db='rancor', collection=None):
 
         self.spark = SparkSession.builder.master(master).getOrCreate()
+        self.sparkContext = self.spark.sparkContext
+        self.sparkContext.setLogLevel(getenv('SPARK_LOG_LEVEL', 'ERROR'))
         self.mongo_uri = dict(uri=uri, database=db, collection=collection)
 
     def read(self):
@@ -17,6 +20,9 @@ class Client(object):
 
     def write(self, df, mode='append'):
         df.write.format(mongo_fmt).mode(mode).options(**self.mongo_uri).save()
+
+    def stop(self):
+        self.spark.stop()
 
     # getters/setters
     @property
