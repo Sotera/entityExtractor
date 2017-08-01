@@ -36,10 +36,9 @@ class Model(object):
         .sortBy(lambda x: x[1], False)\
         .collect()
 
-        # get top x%
         top_hashtags = hashtags[: int(len(hashtags) * .01)]
-        keep = [x for x in top_hashtags if x[0] not in COMMON_TAGS]
-        labels = list(map(lambda x: x[0], keep))
+        print('top x% hashtags', top_hashtags)
+        labels = list(map(lambda x: x[0], top_hashtags))
         self.labels = labels
         bc_labels = self.spark.sparkContext.broadcast(labels)
 
@@ -183,11 +182,9 @@ class Model(object):
         df = self.query_posts(start_time, end_time)
 
         df_retweets = df\
-        .where('featurizer == "hashtag"')\
         .where('broadcast_post_id is not null')
 
         df_no_retweets = df\
-        .where('featurizer == "hashtag"')\
         .where('broadcast_post_id == "null" or broadcast_post_id is null')
 
         # use 1 retweet as stand-in for original tweet
@@ -195,26 +192,31 @@ class Model(object):
 
         df_deduped = df_retweets.union(df_no_retweets)
 
-        self.counts['labeled_posts'] = df_deduped.count()
+        self.counts['labeled posts'] = df_deduped.count()
 
         return df_deduped
 
     # posts used in predictions.
     def query_unlabeled_posts(self, start_time=1, end_time=1):
-        df = self.query_posts(start_time, end_time)\
-        .where('featurizer = "text"') # type doesn't matter, just get 1.
+        df = self.query_posts(start_time, end_time)
 
-        self.counts['unlabeled_posts'] = df.count()
+        self.counts['unlabeled posts'] = df.count()
 
         return df
 
-    # base posts query.
+    # base posts query. rm common tags.
+    # N.B. featurizer type doesn't matter, just get 1.
     def query_posts(self, start_time=1, end_time=1):
         self.spark.collection = 'socialMediaPost'
         df = self.spark.read()\
         .select(['_id', 'text', 'featurizer', 'broadcast_post_id', 'campaigns',
             'hashtags', 'lang',  'post_id', 'timestamp_ms'])\
-        .where('lang = "en"').cache()
+        .where('lang = "en"')\
+        .where('featurizer == "hashtag"')\
+        .where(u_no_common_tags('hashtags'))\
+        .cache()
+
+        self.counts['en posts w/o common tags'] = df.count()
 
         return df
 
@@ -235,3 +237,7 @@ def trunc_array(arr):
 
 u_trunc_array = F.udf(trunc_array, ArrayType(StringType()))
 
+def no_common_tags(tags):
+    return len(set(map(lambda x: x.lower(), tags)) & set(COMMON_TAGS)) == 0
+
+u_no_common_tags = F.udf(no_common_tags, BooleanType())
