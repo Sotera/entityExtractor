@@ -6,6 +6,7 @@ What does this module do?
 '''
 
 from __future__ import print_function
+from os import getenv
 import redis, sys, traceback
 
 '''
@@ -28,8 +29,10 @@ class Worker(object):
         # get object for corresponding key:
         job = self.send.hgetall(key)
         print(job)
+
         if not job:
-            self.send.hmset(key, {'state': 'error', 'error': 'could not find item in redis'})
+            self.send.hmset(key,
+                {'state': 'error', 'error': 'could not find item in redis'})
             print('COULD NOT FIND ITEM IN REDIS')
             return
         # for dupe publishings. job already running.
@@ -39,9 +42,9 @@ class Worker(object):
 
         job['state'] = 'processing'
 
-        # reset results (if job was re-run)
+        # reset results (if job was re-run).
         for k in ('error', 'data'):
-            if k in job: job.pop(k)
+            job.pop(k, None)
 
         # update with new state
         self.send.hmset(key, job)
@@ -66,9 +69,10 @@ class Dispatcher(object):
         process_func: a blocking function with args: key (string), job (dict)
         initial_state: of redis job. ex. 'new'
     '''
-    def __init__(self, redis_host='localhost', redis_port=6379, **kwargs):
-        self.redis_host = redis_host
-        self.redis_port = redis_port
+    def __init__(self, redis_host=None, redis_port=None, **kwargs):
+        self.redis_host = redis_host or getenv('REDIS_HOST', 'redis')
+        self.redis_port = redis_port or getenv('REDIS_PORT', 6379)
+        print('redis conf:', self.redis_host, self.redis_port)
         self.queues = kwargs['queues']
         self.process_func = kwargs['process_func']
         self.initial_state = kwargs.get('initial_state', 'new')
@@ -91,12 +95,13 @@ class Dispatcher(object):
         print('WATCHING QUEUES %s' % self.queues)
         while True:
             try:
-                # block for 10 sec and reset (is blocking forever ok?)
+                # block for 10 sec and reset (don't block forever).
                 item = redis_client.brpop(self.queues, 10)
                 if item:
                     print('MESSAGE HEARD')
                     worker = Worker(redis_client)
-                    worker.run(item, process_func=self.process_func, initial_state=self.initial_state)
+                    worker.run(item, process_func=self.process_func,
+                        initial_state=self.initial_state)
             except Exception as e:
                 print('error running redis worker:', e)
                 traceback.print_exc()
