@@ -56,16 +56,16 @@ class Model(object):
         fo, fo2 = open(train_file, 'w'), open(test_file, 'w')
         i = 0
         for tweet in tweets:
-            tokens = pres_tokenize(tweet[1], 'en', 1)
+            cleaned = clean_text(tweet[1])
             i+=1
             if i%10==0: # to test
                 for htag in tweet[0]:
                     _=fo2.write("__label__{} ".format(htag))
-                _=fo2.write("{}\n".format(" ".join(tokens)))
+                _=fo2.write("{}\n".format(cleaned))
             else: # to train
                 for htag in tweet[0]:
                     _=fo.write("__label__{} ".format(htag))
-                _=fo.write("{}\n".format(" ".join(tokens)))
+                _=fo.write("{}\n".format(cleaned))
 
         fo.close()
         fo2.close()
