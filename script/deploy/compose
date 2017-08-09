@@ -27,9 +27,9 @@ case "$1" in
     ;;
 
   up)
-    docker-compose $compose_files up -d "${@:2}"
-
     if [ "$2" == "deploy" ]; then
+      # make sure svcs are up
+      docker-compose $compose_files up -d
       curr_branch=`git rev-parse --abbrev-ref HEAD`
       if [ "$3" == "local" ]; then
         echo $"⇨ Deploying from LOCAL branch: $curr_branch"
@@ -42,6 +42,9 @@ case "$1" in
         script/deploy/slc-deploy.js
         git checkout $curr_branch
       fi
+    else
+      # pass-thru
+      docker-compose $compose_files up -d "${@:2}"
     fi
     ;;
 
