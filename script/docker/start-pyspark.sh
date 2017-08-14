@@ -6,7 +6,7 @@ svc="pyspark-nb"
 # if "cluster", start master, worker containers.
 if [ "$1" == "cluster" ]; then
   svc=""
-  echo "** You can run spark in local or cluster mode (spark://master:7077) **"
+  echo "** You can run spark in local (local[*]) or cluster mode (spark://master:7077) **"
 else
   echo "** You can run spark in local mode only **"
 fi
