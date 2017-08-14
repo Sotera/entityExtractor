@@ -1,10 +1,13 @@
 version: '2.1'
 
 # runs jupyter on localhost:8888 by default.
-# runs in either spark local or standalone cluster mode.
+# can run in either spark local or standalone cluster mode.
 # i.e.
   # SparkSession.builder.master("spark://master:7077").getOrCreate()
   # SparkSession.builder.master("local[*]").getOrCreate()
+
+# in either mode, localhost:4040 is the Spark app UI.
+# in cluster mode, localhost:9090 is the master UI.
 
 networks:
   watchman:
@@ -18,8 +21,9 @@ services:
       - watchman
     image: sotera/pyspark-mongo-jupyter:4
     ports:
+      - "4040:4040"
+      - "8080:8080"
       - "8888:8888"
-      - "6006:6006"
     environment:
       GRANT_SUDO: "yes"
     extends:
@@ -46,10 +50,10 @@ services:
       - 7077
       - 6066
     ports:
-      - "4040:4040"
+      - "5050:4040"
       - "6066:6066"
       - "7077:7077"
-      - "8080:8080"
+      - "9090:8080"
     extends:
       file: common.notebook.yml
       service: pyspark
