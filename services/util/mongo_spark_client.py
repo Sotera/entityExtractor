@@ -15,8 +15,8 @@ class Client(object):
         self.sparkContext.setLogLevel(getenv('SPARK_LOG_LEVEL', 'ERROR'))
         self.mongo_uri = dict(uri=uri, database=db, collection=collection)
 
-    def read(self):
-        return self.spark.read.load(format=mongo_fmt, **self.mongo_uri)
+    def read(self, schema=None):
+        return self.spark.read.load(format=mongo_fmt, schema=schema, **self.mongo_uri)
 
     def write(self, df, mode='append'):
         df.write.format(mongo_fmt).mode(mode).options(**self.mongo_uri).save()
