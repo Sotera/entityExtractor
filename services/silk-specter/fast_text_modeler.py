@@ -5,6 +5,7 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '../util'))
 from mongo_spark_client import Client as SparkClient
 from tokenizer import pres_tokenize
+import date_utils as dtu
 from courier import deliver
 import fasttext
 
@@ -18,11 +19,12 @@ class Model(object):
         db_port = os.getenv('DB_PORT', 27017)
         uri = 'mongodb://{}:{}'.format(db_host, db_port)
         print('db conf:', uri)
-        self.spark = SparkClient(uri=uri, master='localhost[*]')
+        self.spark = SparkClient(uri=uri)
         self.counts = {} # for reporting
 
-    # TODO: use start, end times
-    def train(self, start_time=1, end_time=1):
+    # times in ms.
+    def train(self, start_time=0, end_time=0):
+        print('train range: %s to %s'.format(dtu.dt_from_ms(start_time), dtu.dt_from_ms(end_time)))
         df = self.query_labeled_posts(start_time, end_time)
 
         rdd_hash = df.rdd
@@ -77,7 +79,9 @@ class Model(object):
 
         return self.classifier
 
-    def predict(self, start_time=1, end_time=1, kafka_url='print', kafka_topic='print'):
+    # times in ms.
+    def predict(self, start_time=0, end_time=0, kafka_url='print', kafka_topic='print'):
+        print('predict range: %s to %s'.format(dtu.dt_from_ms(start_time), dtu.dt_from_ms(end_time)))
         df_posts = self.query_unlabeled_posts(start_time, end_time)\
         .withColumn('fasttext_in', u_clean_text(F.col('text')))
 
@@ -178,7 +182,8 @@ class Model(object):
         self.spark.write(df)
 
     # posts used to train.
-    def query_labeled_posts(self, start_time=1, end_time=1):
+    # times in ms.
+    def query_labeled_posts(self, start_time=0, end_time=0):
         df = self.query_posts(start_time, end_time)
 
         df_retweets = df\
@@ -197,7 +202,8 @@ class Model(object):
         return df_deduped
 
     # posts used in predictions.
-    def query_unlabeled_posts(self, start_time=1, end_time=1):
+    # times in ms.
+    def query_unlabeled_posts(self, start_time=0, end_time=0):
         df = self.query_posts(start_time, end_time)
 
         self.counts['unlabeled posts'] = df.count()
@@ -206,15 +212,22 @@ class Model(object):
 
     # base posts query. rm common tags.
     # N.B. featurizer type doesn't matter, just get 1.
-    def query_posts(self, start_time=1, end_time=1):
+    # times in ms.
+    def query_posts(self, start_time=0, end_time=0):
         self.spark.collection = 'socialMediaPost'
         df = self.spark.read()\
         .select(['_id', 'text', 'featurizer', 'broadcast_post_id', 'campaigns',
             'hashtags', 'lang',  'post_id', 'timestamp_ms'])\
         .where('lang = "en"')\
         .where('featurizer == "hashtag"')\
-        .where(u_no_common_tags('hashtags'))\
-        .cache()
+        .where(u_no_common_tags('hashtags'))
+
+        if start_time:
+            df = df.where(df.timestamp_ms >= start_time)\
+                .where(df.timestamp_ms < end_time)\
+                .cache()
+        else:
+            df = df.cache()
 
         self.counts['en posts w/o common tags'] = df.count()
 
