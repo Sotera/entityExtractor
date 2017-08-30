@@ -24,7 +24,7 @@ class Model(object):
 
     # times in ms.
     def train(self, start_time=0, end_time=0):
-        print('train range: %s to %s'.format(dtu.dt_from_ms(start_time), dtu.dt_from_ms(end_time)))
+        print('train range: {} to {}'.format(dtu.dt_from_ms(start_time), dtu.dt_from_ms(end_time)))
         df = self.query_labeled_posts(start_time, end_time)
 
         rdd_hash = df.rdd
@@ -81,7 +81,7 @@ class Model(object):
 
     # times in ms.
     def predict(self, start_time=0, end_time=0, kafka_url='print', kafka_topic='print'):
-        print('predict range: %s to %s'.format(dtu.dt_from_ms(start_time), dtu.dt_from_ms(end_time)))
+        print('predict range: {} to {}'.format(dtu.dt_from_ms(start_time), dtu.dt_from_ms(end_time)))
         df_posts = self.query_unlabeled_posts(start_time, end_time)\
         .withColumn('fasttext_in', u_clean_text(F.col('text')))
 
