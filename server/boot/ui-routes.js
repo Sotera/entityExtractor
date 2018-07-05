@@ -20,6 +20,13 @@ module.exports = function(server) {
   });
 
   // demo pages
+  router.get('/demo/topics*', function(req, res, next) {
+    const filePath = path.resolve(
+      path.join(server.get('views'), viewsPath, 'demo/topics.html')
+    );
+    res.sendFile(filePath);
+  });
+
   router.get('/demo/*?', function(req, res, next) {
     res.render(path.join(viewsPath, 'demo', req.params[0]));
   });

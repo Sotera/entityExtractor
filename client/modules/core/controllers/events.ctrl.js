@@ -23,6 +23,28 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
     console.info(`${$window.location.origin}/api/charts/twitter/user-network?eventid=${evnt.id}`);
   };
 
+  $scope.topicSelected = function(topic) {
+    // already selected
+    if ($scope.selectedTopic && $scope.selectedTopic.id === topic.id)
+      return;
+
+    $scope.selectedTopic = topic;
+    $scope.hashtags = $scope.selectedTopic.top_hashtags;
+
+    visualizeTopic(topic);
+  };
+
+  function visualizeTopic(topic) {
+    $scope.imageUrls = topic.image_urls;
+
+    sampleSocialMediaPosts('image', topic.post_ids, 500)
+    .then(posts => {
+      $scope.posts = _(posts).orderBy(p => p.screen_name.toLowerCase()).value();
+      createPostsCharts(posts);
+    })
+    .catch(console.error);
+  }
+
   $scope.eventNamed = function(evnt) {
     Event.prototype$updateAttributes({
       id: evnt.id,
@@ -208,7 +230,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
       },
 
       forPosts() {
-        getPosts(clusters)
+        getPostsByClusters(clusters)
         .then(posts => {
           $scope.posts = _(posts).orderBy(p => p.screen_name.toLowerCase()).value();
           createPostsCharts(posts);
@@ -229,7 +251,7 @@ function EventsCtrl($scope, PostsCluster, SocialMediaPost, Event, $window, autho
     return functions;
   }
 
-  function getPosts(clusters) {
+  function getPostsByClusters(clusters) {
     let similarPostIds = _(clusters).map('similar_post_ids')
       .flatten().compact().uniq().value();
 

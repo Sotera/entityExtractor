@@ -1,140 +1,223 @@
 spinner(show='showSpinner') //- boolean scope property to toggle spinner
-h3 Events
+h3 Events &amp; Topics
 h5 drag mouse over an area to select
+
 .row(style='padding-bottom:20px')
   .col-md-12
     .nav-chart-container(style='width:95%; height:160px')
       event-graph
-.row
-  .col-md-3(style='height:550px; overflow-y:auto' ng-show='selectedEvents')
-    | Filter (supports regex on: tags, text, author, mentions)
-    form(ng-submit='filterChanged()')
-      .form-group
+
+.row(style='padding-bottom:20px')
+  .col-md-12
+    ul.nav.nav-tabs(role='tablist')
+      li(role='presentation'): a(data-target='#tc-events' role='tab' data-toggle='tab') Events
+      li.active(role='presentation'): a(data-target='#tc-topics' role='tab' data-toggle='tab') Topics
+
+    .tab-content
+      #tc-topics.tab-pane.active(role='tabpanel')
         .row
-          .col-md-10
-            input.form-control(ng-model='filterText')
-          .col-md-2
-            button.btn.btn-info(type='submit' style='float:right')
-              span.glyphicon.glyphicon-search
+          .col-md-3(style='height:550px; overflow-y:auto' ng-show='selectedTopics')
 
-    table.table.table-striped
-      caption Events
-      tbody
-        tr(ng-repeat='evt in selectedEvents')
-          td(ng-click='eventSelected(evt)' ng-class='{highlight: (selectedEvent && selectedEvent.id === evt.id)}')
-            .row
-              .cell
-                span(style="font-weight:bold" title="This event has hashtags" ng-show="evt.hashtags | isDefined") #
-                span(style="font-weight:bold") {{evt.hashtags | sampleWeightedPairs}}
-              .cell
-                span.glyphicon.glyphicon-picture(title="This event has images" ng-show="evt.image_urls | isDefined")
-              .cell
-                span.glyphicon.glyphicon-map-marker(title="This event has locations" ng-show="evt.location | isDefined")
-              .cell
-                span.glyphicon.glyphicon-user(title="This event has a user network" ng-show="evt.has_user_network")
-            .row
-              .cell
-                p(style='display:inline') {{evt.start_time_ms | date:'short'}} - {{evt.end_time_ms | date:'short'}}
-                input.form-control(style='display:inline;width:100px;margin-left:16px' ng-model='evt.name' ng-model-options='{ debounce: 1000 }' ng-change='eventNamed(evt)')
-            .row
-              .cell
-                label Interesting:
-              .cell
-                label.switch
-                  input(type='checkbox' ng-model='evt.of_interest' ng-change='ofInterestChanged(evt)')
-                  .slider.round
-
-
-  .col-md-4(style='height:550px; overflow-y:hidden')
-    event-map(ng-show='mapPoints | isDefined' points='mapPoints')
-      iframe#map-frame(src='http://54.86.248.86:3005/index.html' style='width:100%; height:600px' scrolling='no' frameborder='0')
-  .col-md-5(ng-show='selectedEvent')
-    .row(ng-show='imageUrls' style='width:100%; height:120px; overflow-y:auto')
-      image-grid(hover-dir='left')
-    .row(ng-show='hashtags | isDefined' style='width:100%; height:100px; overflow-y:auto; font-size:1.5em')
-      |#
-      div(ng-repeat='ht in hashtags' style='display:inline-block')
-        translate(phrase='{{ht[0]}}')
-        | ({{ht[1]}}){{$last ? '' : ','}}&nbsp;
-    .row(style='width:100%; height:280px; overflow-y:auto')
-      ul.nav.nav-tabs(role='tablist')
-        li.active(role='presentation'): a(data-target='#tc-post-types' role='tab' data-toggle='tab') Post types
-        li(role='presentation'): a(data-target='#tc-posts' role='tab' data-toggle='tab') Posts
-        li(role='presentation'): a(data-target='#tc-refs' role='tab' data-toggle='tab') Most referenced
-        li(role='presentation'): a(data-target='#tc-user-network' role='tab' data-toggle='tab') User network
-
-      .tab-content
-        #tc-post-types.tab-pane.active(role='tabpanel')
-          .col-md-6
-            mark Posts ({{posts.length}})
-            pie-chart(content='{{postTypeCounts}}' conf='{{::postTypeConf}}')
-          .col-md-6
-            table.table.table-condensed
-              caption counts (sampled)
+            table.table.table-striped
+              caption Topics ({{selectedTopics.length}})
+              thead
+                tr
+                  th topic
+                  th # posts
+                  th avg. weight
               tbody
-                tr(ng-repeat='c in postTypeCounts')
-                  td {{c.label}}
-                  td {{c.value}}
-            table.table.table-condensed(style='margin-top:-8px')
-              caption aggregates
+                tr(ng-repeat='topic in selectedTopics')
+                  td(ng-click='topicSelected(topic)' ng-class='{highlight: (selectedTopic && selectedTopic.id === topic.id)}').
+                    {{topic.topic}}
+                  td {{topic.cnt_post_ids}}
+                  td {{topic.avg_weight | number:2}}
+
+          .col-md-4(style='height:550px; overflow-y:auto' ng-show='selectedTopic')
+            .row(ng-show='hashtags | isDefined' style='width:100%; height:100px; overflow-y:auto; font-size:1.5em')
+              |#
+              div(ng-repeat='ht in hashtags' style='display:inline-block').
+                {{ ht }}{{$last ? '' : ','}}&nbsp;
+            .row(ng-show='imageUrls' style='width:100%; height:400px; overflow-y:auto')
+              image-grid(hover-dir='left')
+
+          .col-md-5(style='height:550px; overflow-y:auto' ng-show='selectedTopic')
+            ul.nav.nav-tabs(role='tablist')
+              li.active(role='presentation'): a(data-target='#tc-post-types2' role='tab' data-toggle='tab') Post types
+              li(role='presentation'): a(data-target='#tc-posts2' role='tab' data-toggle='tab') Posts
+              li(role='presentation'): a(data-target='#tc-refs2' role='tab' data-toggle='tab') Most referenced
+
+            .tab-content
+              #tc-post-types2.tab-pane.active(role='tabpanel')
+                .col-md-6
+                  mark Posts ({{posts.length}})
+                  pie-chart(content='{{postTypeCounts}}' conf='{{::postTypeConf}}')
+                .col-md-6
+                  table.table.table-condensed
+                    caption counts (sampled)
+                    tbody
+                      tr(ng-repeat='c in postTypeCounts')
+                        td {{c.label}}
+                        td {{c.value}}
+                  table.table.table-condensed(style='margin-top:-8px')
+                    caption aggregates
+                    tbody
+                      tr(ng-repeat='c in aggCounts')
+                        td {{c.label}}
+                        td {{c.value}}
+              #tc-posts2.tab-pane(role='tabpanel')
+                table.table.table-striped.table-condensed
+                  caption Posts ({{posts.length}})
+                  tbody
+                    tr(ng-repeat='post in posts')
+                      td
+                        a(ng-click='loadAuthorUrl(post)')
+                          | {{post.screen_name}}
+                          br
+                          img(ng-src='{{post.author_image_url}}' style='border:0; width:48px; height:48px')
+                      td(ng-class='{highlight: (selectedImageUrl && selectedImageUrl === post.primary_image_url)}') {{post.text}}
+                      td: a(ng-href='{{post.post_url}}' target='_blank') visit
+              #tc-refs2.tab-pane(role='tabpanel')
+                table.table.table-condensed(style='margin-top:-8px')
+                  caption Retweeted links
+                  tbody
+                    tr(ng-repeat='c in broadcastCounts')
+                      td: a(ng-href='{{c.label | statusUrl}}' target='_blank') {{c.label}}
+                      td {{c.value}}
+
+
+
+      #tc-events.tab-pane(role='tabpanel')
+
+        .row
+          .col-md-3(style='height:550px; overflow-y:auto' ng-show='selectedEvents')
+            | Filter (supports regex on: tags, text, author, mentions)
+            form(ng-submit='filterChanged()')
+              .form-group
+                .row
+                  .col-md-10
+                    input.form-control(ng-model='filterText')
+                  .col-md-2
+                    button.btn.btn-info(type='submit' style='float:right')
+                      span.glyphicon.glyphicon-search
+
+            table.table.table-striped
+              caption Events
               tbody
-                tr(ng-repeat='c in aggCounts')
-                  td {{c.label}}
-                  td {{c.value}}
-        #tc-posts.tab-pane(role='tabpanel')
-          table.table.table-striped.table-condensed
-            caption Posts ({{posts.length}})
-            tbody
-              tr(ng-repeat='post in posts')
-                td
-                  a(ng-click='loadAuthorUrl(post)')
-                    | {{post.screen_name}}
-                    br
-                    img(ng-src='{{post.author_image_url}}' style='border:0; width:48px; height:48px')
-                td(ng-class='{highlight: (selectedImageUrl && selectedImageUrl === post.primary_image_url)}') {{post.text}}
-                td: a(ng-href='{{post.post_url}}' target='_blank') visit
-        #tc-refs.tab-pane(role='tabpanel')
-          table.table.table-condensed(style='margin-top:-8px')
-            caption Retweeted links
-            tbody
-              tr(ng-repeat='c in broadcastCounts')
-                td: a(ng-href='{{c.label | statusUrl}}' target='_blank') {{c.label}}
-                td {{c.value}}
-        #tc-user-network.tab-pane(role='tabpanel')
-          .chart-container(style='width:100%; height:300px')
-            user-network-graph
-.row(ng-show='selectedEvent')
-  .col-md-4(style='height:400px; overflow-y:auto')
-    table.table.table-striped
-      caption Keywords
-      thead
-        tr
-          th word
-          th count
-      tbody
-        tr(ng-repeat='keyword in keywords')
-          td
-            translate(phrase='{{keyword[0]}}')
-          td {{keyword[1]}}
-  .col-md-4(style='height:400px; overflow-y:auto')
-    table.table.table-striped
-      caption Locations
-      thead
-        tr
-          th loc
-          th weight
-      tbody
-        tr(ng-repeat='loc in locations')
-          td: translate(phrase='{{loc.label}}')
-          td {{loc.weight | number:1}}
-  .col-md-4(ng-show='authorPosts' style='height:400px; overflow-y:auto')
-    table.table.table-striped
-      caption
-        a(ng-click='loadAuthorUrl(authorPosts[0])')
-          img(ng-src='{{authorPosts[0].author_image_url}}' style='border:0; width:48px; height:48px')
-          | All {{authorPosts[0].screen_name}} Posts ({{authorPosts.length}})
-      tbody
-        tr(ng-repeat='post in authorPosts')
-          td: a(ng-href='{{post.post_url}}' target='_blank') visit
-          td {{post.text}}
-          td {{post.timestamp_ms | date:'short'}}
+                tr(ng-repeat='evt in selectedEvents')
+                  td(ng-click='eventSelected(evt)' ng-class='{highlight: (selectedEvent && selectedEvent.id === evt.id)}')
+                    .row
+                      .cell
+                        span(style="font-weight:bold" title="This event has hashtags" ng-show="evt.hashtags | isDefined") #
+                        span(style="font-weight:bold") {{evt.hashtags | sampleWeightedPairs}}
+                      .cell
+                        span.glyphicon.glyphicon-picture(title="This event has images" ng-show="evt.image_urls | isDefined")
+                      .cell
+                        span.glyphicon.glyphicon-map-marker(title="This event has locations" ng-show="evt.location | isDefined")
+                      .cell
+                        span.glyphicon.glyphicon-user(title="This event has a user network" ng-show="evt.has_user_network")
+                    .row
+                      .cell
+                        p(style='display:inline') {{evt.start_time_ms | date:'short'}} - {{evt.end_time_ms | date:'short'}}
+                        input.form-control(style='display:inline;width:100px;margin-left:16px' ng-model='evt.name' ng-model-options='{ debounce: 1000 }' ng-change='eventNamed(evt)')
+                    .row
+                      .cell
+                        label Interesting:
+                      .cell
+                        label.switch
+                          input(type='checkbox' ng-model='evt.of_interest' ng-change='ofInterestChanged(evt)')
+                          .slider.round
+
+
+          .col-md-4(style='height:550px; overflow-y:hidden')
+            event-map(ng-show='mapPoints | isDefined' points='mapPoints')
+              iframe#map-frame(src='http://54.86.248.86:3005/index.html' style='width:100%; height:600px' scrolling='no' frameborder='0')
+          .col-md-5(ng-show='selectedEvent')
+            .row(ng-show='imageUrls' style='width:100%; height:120px; overflow-y:auto')
+              image-grid(hover-dir='left')
+            .row(ng-show='hashtags | isDefined' style='width:100%; height:100px; overflow-y:auto; font-size:1.5em')
+              |#
+              div(ng-repeat='ht in hashtags' style='display:inline-block')
+                translate(phrase='{{ht[0]}}')
+                | ({{ht[1]}}){{$last ? '' : ','}}&nbsp;
+            .row(style='width:100%; height:280px; overflow-y:auto')
+              ul.nav.nav-tabs(role='tablist')
+                li.active(role='presentation'): a(data-target='#tc-post-types' role='tab' data-toggle='tab') Post types
+                li(role='presentation'): a(data-target='#tc-posts' role='tab' data-toggle='tab') Posts
+                li(role='presentation'): a(data-target='#tc-refs' role='tab' data-toggle='tab') Most referenced
+                li(role='presentation'): a(data-target='#tc-user-network' role='tab' data-toggle='tab') User network
+
+              .tab-content
+                #tc-post-types.tab-pane.active(role='tabpanel')
+                  .col-md-6
+                    mark Posts ({{posts.length}})
+                    pie-chart(content='{{postTypeCounts}}' conf='{{::postTypeConf}}')
+                  .col-md-6
+                    table.table.table-condensed
+                      caption counts (sampled)
+                      tbody
+                        tr(ng-repeat='c in postTypeCounts')
+                          td {{c.label}}
+                          td {{c.value}}
+                    table.table.table-condensed(style='margin-top:-8px')
+                      caption aggregates
+                      tbody
+                        tr(ng-repeat='c in aggCounts')
+                          td {{c.label}}
+                          td {{c.value}}
+                #tc-posts.tab-pane(role='tabpanel')
+                  table.table.table-striped.table-condensed
+                    caption Posts ({{posts.length}})
+                    tbody
+                      tr(ng-repeat='post in posts')
+                        td
+                          a(ng-click='loadAuthorUrl(post)')
+                            | {{post.screen_name}}
+                            br
+                            img(ng-src='{{post.author_image_url}}' style='border:0; width:48px; height:48px')
+                        td(ng-class='{highlight: (selectedImageUrl && selectedImageUrl === post.primary_image_url)}') {{post.text}}
+                        td: a(ng-href='{{post.post_url}}' target='_blank') visit
+                #tc-refs.tab-pane(role='tabpanel')
+                  table.table.table-condensed(style='margin-top:-8px')
+                    caption Retweeted links
+                    tbody
+                      tr(ng-repeat='c in broadcastCounts')
+                        td: a(ng-href='{{c.label | statusUrl}}' target='_blank') {{c.label}}
+                        td {{c.value}}
+                #tc-user-network.tab-pane(role='tabpanel')
+                  .chart-container(style='width:100%; height:300px')
+                    user-network-graph
+        .row(ng-show='selectedEvent')
+          .col-md-4(style='height:400px; overflow-y:auto')
+            table.table.table-striped
+              caption Keywords
+              thead
+                tr
+                  th word
+                  th count
+              tbody
+                tr(ng-repeat='keyword in keywords')
+                  td
+                    translate(phrase='{{keyword[0]}}')
+                  td {{keyword[1]}}
+          .col-md-4(style='height:400px; overflow-y:auto')
+            table.table.table-striped
+              caption Locations
+              thead
+                tr
+                  th loc
+                  th weight
+              tbody
+                tr(ng-repeat='loc in locations')
+                  td: translate(phrase='{{loc.label}}')
+                  td {{loc.weight | number:1}}
+          .col-md-4(ng-show='authorPosts' style='height:400px; overflow-y:auto')
+            table.table.table-striped
+              caption
+                a(ng-click='loadAuthorUrl(authorPosts[0])')
+                  img(ng-src='{{authorPosts[0].author_image_url}}' style='border:0; width:48px; height:48px')
+                  | All {{authorPosts[0].screen_name}} Posts ({{authorPosts.length}})
+              tbody
+                tr(ng-repeat='post in authorPosts')
+                  td: a(ng-href='{{post.post_url}}' target='_blank') visit
+                  td {{post.text}}
+                  td {{post.timestamp_ms | date:'short'}}

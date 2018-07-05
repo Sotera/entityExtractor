@@ -8,7 +8,7 @@ if ! [ -e "$jq" ]; then
 fi
 
 for name in 'caffe_redis_client' 'comedian' 'dr-manhattan' \
-'feature-sim' 'image-fetcher' 'ozymandias' 'rorschach'
+'feature-sim' 'image-fetcher' 'ozymandias' 'rorschach' 'silk-specter'
 do
   curl -s https://registry.hub.docker.com/v2/repositories/sotera/$name/tags/ |
   jq --arg name $name '."results"[0] | {name: [$name]} + {last_tag: .name, updated: .last_updated}'

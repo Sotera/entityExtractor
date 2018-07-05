@@ -15,7 +15,7 @@ function eventGraphDirective() {
   }
 }
 
-function eventGraphController($scope, Event, EventNetwork) {
+function eventGraphController($scope, Event, EventNetwork, Topic) {
   // models primarily controlled by directive
   $scope.events = null;
   $scope.selectedDates = [0,0];
@@ -36,6 +36,25 @@ function eventGraphController($scope, Event, EventNetwork) {
     }).orderBy('start_time_ms').value();
 
     decorateSelectedEvents();
+  };
+
+  $scope.getTopicsInRange = function(start, end) {
+    // use cached value if none given
+    start = start || $scope.selectedDates[0];
+    end = end || $scope.selectedDates[1];
+    Topic.find({
+      // TODO:
+      filter: {
+      //   where: {
+
+      //   }
+        order: 'cnt_post_ids desc'
+      }
+    })
+    .$promise
+    .then(topics => $scope.selectedTopics = topics)
+    ;
+
   };
 
   // issue 'side' queries, to decorate events with additional attributes.
@@ -221,6 +240,7 @@ function eventGraphController($scope, Event, EventNetwork) {
       // TODO: better way to get selected values from chart?
       $scope.selectedDates = [start, end];
       $scope.getEventsInRange(start, end);
+      $scope.getTopicsInRange(start, end);
     }
 
     navChart.append('g')

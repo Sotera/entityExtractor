@@ -29,3 +29,7 @@ docker-compose.override.yml
 .config.json
 *.backup
 *_cred.json
+
+# services
+services/**/*.bin
+services/**/*.txt

@@ -116,6 +116,28 @@ services:
     ports:
       - "3005:3000"
 
+  # event-classifier:
+  #   image: sotera/event-classifier:3
+  #   hostname: event-classifier
+  #   environment:
+  #     - SPARK_EXECUTOR_MEMORY=10g
+  #     - SPARK_DRIVER_MEMORY=10g
+  #   depends_on:
+  #     - redis
+  #     - mongo
+
+  # silk-specter:
+  #   image: sotera/silk-specter:8
+  #   hostname: silk-specter
+  #   environment:
+  #     - SPARK_EXECUTOR_MEMORY=30g
+  #     - SPARK_DRIVER_MEMORY=30g
+  #     - DB_HOST=mongo
+  #     - DB_PORT=27017
+  #   depends_on:
+  #     - redis
+  #     - mongo
+
   dr-manhattan:
     extends:
       file: common.yml
